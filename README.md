@@ -2,8 +2,6 @@
 
 A modern, beautiful web-based file manager for S3-compatible storage buckets. Built with React and Express, designed to integrate seamlessly with Railway's design language.
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/subratomandalme/railway-bucket-explorer)
-
 ![Railway Bucket Explorer](https://img.shields.io/badge/Railway-Bucket%20Explorer-C049FF?style=for-the-badge)
 
 ## Features
