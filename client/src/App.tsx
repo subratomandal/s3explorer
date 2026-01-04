@@ -1,3 +1,4 @@
+// v 1.0
 import { useState, useEffect, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Folder, Database, Download, Edit3, Trash2 } from 'lucide-react';

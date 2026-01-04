@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview Context menu components for right-click actions.
  * Provides a positioned dropdown menu that appears on right-click.

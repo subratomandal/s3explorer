@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview Express server entry point for Railway Bucket Explorer.
  * Sets up the Express application with middleware, routes, and static file serving.
@@ -73,6 +74,6 @@ if (process.env.NODE_ENV === 'production') {
 // ============================================================================
 
 app.listen(PORT, () => {
-  console.log(`🚀 Railway Bucket Explorer running on http://localhost:${PORT}`);
-  console.log(`📦 S3 Endpoint: ${process.env.S3_ENDPOINT || 'Not configured'}`);
+  console.log(`Railway Bucket Explorer running on http://localhost:${PORT}`);
+  console.log(`S3 Endpoint: ${process.env.S3_ENDPOINT || 'Not configured'}`);
 });

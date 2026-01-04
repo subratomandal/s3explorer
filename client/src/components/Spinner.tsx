@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview Reusable loading spinner component.
  * Displays an animated SVG spinner for loading states.

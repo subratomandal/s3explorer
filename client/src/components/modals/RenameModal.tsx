@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview Modal dialog for renaming files and folders.
  */

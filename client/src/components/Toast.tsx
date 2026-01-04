@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview Toast notification component.
  * Displays temporary success/error messages that auto-dismiss.

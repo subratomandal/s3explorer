@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview Drag and drop overlay component.
  * Displays a visual indicator when files are being dragged over the drop zone.

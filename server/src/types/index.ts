@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview Centralized TypeScript type definitions for the server.
  * This file contains all shared interfaces used across the Express routes and S3 service.

@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview Reusable modal dialog component.
  * Provides a centered overlay modal with title bar and close functionality.

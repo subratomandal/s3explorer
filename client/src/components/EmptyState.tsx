@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview Empty state placeholder component.
  * Displays a centered message with icon when there's no content to show.

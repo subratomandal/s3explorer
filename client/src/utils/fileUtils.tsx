@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview Utility functions for file operations and display.
  * Contains functions for extracting filenames and determining file type icons.

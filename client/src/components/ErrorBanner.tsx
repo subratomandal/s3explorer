@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview Error banner component.
  * Displays dismissible error messages at the top of the content area.

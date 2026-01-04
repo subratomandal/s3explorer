@@ -4,7 +4,7 @@ A modern, beautiful web-based file manager for S3-compatible storage buckets. Bu
 
 ![Railway Bucket Explorer](https://img.shields.io/badge/Railway-Bucket%20Explorer-C049FF?style=for-the-badge)
 
-## 🚀 Features
+## Features
 
 ### File Operations
 - **Upload** - Drag-and-drop or file picker with progress indicator
@@ -19,15 +19,15 @@ A modern, beautiful web-based file manager for S3-compatible storage buckets. Bu
 - Delete empty buckets
 
 ### User Interface
-- 🌙 Dark theme matching Railway's design system
-- 📱 Responsive layout for desktop and mobile
-- 🗂️ Breadcrumb navigation for nested folders
-- 🎨 File type icons for common formats
-- ⚡ Loading states and skeleton placeholders
-- 🔔 Toast notifications for actions
-- 📜 Context menus for quick actions
+- Dark theme matching Railway's design system
+- Responsive layout for desktop and mobile
+- Breadcrumb navigation for nested folders
+- File type icons for common formats
+- Loading states and skeleton placeholders
+- Toast notifications for actions
+- Context menus for quick actions
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 railway-bucket-explorer/
@@ -71,7 +71,7 @@ railway-bucket-explorer/
 └── package.json                 # Root workspace scripts
 ```
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|------------|
@@ -81,7 +81,7 @@ railway-bucket-explorer/
 | Dev Tools | Minio (local S3), Docker |
 | Deployment | Docker container, Railway |
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js 18+
@@ -125,7 +125,7 @@ railway-bucket-explorer/
    - App: http://localhost:5173
    - Minio Console: http://localhost:9001 (minioadmin/minioadmin)
 
-## 📡 API Reference
+## API Reference
 
 ### Bucket Endpoints
 
@@ -156,7 +156,7 @@ railway-bucket-explorer/
 | `GET` | `/api/config/environments` | Get env var documentation |
 | `GET` | `/api/health` | Health check |
 
-## 🚢 Deployment
+## Deployment
 
 ### Deploy to Railway
 
@@ -166,11 +166,11 @@ railway-bucket-explorer/
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `S3_ENDPOINT` | S3-compatible endpoint URL | ✅ |
-| `S3_ACCESS_KEY` | Access key ID | ✅ |
-| `S3_SECRET_KEY` | Secret access key | ✅ |
-| `S3_REGION` | AWS region | ❌ (default: us-east-1) |
-| `S3_FORCE_PATH_STYLE` | Use path-style URLs | ❌ (default: true) |
+| `S3_ENDPOINT` | S3-compatible endpoint URL | Yes |
+| `S3_ACCESS_KEY` | Access key ID | Yes |
+| `S3_SECRET_KEY` | Secret access key | Yes |
+| `S3_REGION` | AWS region | No (default: us-east-1) |
+| `S3_FORCE_PATH_STYLE` | Use path-style URLs | No (default: true) |
 
 4. Deploy!
 
@@ -192,7 +192,7 @@ S3_ENDPOINT=https://<account_id>.r2.cloudflarestorage.com
 S3_ENDPOINT=https://<region>.digitaloceanspaces.com
 ```
 
-## 🧩 Component Overview
+## Component Overview
 
 ### Client Components
 
@@ -216,11 +216,11 @@ S3_ENDPOINT=https://<region>.digitaloceanspaces.com
 |---------|---------|
 | `s3.ts` | All S3 operations (list, upload, download, delete, copy, rename) |
 
-## 📝 License
+## License
 
 MIT
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 

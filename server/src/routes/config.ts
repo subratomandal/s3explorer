@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview Express routes for S3 configuration information.
  * Provides endpoints to check connection status and get configuration help.

@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview File table component for displaying bucket contents.
  * Shows files and folders in a sortable table with actions.

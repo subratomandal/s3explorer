@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview Centralized TypeScript type definitions for the client application.
  * This file contains all shared interfaces used across the React components and API layer.

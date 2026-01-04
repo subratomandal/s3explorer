@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview API client for communicating with the backend server.
  * Provides functions for all S3 bucket and object operations.

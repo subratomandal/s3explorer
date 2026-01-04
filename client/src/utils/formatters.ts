@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview Utility functions for formatting data for display.
  * Contains functions for human-readable byte sizes and relative timestamps.

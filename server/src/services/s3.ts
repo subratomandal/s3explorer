@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview S3 service layer for all storage operations.
  * This module provides functions for interacting with S3-compatible storage.

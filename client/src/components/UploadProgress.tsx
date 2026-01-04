@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview Upload progress bar component.
  * Displays a progress indicator during file uploads.

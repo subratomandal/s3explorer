@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview Sidebar component for bucket navigation.
  * Displays the list of S3 buckets with search functionality.

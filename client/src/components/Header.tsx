@@ -1,3 +1,4 @@
+// v 1.0
 /**
  * @fileoverview Header component with navigation and actions.
  * Contains breadcrumb navigation, refresh, and upload controls.
