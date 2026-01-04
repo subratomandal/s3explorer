@@ -31,44 +31,44 @@ A modern, beautiful web-based file manager for S3-compatible storage buckets. Bu
 
 ```
 railway-bucket-explorer/
-├── client/                      # React frontend (Vite + TypeScript)
+├── client/                      
 │   ├── src/
-│   │   ├── components/          # Reusable UI components
-│   │   │   ├── modals/          # Modal dialogs
-│   │   │   ├── ContextMenu.tsx  # Right-click menu
-│   │   │   ├── EmptyState.tsx   # Empty state placeholder
-│   │   │   ├── ErrorBanner.tsx  # Error message banner
-│   │   │   ├── FileTable.tsx    # File/folder table
-│   │   │   ├── Header.tsx       # Top navigation bar
-│   │   │   ├── Modal.tsx        # Reusable modal base
-│   │   │   ├── Sidebar.tsx      # Bucket list sidebar
-│   │   │   ├── Spinner.tsx      # Loading spinner
-│   │   │   ├── Toast.tsx        # Notification toasts
-│   │   │   ├── UploadProgress.tsx # Upload progress bar
-│   │   │   └── DropOverlay.tsx  # Drag-drop overlay
-│   │   ├── types/               # TypeScript interfaces
-│   │   ├── utils/               # Utility functions
-│   │   ├── api.ts               # API client
-│   │   ├── App.tsx              # Main application
-│   │   └── main.tsx             # Entry point
-│   └── public/                  # Static assets
+│   │   ├── components/          
+│   │   │   ├── modals/          
+│   │   │   ├── ContextMenu.tsx  
+│   │   │   ├── EmptyState.tsx   
+│   │   │   ├── ErrorBanner.tsx  
+│   │   │   ├── FileTable.tsx    
+│   │   │   ├── Header.tsx       
+│   │   │   ├── Modal.tsx        
+│   │   │   ├── Sidebar.tsx      
+│   │   │   ├── Spinner.tsx      
+│   │   │   ├── Toast.tsx        
+│   │   │   ├── UploadProgress.tsx 
+│   │   │   └── DropOverlay.tsx  
+│   │   ├── types/               
+│   │   ├── utils/              
+│   │   ├── api.ts               
+│   │   ├── App.tsx             
+│   │   └── main.tsx             
+│   └── public/                 
 │
-├── server/                      # Express backend (TypeScript)
+├── server/                      
 │   ├── src/
-│   │   ├── routes/              # API route handlers
-│   │   │   ├── buckets.ts       # Bucket CRUD endpoints
-│   │   │   ├── objects.ts       # Object CRUD endpoints
-│   │   │   └── config.ts        # Configuration endpoints
+│   │   ├── routes/             
+│   │   │   ├── buckets.ts       
+│   │   │   ├── objects.ts       
+│   │   │   └── config.ts        
 │   │   ├── services/
-│   │   │   └── s3.ts            # S3 SDK operations
-│   │   ├── types/               # TypeScript interfaces
-│   │   └── index.ts             # Server entry point
+│   │   │   └── s3.ts           
+│   │   ├── types/               
+│   │   └── index.ts            
 │   └── package.json
 │
-├── Dockerfile                   # Multi-stage production build
-├── docker-compose.yml           # Local development with Minio
-├── railway.toml                 # Railway deployment config
-└── package.json                 # Root workspace scripts
+├── Dockerfile                   
+├── docker-compose.yml           
+├── railway.toml                 
+└── package.json                
 ```
 
 ## Tech Stack
