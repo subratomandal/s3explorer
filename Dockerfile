@@ -1,17 +1,17 @@
 # Build stage for client
 FROM node:20-alpine AS client-builder
 WORKDIR /app/client
-COPY client/package*.json ./
+COPY apps/client/package*.json ./
 RUN npm ci
-COPY client/ ./
+COPY apps/client/ ./
 RUN npm run build
 
 # Build stage for server
 FROM node:20-alpine AS server-builder
 WORKDIR /app/server
-COPY server/package*.json ./
+COPY apps/server/package*.json ./
 RUN npm ci
-COPY server/ ./
+COPY apps/server/ ./
 RUN npm run build
 
 # Production stage
