@@ -62,6 +62,18 @@ export default function App() {
     return localStorage.getItem(STORAGE_KEYS.ACTIVE_PROFILE);
   });
 
+  const [folderCache, setFolderCache] = useState<Record<string, S3Object[]>>({});
+
+  const getCacheKey = (bucket: string, path: string) => `${bucket}:${path}`;
+
+  const invalidateCache = useCallback((bucket: string, path: string) => {
+    setFolderCache(prev => {
+      const next = { ...prev };
+      delete next[getCacheKey(bucket, path)];
+      return next;
+    });
+  }, []);
+
   const [theme] = useState<'dark' | 'light'>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.THEME);
     return (saved === 'light' || saved === 'dark') ? saved : 'dark';
@@ -151,19 +163,27 @@ export default function App() {
     }
   }, []);
 
-  const loadObjects = useCallback(async () => {
+  const loadObjects = useCallback(async (refresh = false) => {
     if (!selectedBucket) return;
+    const cacheKey = getCacheKey(selectedBucket, currentPath);
+
+    if (!refresh && folderCache[cacheKey]) {
+      setObjects(folderCache[cacheKey]);
+      return;
+    }
+
     try {
-      setLoading(true);
+      setLoading(!refresh && !folderCache[cacheKey]); // Only show loading if no cache or force refresh
       setError(null);
       const data = await api.listObjects(selectedBucket, currentPath);
       setObjects(data);
+      setFolderCache(prev => ({ ...prev, [cacheKey]: data }));
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [selectedBucket, currentPath]);
+  }, [selectedBucket, currentPath, folderCache]);
 
   useEffect(() => { loadBuckets(); }, [loadBuckets]);
   useEffect(() => { if (selectedBucket) loadObjects(); }, [selectedBucket, currentPath, loadObjects]);
@@ -177,10 +197,11 @@ export default function App() {
       await api.uploadFiles(selectedBucket, currentPath, acceptedFiles);
       clearInterval(interval);
       setUploadProgress(100);
+      invalidateCache(selectedBucket, currentPath);
       setTimeout(() => {
         setUploading(false);
         setUploadProgress(0);
-        loadObjects();
+        loadObjects(true);
         showToast(`${acceptedFiles.length} file${acceptedFiles.length > 1 ? 's' : ''} uploaded`);
       }, 400);
     } catch (err: any) {
@@ -247,7 +268,9 @@ export default function App() {
       await api.createFolder(selectedBucket, currentPath + newName.trim());
       setShowNewFolder(false);
       setNewName('');
-      loadObjects();
+      setNewName('');
+      invalidateCache(selectedBucket, currentPath);
+      loadObjects(true);
       showToast(`Folder created`);
     } catch (err: any) {
       showToast('Failed to create folder', 'error');
@@ -271,7 +294,11 @@ export default function App() {
       await api.renameObject(selectedBucket, showRename.key, newKey);
       setShowRename(null);
       setNewName('');
-      loadObjects();
+      setNewName('');
+      invalidateCache(selectedBucket, currentPath); // Invalidate current path (where rename happened)
+      // Note: Ideally we should invalidate the parent of the old key too if it was a move,
+      // but simplistic invalidation of current view covers most UX needs for now.
+      loadObjects(true);
       showToast(`Renamed`);
     } catch (err: any) {
       showToast('Rename failed', 'error');
@@ -283,7 +310,9 @@ export default function App() {
     try {
       await api.deleteObject(selectedBucket, showDelete.key, showDelete.isFolder);
       setShowDelete(null);
-      loadObjects();
+      setShowDelete(null);
+      invalidateCache(selectedBucket, currentPath);
+      loadObjects(true);
       showToast(`Deleted`);
     } catch (err: any) {
       showToast('Delete failed', 'error');
@@ -324,7 +353,7 @@ export default function App() {
           onGoBack={handleGoBack}
           onNavigateToRoot={() => setCurrentPath('')}
           onNavigateToBreadcrumb={(i) => setCurrentPath(breadcrumbs.slice(0, i + 1).join('/') + '/')}
-          onRefresh={loadObjects}
+          onRefresh={() => loadObjects(true)}
           onNewFolder={() => setShowNewFolder(true)}
           onUpload={onDrop}
           onOpenCommandPalette={() => setShowCommandPalette(true)}
@@ -431,7 +460,7 @@ export default function App() {
         onSelectBucket={(name) => { setSelectedBucket(name); setCurrentPath(''); }}
         onNavigateToRoot={() => setCurrentPath('')}
         onGoBack={handleGoBack}
-        onRefresh={loadObjects}
+        onRefresh={() => loadObjects(true)}
         onNewFolder={() => setShowNewFolder(true)}
         onUpload={() => fileInputRef.current?.click()}
         onOpenConnections={() => setShowConnectionManager(true)}
