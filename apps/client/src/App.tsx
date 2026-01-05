@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Folder, Database, Download, Edit3, Trash2, Heart, Settings, X } from 'lucide-react';
+import { Folder, Database, Download, Edit3, Trash2, Heart, X } from 'lucide-react';
 import * as api from './api';
 import type { Bucket, S3Object, ToastState, ContextMenuState, ConnectionProfile } from './types';
 import { getFileName } from './utils/fileUtils';
