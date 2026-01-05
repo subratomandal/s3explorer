@@ -5,13 +5,13 @@
   "private": true,
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:server": "cd server && npm run dev",
-    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd apps/server && npm run dev",
+    "dev:client": "cd apps/client && npm run dev",
     "build": "npm run build:client && npm run build:server",
-    "build:client": "cd client && npm run build",
-    "build:server": "cd server && npm run build",
-    "start": "cd server && npm start",
-    "install:all": "npm install && cd client && npm install && cd ../server && npm install"
+    "build:client": "cd apps/client && npm run build",
+    "build:server": "cd apps/server && npm run build",
+    "start": "cd apps/server && npm start",
+    "install:all": "npm install && cd apps/client && npm install && cd ../server && npm install"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

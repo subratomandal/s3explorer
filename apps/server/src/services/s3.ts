@@ -1,0 +1,245 @@
+import {
+  S3Client,
+  ListBucketsCommand,
+  CreateBucketCommand,
+  DeleteBucketCommand,
+  ListObjectsV2Command,
+  GetObjectCommand,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  CopyObjectCommand,
+  HeadObjectCommand,
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import type { BucketInfo, ObjectInfo, ObjectMetadata } from '../types/index.js';
+
+export type { BucketInfo, ObjectInfo, ObjectMetadata };
+
+export interface S3ConnectionConfig {
+  endpoint: string;
+  accessKey: string;
+  secretKey: string;
+  region?: string;
+  forcePathStyle?: boolean;
+}
+
+let activeConnection: S3ConnectionConfig | null = null;
+
+export function setActiveConnection(config: S3ConnectionConfig | null): void {
+  activeConnection = config;
+}
+
+export function getActiveConnection(): S3ConnectionConfig | null {
+  return activeConnection;
+}
+
+const getS3Client = (configOverride?: S3ConnectionConfig) => {
+  const config = configOverride || activeConnection;
+
+  if (config) {
+    return new S3Client({
+      endpoint: config.endpoint,
+      region: config.region || 'us-east-1',
+      credentials: {
+        accessKeyId: config.accessKey,
+        secretAccessKey: config.secretKey,
+      },
+      forcePathStyle: config.forcePathStyle ?? true,
+    });
+  }
+
+  return new S3Client({
+    endpoint: process.env.S3_ENDPOINT,
+    region: process.env.S3_REGION || 'us-east-1',
+    credentials: {
+      accessKeyId: process.env.S3_ACCESS_KEY || '',
+      secretAccessKey: process.env.S3_SECRET_KEY || '',
+    },
+    forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+  });
+};
+
+export async function listBuckets(config?: S3ConnectionConfig): Promise<BucketInfo[]> {
+  const client = getS3Client(config);
+  const command = new ListBucketsCommand({});
+  const response = await client.send(command);
+
+  return (response.Buckets || []).map(bucket => ({
+    name: bucket.Name || '',
+    creationDate: bucket.CreationDate,
+  }));
+}
+
+export async function createBucket(name: string): Promise<void> {
+  const client = getS3Client();
+  const command = new CreateBucketCommand({ Bucket: name });
+  await client.send(command);
+}
+
+export async function deleteBucket(name: string): Promise<void> {
+  const client = getS3Client();
+  const command = new DeleteBucketCommand({ Bucket: name });
+  await client.send(command);
+}
+
+export async function listObjects(
+  bucket: string,
+  prefix: string = '',
+  delimiter: string = '/'
+): Promise<{ objects: ObjectInfo[]; prefixes: string[] }> {
+  const client = getS3Client();
+  const command = new ListObjectsV2Command({
+    Bucket: bucket,
+    Prefix: prefix,
+    Delimiter: delimiter,
+  });
+  const response = await client.send(command);
+
+  const objects: ObjectInfo[] = (response.Contents || [])
+    .filter(obj => obj.Key !== prefix)
+    .map(obj => ({
+      key: obj.Key || '',
+      size: obj.Size || 0,
+      lastModified: obj.LastModified,
+      isFolder: false,
+    }));
+
+  const prefixes = (response.CommonPrefixes || []).map(p => p.Prefix || '');
+
+  prefixes.forEach(p => {
+    objects.push({
+      key: p,
+      size: 0,
+      isFolder: true,
+    });
+  });
+
+  return { objects, prefixes };
+}
+
+export async function getObjectUrl(
+  bucket: string,
+  key: string,
+  expiresIn: number = 3600
+): Promise<string> {
+  const client = getS3Client();
+  const command = new GetObjectCommand({ Bucket: bucket, Key: key });
+  return getSignedUrl(client, command, { expiresIn });
+}
+
+export async function uploadObject(
+  bucket: string,
+  key: string,
+  body: Buffer,
+  contentType?: string
+): Promise<void> {
+  const client = getS3Client();
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    Body: body,
+    ContentType: contentType,
+  });
+  await client.send(command);
+}
+
+export async function deleteObject(bucket: string, key: string): Promise<void> {
+  const client = getS3Client();
+  const command = new DeleteObjectCommand({ Bucket: bucket, Key: key });
+  await client.send(command);
+}
+
+export async function deleteFolder(bucket: string, prefix: string): Promise<void> {
+  const client = getS3Client();
+
+  const listCommand = new ListObjectsV2Command({
+    Bucket: bucket,
+    Prefix: prefix,
+  });
+  const response = await client.send(listCommand);
+
+  for (const obj of response.Contents || []) {
+    if (obj.Key) {
+      await deleteObject(bucket, obj.Key);
+    }
+  }
+}
+
+export async function renameObject(
+  bucket: string,
+  oldKey: string,
+  newKey: string
+): Promise<void> {
+  const client = getS3Client();
+  const isFolder = oldKey.endsWith('/');
+
+  if (isFolder) {
+    const listCommand = new ListObjectsV2Command({
+      Bucket: bucket,
+      Prefix: oldKey,
+    });
+    const response = await client.send(listCommand);
+
+    for (const obj of response.Contents || []) {
+      if (obj.Key) {
+        const newObjKey = obj.Key.replace(oldKey, newKey);
+
+        const copyCommand = new CopyObjectCommand({
+          Bucket: bucket,
+          CopySource: encodeURIComponent(`${bucket}/${obj.Key}`),
+          Key: newObjKey,
+        });
+        await client.send(copyCommand);
+
+        await deleteObject(bucket, obj.Key);
+      }
+    }
+  } else {
+    const copyCommand = new CopyObjectCommand({
+      Bucket: bucket,
+      CopySource: encodeURIComponent(`${bucket}/${oldKey}`),
+      Key: newKey,
+    });
+    await client.send(copyCommand);
+
+    await deleteObject(bucket, oldKey);
+  }
+}
+
+export async function copyObject(
+  sourceBucket: string,
+  sourceKey: string,
+  destBucket: string,
+  destKey: string
+): Promise<void> {
+  const client = getS3Client();
+  const command = new CopyObjectCommand({
+    Bucket: destBucket,
+    CopySource: `${sourceBucket}/${sourceKey}`,
+    Key: destKey,
+  });
+  await client.send(command);
+}
+
+export async function createFolder(bucket: string, path: string): Promise<void> {
+  const client = getS3Client();
+  const folderKey = path.endsWith('/') ? path : `${path}/`;
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: folderKey,
+    Body: Buffer.alloc(0),
+  });
+  await client.send(command);
+}
+
+export async function getObjectMetadata(bucket: string, key: string): Promise<ObjectMetadata> {
+  const client = getS3Client();
+  const command = new HeadObjectCommand({ Bucket: bucket, Key: key });
+  const response = await client.send(command);
+  return {
+    contentType: response.ContentType,
+    contentLength: response.ContentLength,
+    lastModified: response.LastModified,
+    metadata: response.Metadata,
+  };
+}
