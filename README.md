@@ -2,13 +2,13 @@
 
 A web-based file manager for S3-compatible storage buckets.
 
-![Railway Object Explorer](https://img.shields.io/badge/S3-Object%20Explorer-C049FF?style=for-the-badge)
+[![S3 Explorer](https://img.shields.io/badge/S3-Explorer%20-C049FF?style=for-the-badge)](https://s3explorer.up.railway.app/)
 
 ---
 
 ## Overview
 
-Managing S3 buckets often requires command-line tools or provider-specific dashboards that vary significantly in usability. Object Explorer unifies this experience by offering a single, consistent web interface to upload, download, and organize files across any S3-compatible provider.
+Managing S3 buckets often requires command-line tools or provider-specific dashboards that vary significantly in usability. S3 Explorer unifies this experience by offering a single, consistent web interface to upload, download, and organize files across any S3-compatible provider.
 
 Supported providers include:
 
@@ -18,16 +18,16 @@ Supported providers include:
 - DigitalOcean Spaces  
 
 <p>
-    <img width="1468" height="831" alt="Screenshot 2026-01-05 at 12 59 24 PM" src="https://github.com/user-attachments/assets/90370d52-2ba5-4a99-b53b-7510b2e20516" />
+    <img src= "https://raw.githubusercontent.com/subratomandalme/s3-explorer/main/apps/client/public/images/main.png" />
 
 </p>
 
 <p>
-    <img width="1464" height="832" alt="Screenshot 2026-01-05 at 1 00 23 PM" src="https://github.com/user-attachments/assets/11f35f47-3015-424a-bd0e-0fcb52a18c5b" />
+    <img src= "https://raw.githubusercontent.com/subratomandalme/s3-explorer/main/apps/client/public/images/search.png" />
 
 
 <p>
-    <img width="1467" height="832" alt="Screenshot 2026-01-05 at 12 59 51 PM" src="https://github.com/user-attachments/assets/a8079cb3-fa88-45de-9594-02730397e727" />
+    <img src= "https://raw.githubusercontent.com/subratomandalme/s3-explorer/main/apps/client/public/images/connection.png" />
 
 </p>
 
@@ -163,7 +163,7 @@ All credentials remain in your local browser storage and are never sent to a cen
 
 The application is packaged as a Docker container and is ready to deploy on Railway.
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.com/deploy/object-explorer)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.com/deploy/s3-explorer)
 
 ---
 
