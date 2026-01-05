@@ -61,7 +61,7 @@ export function Sidebar({
                 </div>
 
                 <div className="flex-1 overflow-y-auto px-3">
-                    <div className="flex items-center justify-between px-2 py-2">
+                    <div className="flex items-center justify-between pl-2 py-2">
                         <span className="text-xs font-semibold text-foreground-muted uppercase tracking-wider">
                             Buckets
                         </span>
