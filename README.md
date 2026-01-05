@@ -8,7 +8,7 @@ A web-based file manager for S3-compatible storage buckets.
 
 ## Overview
 
-Managing S3 buckets often requires command-line tools or provider-specific dashboards that vary significantly in usability. Object Explorer unifies this experience by offering a single, consistent web interface to upload, download, and organize files across any S3-compatible provider.
+Managing S3 buckets often requires command-line tools or provider-specific dashboards that vary significantly in usability. S3 Explorer unifies this experience by offering a single, consistent web interface to upload, download, and organize files across any S3-compatible provider.
 
 Supported providers include:
 
