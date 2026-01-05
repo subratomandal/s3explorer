@@ -163,7 +163,7 @@ All credentials remain in your local browser storage and are never sent to a cen
 
 The application is packaged as a Docker container and is ready to deploy on Railway.
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/NEW_TEMPLATE_LINK)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.com/deploy/object-explorer)
 
 ---
 
