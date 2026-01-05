@@ -12,28 +12,76 @@ interface ConnectionManagerModalProps {
   onConnect: (profileId: string) => void;
 }
 
-const AWS_REGIONS = [
-  { value: 'us-east-1', label: 'US East (N. Virginia)' },
-  { value: 'us-east-2', label: 'US East (Ohio)' },
-  { value: 'us-west-1', label: 'US West (N. California)' },
-  { value: 'us-west-2', label: 'US West (Oregon)' },
-  { value: 'eu-west-1', label: 'EU (Ireland)' },
-  { value: 'eu-west-2', label: 'EU (London)' },
-  { value: 'eu-west-3', label: 'EU (Paris)' },
-  { value: 'eu-central-1', label: 'EU (Frankfurt)' },
-  { value: 'eu-north-1', label: 'EU (Stockholm)' },
-  { value: 'ap-south-1', label: 'Asia Pacific (Mumbai)' },
-  { value: 'ap-southeast-1', label: 'Asia Pacific (Singapore)' },
-  { value: 'ap-southeast-2', label: 'Asia Pacific (Sydney)' },
-  { value: 'ap-northeast-1', label: 'Asia Pacific (Tokyo)' },
-  { value: 'ap-northeast-2', label: 'Asia Pacific (Seoul)' },
-  { value: 'ap-northeast-3', label: 'Asia Pacific (Osaka)' },
-  { value: 'sa-east-1', label: 'South America (São Paulo)' },
-  { value: 'ca-central-1', label: 'Canada (Central)' },
-  { value: 'me-south-1', label: 'Middle East (Bahrain)' },
-  { value: 'af-south-1', label: 'Africa (Cape Town)' },
-  { value: 'auto', label: 'Auto (R2/MinIO)' },
+interface RegionOption {
+  value: string;
+  label: string;
+}
+
+interface RegionGroup {
+  label: string;
+  options: RegionOption[];
+}
+
+const REGION_GROUPS: RegionGroup[] = [
+  {
+    label: 'Railway',
+    options: [
+      { value: 'wnam', label: 'US West' },
+      { value: 'enam', label: 'US East' },
+      { value: 'weur', label: 'EU West' },
+      { value: 'eeur', label: 'EU East' },
+      { value: 'apac', label: 'Asia Pacific' },
+      { value: 'oc', label: 'Oceania' },
+    ]
+  },
+  {
+    label: 'AWS',
+    options: [
+      { value: 'us-east-1', label: 'US East (N. Virginia)' },
+      { value: 'us-east-2', label: 'US East (Ohio)' },
+      { value: 'us-west-1', label: 'US West (N. California)' },
+      { value: 'us-west-2', label: 'US West (Oregon)' },
+      { value: 'eu-west-1', label: 'EU (Ireland)' },
+      { value: 'eu-central-1', label: 'EU (Frankfurt)' },
+      { value: 'ap-south-1', label: 'Asia Pacific (Mumbai)' },
+      { value: 'ap-southeast-1', label: 'Asia Pacific (Singapore)' },
+      { value: 'ap-northeast-1', label: 'Asia Pacific (Tokyo)' },
+      { value: 'sa-east-1', label: 'South America (São Paulo)' },
+    ]
+  },
+  {
+    label: 'Cloudflare R2',
+    options: [
+      { value: 'auto', label: 'Auto' },
+      { value: 'wnam', label: 'Western North America' },
+      { value: 'enam', label: 'Eastern North America' },
+      { value: 'weur', label: 'Western Europe' },
+      { value: 'eeur', label: 'Eastern Europe' },
+      { value: 'apac', label: 'Asia Pacific' },
+    ]
+  },
+  {
+    label: 'DigitalOcean Spaces',
+    options: [
+      { value: 'nyc1', label: 'New York 1' },
+      { value: 'nyc3', label: 'New York 3' },
+      { value: 'ams3', label: 'Amsterdam 3' },
+      { value: 'sgp1', label: 'Singapore 1' },
+      { value: 'sfo3', label: 'San Francisco 3' },
+    ]
+  },
+  {
+    label: 'Self Hosted / Docker',
+    options: [
+      { value: 'auto', label: 'Auto (MinIO / Docker)' },
+    ]
+  }
 ];
+
+const isKnownRegion = (region: string) => {
+  if (!region) return false;
+  return REGION_GROUPS.some(group => group.options.some(opt => opt.value === region));
+};
 
 export function ConnectionManagerModal({
   isOpen,
@@ -46,6 +94,7 @@ export function ConnectionManagerModal({
   const [localProfiles, setLocalProfiles] = useState<ConnectionProfile[]>(profiles);
   const [editingProfile, setEditingProfile] = useState<ConnectionProfile | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [isCustomRegion, setIsCustomRegion] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -66,12 +115,15 @@ export function ConnectionManagerModal({
   });
 
   const handleAddNew = () => {
-    setEditingProfile(createEmptyProfile());
+    const newProfile = createEmptyProfile();
+    setEditingProfile(newProfile);
+    setIsCustomRegion(!isKnownRegion(newProfile.region) && newProfile.region !== '');
     setShowForm(true);
   };
 
   const handleEdit = (profile: ConnectionProfile) => {
     setEditingProfile({ ...profile });
+    setIsCustomRegion(!isKnownRegion(profile.region));
     setShowForm(true);
   };
 
@@ -176,16 +228,45 @@ export function ConnectionManagerModal({
                     Region
                   </label>
                   <select
-                    className="input"
-                    value={editingProfile.region}
-                    onChange={e => setEditingProfile({ ...editingProfile, region: e.target.value })}
+                    className="input mb-2"
+                    value={isCustomRegion ? 'custom' : editingProfile.region}
+                    onChange={e => {
+                      const value = e.target.value;
+                      if (value === 'custom') {
+                        setIsCustomRegion(true);
+                        // Convert to empty or keep existing if it was already custom-ish? 
+                        // Let's keep existing if it's not in the list, otherwise clear it to prompt entry
+                        if (isKnownRegion(editingProfile.region)) {
+                          setEditingProfile({ ...editingProfile, region: '' });
+                        }
+                      } else {
+                        setIsCustomRegion(false);
+                        setEditingProfile({ ...editingProfile, region: value });
+                      }
+                    }}
                   >
-                    {AWS_REGIONS.map(region => (
-                      <option key={region.value} value={region.value}>
-                        {region.label}
-                      </option>
+                    {REGION_GROUPS.map(group => (
+                      <optgroup key={group.label} label={group.label}>
+                        {group.options.map(opt => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </optgroup>
                     ))}
+                    <option value="custom">Custom</option>
                   </select>
+
+                  {isCustomRegion && (
+                    <input
+                      type="text"
+                      className="input animate-fadeIn"
+                      placeholder="e.g. us-gov-west-1"
+                      value={editingProfile.region}
+                      onChange={e => setEditingProfile({ ...editingProfile, region: e.target.value })}
+                      autoFocus
+                    />
+                  )}
                 </div>
                 <div className="flex items-end">
                   <label className="flex items-center gap-2 cursor-pointer p-2.5 rounded-lg hover:bg-background-hover transition-colors">
