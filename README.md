@@ -1,321 +1,177 @@
-# Railway Bucket Explorer
+# Bucket Explorer
 
-A modern, beautiful web-based file manager for S3-compatible storage buckets. Built with React and Express, designed to integrate seamlessly with Railway's design language.
+A web-based file manager for S3-compatible storage buckets.
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/bucket-explorer?referralCode=railway-bucket-explorer)
+![Railway Object Explorer](https://img.shields.io/badge/S3-Object%20Explorer-C049FF?style=for-the-badge)
 
-![Railway Bucket Explorer](https://img.shields.io/badge/Railway-Bucket%20Explorer-C049FF?style=for-the-badge)
+---
+
+## Overview
+
+Managing S3 buckets often requires command-line tools or provider-specific dashboards that vary significantly in usability. Object Explorer unifies this experience by offering a single, consistent web interface to upload, download, and organize files across any S3-compatible provider.
+
+Supported providers include:
+
+- AWS S3  
+- Cloudflare R2  
+- MinIO  
+- DigitalOcean Spaces  
+
+<p>
+    <img width="1468" height="831" alt="Screenshot 2026-01-05 at 12 59 24 PM" src="https://github.com/user-attachments/assets/90370d52-2ba5-4a99-b53b-7510b2e20516" />
+
+</p>
+
+<p>
+    <img width="1464" height="832" alt="Screenshot 2026-01-05 at 1 00 23 PM" src="https://github.com/user-attachments/assets/11f35f47-3015-424a-bd0e-0fcb52a18c5b" />
+
+
+<p>
+    <img width="1467" height="832" alt="Screenshot 2026-01-05 at 12 59 51 PM" src="https://github.com/user-attachments/assets/a8079cb3-fa88-45de-9594-02730397e727" />
+
+</p>
+
+---
 
 ## Features
 
+### File Management
+
+Perform common file operations directly from the browser:
+
+- Drag-and-drop file uploads
+- Create folders for organization
+- Rename files and folders
+- Delete files and folders with confirmation
+- Download files using secure presigned URLs
+
+---
+
 ### Multi-Environment Support
-- **Connection Manager** - Switch between staging, production, or different providers without redeploying
-- **Profile Persistence** - Save multiple connection profiles in browser storage
-- **Dynamic Switching** - Change S3 credentials at runtime with instant bucket refresh
 
-### File Operations
-- **Upload** - Drag-and-drop or file picker with progress indicator
-- **Download** - Secure presigned URLs for direct downloads
-- **Rename** - Rename files and folders with a simple modal
-- **Delete** - Delete files and folders with confirmation
-- **Create Folder** - Create new folders for organization
+Manage multiple S3 connections without redeploying the application:
 
-### Bucket Management
-- View all buckets with search/filter
-- Create new buckets
-- Delete empty buckets
+- **Default Environment**  
+  Configure a fallback S3 connection using environment variables for deployed instances.
 
-### User Interface
-- Dark theme matching Railway's design system
-- Command Palette (Cmd+K) for keyboard-driven navigation
-- Responsive layout for desktop and mobile
-- Breadcrumb navigation for nested folders
-- File type icons for common formats
-- Loading states and skeleton placeholders
-- Toast notifications for actions
-- Context menus for quick actions
-- Glass morphism and Railway-style UI polish
+- **Local Profiles**  
+  Add and store multiple S3 connections locally in the browser.
+
+- **Instant Switching**  
+  Switch between staging, production, or personal buckets instantly.
+
+Local profiles are stored only in the browser and never sent to a centralized backend.
+
+---
+
+### Keyboard Navigation
+
+The interface is optimized for keyboard-driven workflows:
+
+- Global command palette for fast navigation
+- Perform actions without clicking through menus
+
+---
 
 ### Keyboard Shortcuts
-| Shortcut | Action |
-|----------|--------|
-| `Cmd+K` / `Ctrl+K` | Open command palette |
-| `Cmd+,` / `Ctrl+,` | Open connection manager |
-| `Escape` | Close modals |
 
-## Project Structure
+| Shortcut              | Action                     |
+|-----------------------|----------------------------|
+| `Cmd+K / Ctrl+K`      | Open command palette       |
+| `Cmd+, / Ctrl+,`      | Open connection manager    |
+| `Escape`              | Close active modal         |
 
-```
-railway-bucket-explorer/
-├── client/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── modals/
-│   │   │   │   └── ConnectionManagerModal.tsx  # Multi-environment switching
-│   │   │   ├── CommandPalette.tsx   # Cmd+K navigation
-│   │   │   ├── ContextMenu.tsx
-│   │   │   ├── EmptyState.tsx
-│   │   │   ├── ErrorBanner.tsx
-│   │   │   ├── FileTable.tsx
-│   │   │   ├── Header.tsx
-│   │   │   ├── Modal.tsx
-│   │   │   ├── Sidebar.tsx
-│   │   │   ├── Spinner.tsx
-│   │   │   ├── Toast.tsx
-│   │   │   ├── UploadProgress.tsx
-│   │   │   └── DropOverlay.tsx
-│   │   ├── types/
-│   │   ├── utils/
-│   │   ├── api.ts
-│   │   ├── App.tsx
-│   │   └── main.tsx
-│   └── public/
-│
-├── server/
-│   ├── src/
-│   │   ├── routes/
-│   │   │   ├── buckets.ts
-│   │   │   ├── objects.ts
-│   │   │   └── config.ts        # Dynamic connection switching
-│   │   ├── services/
-│   │   │   └── s3.ts
-│   │   ├── types/
-│   │   └── index.ts
-│   └── package.json
-│
-├── Dockerfile
-├── docker-compose.yml
-├── railway.toml
-├── railway.json                 # Railway template config
-└── package.json
-```
+---
 
-## Tech Stack
+## User Guide
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | React 18, Vite, TypeScript, Tailwind CSS |
-| Backend | Node.js, Express, TypeScript |
-| Storage | AWS SDK v3 for S3 operations |
-| Dev Tools | Minio (local S3), Docker, OrbStack |
-| Deployment | Docker container, Railway |
+### Connection Manager
 
-## Quick Start
 
-### Prerequisites
-- Node.js 18+
-- Docker (for local S3 with Minio)
-- **OrbStack** (recommended for macOS) - Low resource Docker alternative
+The Connection Manager allows you to connect to different S3-compatible storage providers without redeploying the application.
 
-### Local Development with OrbStack
+### Adding a Connection
 
-[OrbStack](https://orbstack.dev/) is the recommended way to run Docker containers on macOS due to its significantly lower resource usage compared to Docker Desktop.
+To connect to a storage provider:
 
-1. **Install OrbStack**
-   ```bash
-   brew install orbstack
-   ```
+1. Open the settings menu  
+   - Press `Cmd + ,` or click the settings icon
+2. Click **Add Connection**
+3. Enter the provider details (see guides below)
+4. Save the profile to switch instantly
 
-2. **Clone the repository**
-   ```bash
-   git clone https://github.com/subratomandalme/railway-bucket-explorer.git
-   cd railway-bucket-explorer
-   ```
+All credentials remain in your local browser storage and are never sent to a centralized backend.
 
-3. **Install dependencies**
-   ```bash
-   npm run install:all
-   ```
+---
 
-4. **Start Minio (local S3)**
-   ```bash
-   docker-compose up minio -d
-   ```
+## Provider Setup Guide
 
-5. **Create environment file**
-   ```bash
-   cat > .env << EOF
-   S3_ENDPOINT=http://localhost:9000
-   S3_ACCESS_KEY=minioadmin
-   S3_SECRET_KEY=minioadmin
-   S3_REGION=us-east-1
-   S3_FORCE_PATH_STYLE=true
-   EOF
-   ```
+### Cloudflare R2
 
-6. **Start development servers**
-   ```bash
-   npm run dev
-   ```
+1. Go to **Cloudflare Dashboard → Storage and databases → R2 object storage**
+2. Click **Manage**
+3. Click **Create API Token**
+4. Select the **Admin Read & Write** template
+5. Create the token and copy the values into Connection manager:
 
-7. **Open the app**
-   - App: http://localhost:5173
-   - Minio Console: http://localhost:9001 (minioadmin/minioadmin)
+- **Endpoint**  
+  `S3 API`
+- **Access Key**  
+  Your R2 Access Key ID
+- **Secret Key**  
+  Your R2 Secret Access Key
 
-## Multi-Environment Setup
+---
 
-### Using the Connection Manager
+### AWS S3
 
-The Connection Manager allows you to switch between different S3 environments without redeploying:
+1. Go to **AWS Console → IAM**
+2. Create a new user
+3. Attach the `AmazonS3FullAccess` policy  
+   (or a restricted bucket-level policy)
+4. Open the user's **Security Credentials** tab
+5. Click **Create Access Key**
+6. Copy the values into Railway Bucket Explorer:
 
-1. Click the **Settings** icon in the header or press `Cmd+,`
-2. Click **Add Connection** to create a new profile
-3. Enter your S3 credentials (endpoint, access key, secret key)
-4. Save and click on the profile to connect
+- **Endpoint**  
+  `https://s3.us-east-1.amazonaws.com`  
+  (replace `us-east-1` with your bucket’s region)
+- **Access Key**  
+  Generated Access Key ID (usually starts with `AKIA`)
+- **Secret Key**  
+  Generated Secret Access Key
 
-Profiles are stored in your browser's local storage and persist across sessions.
+---
 
-### Environment Variable Profiles
+### Railway Object Storage (MinIO)
 
-For deployment scenarios, you can also configure multiple environments using environment variables:
+1. Open your **Object Storage / MinIO** service inside your Railway project
+2. Navigate to the **Variables** tab
+3. Copy the values into Railway Bucket Explorer:
 
-```bash
-# Primary connection (from environment)
-S3_ENDPOINT=https://s3.amazonaws.com
-S3_ACCESS_KEY=your-access-key
-S3_SECRET_KEY=your-secret-key
+- **Endpoint**  
+  Public service domain  
+  Example: `https://minio-production.up.railway.app`
+- **Access Key**  
+  `MINIO_ROOT_USER` or `S3_ACCESS_KEY`
+- **Secret Key**  
+  `MINIO_ROOT_PASSWORD` or `S3_SECRET_KEY`
 
-# Additional connections can be added via the UI
-```
-
-## API Reference
-
-### Bucket Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/buckets` | List all buckets |
-| `POST` | `/api/buckets` | Create bucket `{name}` |
-| `DELETE` | `/api/buckets/:name` | Delete bucket |
-
-### Object Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/objects/:bucket` | List objects `?prefix=path/` |
-| `GET` | `/api/objects/:bucket/download` | Get download URL `?key=path` |
-| `GET` | `/api/objects/:bucket/metadata` | Get metadata `?key=path` |
-| `POST` | `/api/objects/:bucket/upload` | Upload files (multipart) |
-| `POST` | `/api/objects/:bucket/folder` | Create folder `{path}` |
-| `PUT` | `/api/objects/:bucket/rename` | Rename `{oldKey, newKey}` |
-| `POST` | `/api/objects/:bucket/copy` | Copy `{sourceKey, destKey}` |
-| `DELETE` | `/api/objects/:bucket` | Delete `?key=path&isFolder=bool` |
-
-### Config Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/config` | Get connection status |
-| `POST` | `/api/config/connect` | Switch S3 connection dynamically |
-| `POST` | `/api/config/disconnect` | Revert to environment config |
-| `POST` | `/api/config/test` | Test connection without switching |
-| `GET` | `/api/config/environments` | Get env var documentation |
-| `GET` | `/api/health` | Health check |
+---
 
 ## Deployment
 
-### One-Click Deploy to Railway
+The application is packaged as a Docker container and is ready to deploy on Railway.
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/bucket-explorer?referralCode=railway-bucket-explorer)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/NEW_TEMPLATE_LINK)
 
-Click the button above to deploy with one click. You'll be prompted to set the required environment variables.
+---
 
-### Manual Deploy to Railway
-
-1. Create a new project on [Railway](https://railway.app)
-2. Connect your GitHub repository
-3. Set the environment variables:
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `S3_ENDPOINT` | S3-compatible endpoint URL | Yes |
-| `S3_ACCESS_KEY` | Access key ID | Yes |
-| `S3_SECRET_KEY` | Secret access key | Yes |
-| `S3_REGION` | AWS region | No (default: us-east-1) |
-| `S3_FORCE_PATH_STYLE` | Use path-style URLs | No (default: true) |
-
-4. Deploy!
-
-### Private Networking on Railway
-
-For enhanced security when accessing private S3-compatible buckets:
-
-1. **Deploy on Private Network**: In Railway's service settings, enable private networking
-2. **Use Internal Endpoints**: If your S3 bucket is on Railway (e.g., Railway's Object Storage), use the internal DNS name
-3. **Restrict Public Access**: The Bucket Explorer can run on a private network while still being accessible via Railway's public domain
-
-Example configuration for Railway's private network:
-```bash
-# Internal endpoint (only accessible within Railway)
-S3_ENDPOINT=http://your-minio-service.railway.internal:9000
-```
-
-### Connecting to Different Providers
-
-**AWS S3:**
-```
-S3_ENDPOINT=https://s3.us-east-1.amazonaws.com
-S3_FORCE_PATH_STYLE=false
-```
-
-**Cloudflare R2:**
-```
-S3_ENDPOINT=https://<account_id>.r2.cloudflarestorage.com
-```
-
-**DigitalOcean Spaces:**
-```
-S3_ENDPOINT=https://<region>.digitaloceanspaces.com
-```
-
-**Railway Object Storage:**
-```
-S3_ENDPOINT=<provided-by-railway>
-```
-
-## Component Overview
-
-### Client Components
-
-| Component | Purpose |
-|-----------|---------|
-| `App` | Main application with state management |
-| `Sidebar` | Bucket list with search |
-| `Header` | Breadcrumb navigation and actions |
-| `FileTable` | File/folder table view |
-| `Modal` | Reusable modal dialog |
-| `CommandPalette` | Cmd+K keyboard navigation |
-| `ConnectionManagerModal` | Multi-environment switching |
-| `Toast` | Auto-dismissing notifications |
-| `ContextMenu` | Right-click action menu |
-| `EmptyState` | Empty folder/bucket placeholder |
-| `UploadProgress` | File upload progress bar |
-| `DropOverlay` | Drag-and-drop visual indicator |
-| `ErrorBanner` | Dismissible error messages |
-
-### Server Services
-
-| Service | Purpose |
-|---------|---------|
-| `s3.ts` | All S3 operations with dynamic connection support |
-| `config.ts` | Connection switching and configuration endpoints |
-
-## Security Considerations
-
-- **Credentials Storage**: Connection profiles are stored in browser localStorage. For production use, consider implementing server-side encrypted storage.
-- **Private Networks**: Run the Bucket Explorer on a private network when accessing sensitive buckets.
-- **Access Control**: The app inherits permissions from the S3 credentials provided. Use IAM policies to restrict access.
 
 ## License
 
 MIT
 
-## Contributing
+---
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Created by https://github.com/subratomandalme
