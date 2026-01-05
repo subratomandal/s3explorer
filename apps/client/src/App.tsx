@@ -185,7 +185,28 @@ export default function App() {
     }
   }, [selectedBucket, currentPath, folderCache]);
 
-  useEffect(() => { loadBuckets(); }, [loadBuckets]);
+  useEffect(() => {
+    const restoreConnection = async () => {
+      if (activeProfileId) {
+        const profile = connectionProfiles.find(p => p.id === activeProfileId);
+        if (profile) {
+          try {
+            await api.connectToS3({
+              endpoint: profile.endpoint,
+              accessKey: profile.accessKey,
+              secretKey: profile.secretKey,
+              region: profile.region,
+              forcePathStyle: profile.forcePathStyle,
+            });
+            await loadBuckets();
+          } catch (err) {
+            console.error('Failed to restore connection:', err);
+          }
+        }
+      }
+    };
+    restoreConnection();
+  }, []);
   useEffect(() => { if (selectedBucket) loadObjects(); }, [selectedBucket, currentPath, loadObjects]);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
