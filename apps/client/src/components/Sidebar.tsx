@@ -47,7 +47,7 @@ export function Sidebar({
                         alt=""
                         className="w-7 h-7 invert logo-spin"
                     />
-                    <span className="font-semibold text-base">Bucket Explorer</span>
+                    <span className="font-semibold text-base">Object Explorer</span>
                 </div>
 
                 <div className="p-3">
