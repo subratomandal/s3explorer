@@ -2,7 +2,7 @@
 
 A web-based file manager for S3-compatible storage buckets.
 
-![Railway Object Explorer](https://img.shields.io/badge/S3-Object%20Explorer-C049FF?style=for-the-badge)
+[![S3 Explorer](https://img.shields.io/badge/S3-Explorer%20-C049FF?style=for-the-badge)](https://s3explorer.up.railway.app/)
 
 ---
 
