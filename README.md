@@ -1,4 +1,4 @@
-# Bucket Explorer
+# S3 Explorer
 
 A web-based file manager for S3-compatible storage buckets.
 
