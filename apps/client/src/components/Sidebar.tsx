@@ -12,6 +12,7 @@ interface SidebarProps {
     onNewBucket: () => void;
     onDeleteBucket: (name: string) => void;
     onCloseSidebar: () => void;
+    onNavigateHome: () => void;
 }
 
 export function Sidebar({
@@ -25,6 +26,7 @@ export function Sidebar({
     onNewBucket,
     onDeleteBucket,
     onCloseSidebar,
+    onNavigateHome,
 }: SidebarProps) {
     const filteredBuckets = buckets.filter(b =>
         !searchQuery.trim() || b.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -41,13 +43,18 @@ export function Sidebar({
 
             <aside className={`w-64 flex flex-col border-r border-border bg-background-secondary flex-shrink-0 fixed md:relative inset-y-0 left-0 z-50 transform transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
 
-                <div className="h-14 flex items-center gap-2.5 px-4 border-b border-border">
+                <div
+                    className="h-14 flex items-center gap-2.5 px-4 border-b border-border cursor-pointer group transition-all duration-300 hover:bg-background-tertiary/30"
+                    onClick={onNavigateHome}
+                >
                     <img
                         src="/logo.svg"
                         alt=""
-                        className="w-7 h-7 invert logo-spin"
+                        className="w-7 h-7 invert logo-spin transition-all duration-300 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
                     />
-                    <span className="font-semibold text-base">Object Explorer</span>
+                    <span className="font-semibold text-base transition-all duration-300 group-hover:text-foreground group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
+                        Object Explorer
+                    </span>
                 </div>
 
                 <div className="p-3">

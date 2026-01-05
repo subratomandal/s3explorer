@@ -9,6 +9,7 @@ import {
   DeleteObjectCommand,
   CopyObjectCommand,
   HeadObjectCommand,
+  DeleteObjectsCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type { BucketInfo, ObjectInfo, ObjectMetadata } from '../types/index.js';
@@ -76,8 +77,35 @@ export async function createBucket(name: string): Promise<void> {
   await client.send(command);
 }
 
+async function emptyBucket(bucket: string): Promise<void> {
+  const client = getS3Client();
+  let continuationToken: string | undefined;
+
+  do {
+    const listCommand = new ListObjectsV2Command({
+      Bucket: bucket,
+      ContinuationToken: continuationToken,
+    });
+    const listResponse = await client.send(listCommand);
+
+    if (listResponse.Contents && listResponse.Contents.length > 0) {
+      const deleteCommand = new DeleteObjectsCommand({
+        Bucket: bucket,
+        Delete: {
+          Objects: listResponse.Contents.map(obj => ({ Key: obj.Key })),
+          Quiet: true,
+        },
+      });
+      await client.send(deleteCommand);
+    }
+
+    continuationToken = listResponse.NextContinuationToken;
+  } while (continuationToken);
+}
+
 export async function deleteBucket(name: string): Promise<void> {
   const client = getS3Client();
+  await emptyBucket(name);
   const command = new DeleteBucketCommand({ Bucket: name });
   await client.send(command);
 }

@@ -339,6 +339,7 @@ export default function App() {
         onNewBucket={() => setShowNewBucket(true)}
         onDeleteBucket={(name) => setShowDeleteBucket(name)}
         onCloseSidebar={() => setSidebarOpen(false)}
+        onNavigateHome={() => { setSelectedBucket(null); setCurrentPath(''); setSidebarOpen(false); }}
       />
 
       <main className="flex-1 flex flex-col min-w-0" {...getRootProps()}>
@@ -482,7 +483,7 @@ export default function App() {
 
       {/* Welcome popup for first-time users */}
       {showWelcome && (
-        <div className="fixed bottom-20 right-4 w-80 bg-background-secondary border border-border rounded-xl shadow-2xl animate-fadeIn z-50">
+        <div className="fixed bottom-5 right-4 w-80 bg-background-secondary border border-border rounded-xl shadow-2xl animate-fadeIn z-50">
           <div className="p-4">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
