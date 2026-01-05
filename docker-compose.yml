@@ -36,3 +36,5 @@ services:
 
 volumes:
   minio_data:
+
+# v 1.0
