@@ -26,14 +26,14 @@ This document describes the security architecture redesign of S3 Explorer, trans
 
 ### Key Changes
 
-| Before | After |
-|--------|-------|
-| No authentication | Password auth with Argon2id |
-| Credentials in localStorage | AES-256-GCM encrypted at rest |
-| No sessions | SQLite-backed server sessions |
-| CORS wide open | Strict same-origin with credentials |
-| Global mutable state | Per-request S3 client from DB |
-| No rate limiting | IP-based rate limiting |
+| Before                      | After                               |
+| --------------------------- | ----------------------------------- |
+| No authentication           | Password auth with Argon2id         |
+| Credentials in localStorage | AES-256-GCM encrypted at rest       |
+| No sessions                 | SQLite-backed server sessions       |
+| CORS wide open              | Strict same-origin with credentials |
+| Global mutable state        | Per-request S3 client from DB       |
+| No rate limiting            | IP-based rate limiting              |
 
 ---
 
@@ -89,7 +89,7 @@ flowchart TB
             RateLimit["Rate Limiter"]
             Session["Session Middleware"]
             Auth["Auth Middleware"]
-            
+
             subgraph Routes["API Routes"]
                 AuthRoutes["/api/auth/*"]
                 ConnRoutes["/api/connections/*"]
@@ -136,16 +136,16 @@ flowchart TB
 
 ### Component Responsibilities
 
-| Component | Responsibility |
-|-----------|---------------|
-| **Helmet** | Security headers (CSP, HSTS, X-Frame-Options, etc.) |
-| **Rate Limiter** | Prevent brute force (10 attempts/15min, 30min lockout) |
-| **Session Middleware** | Manage httpOnly cookies, link to SQLite store |
-| **Auth Middleware** | Verify session validity, reject unauthenticated requests |
-| **Auth Service** | Password verification with Argon2id |
-| **Crypto Service** | AES-256-GCM encrypt/decrypt for S3 credentials |
-| **DB Service** | SQLite operations, session store implementation |
-| **S3 Service** | Create per-request S3 clients from decrypted credentials |
+| Component              | Responsibility                                           |
+| ---------------------- | -------------------------------------------------------- |
+| **Helmet**             | Security headers (CSP, HSTS, X-Frame-Options, etc.)      |
+| **Rate Limiter**       | Prevent brute force (10 attempts/15min, 30min lockout)   |
+| **Session Middleware** | Manage httpOnly cookies, link to SQLite store            |
+| **Auth Middleware**    | Verify session validity, reject unauthenticated requests |
+| **Auth Service**       | Password verification with Argon2id                      |
+| **Crypto Service**     | AES-256-GCM encrypt/decrypt for S3 credentials           |
+| **DB Service**         | SQLite operations, session store implementation          |
+| **S3 Service**         | Create per-request S3 clients from decrypted credentials |
 
 ---
 
@@ -164,13 +164,13 @@ sequenceDiagram
 
     U->>S: POST /api/auth/login {password, rememberMe}
     S->>R: Check IP rate limit
-    
+
     alt Too many attempts
         R-->>U: 429 Too Many Requests (wait 30min)
     else Within limit
         R->>A: Verify password
         A->>A: Argon2id verify against APP_PASSWORD hash
-        
+
         alt Invalid password
             A->>R: Record failed attempt
             A-->>U: 401 Invalid password
@@ -207,7 +207,7 @@ sequenceDiagram
     S->>D: INSERT connection with encrypted creds
     D-->>S: Connection ID
     S-->>U: 201 Created {id, name, endpoint}
-    
+
     Note over U,K: Credentials never leave server unencrypted
 ```
 
@@ -232,7 +232,7 @@ sequenceDiagram
     S->>S3: ListBuckets
     S3-->>S: Bucket list
     S-->>U: JSON response
-    
+
     Note over S: S3 client is garbage collected after request
 ```
 
@@ -256,6 +256,7 @@ await argon2.verify(storedHash, providedPassword);
 ```
 
 **Why Argon2id?**
+
 - Winner of Password Hashing Competition (2015)
 - Resistant to GPU/ASIC attacks (memory-hard)
 - Resistant to side-channel attacks (Argon2id variant)
@@ -271,13 +272,14 @@ await argon2.verify(storedHash, providedPassword);
 // Auth Tag: 128-bit (prevents tampering)
 
 interface EncryptedData {
-  iv: string;        // Base64 encoded 16 bytes
-  authTag: string;   // Base64 encoded 16 bytes  
+  iv: string; // Base64 encoded 16 bytes
+  authTag: string; // Base64 encoded 16 bytes
   ciphertext: string; // Base64 encoded encrypted data
 }
 ```
 
 **Why AES-256-GCM?**
+
 - Industry standard for authenticated encryption
 - Provides confidentiality AND integrity
 - Fast with hardware acceleration (AES-NI)
@@ -298,6 +300,7 @@ interface EncryptedData {
 ```
 
 **Why server-side sessions?**
+
 - Session data never leaves server
 - Can invalidate sessions server-side
 - No JWT signature verification overhead
@@ -309,7 +312,7 @@ interface EncryptedData {
 
 ```typescript
 // Configuration
-const MAX_ATTEMPTS = 10;        // Per 15-minute window
+const MAX_ATTEMPTS = 10; // Per 15-minute window
 const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 const LOCKOUT_MS = 30 * 60 * 1000; // 30 minutes
 
@@ -317,7 +320,7 @@ const LOCKOUT_MS = 30 * 60 * 1000; // 30 minutes
 interface RateLimit {
   ip: string;
   attempts: number;
-  first_attempt: number;  // Unix timestamp
+  first_attempt: number; // Unix timestamp
   blocked_until: number | null;
 }
 ```
@@ -331,11 +334,13 @@ interface RateLimit {
 **Q**: Why not implement full user authentication with usernames?
 
 **A**: This is a **single-user, self-hosted** application. Adding usernames would:
+
 1. Increase complexity without benefit (only one user)
 2. Require additional storage and validation
 3. Create username enumeration attack surface
 
 The password is set via environment variable (`APP_PASSWORD`), which:
+
 - Is configured at deploy time by the instance owner
 - Never stored in code or database
 - Can be changed by redeploying with new env var
@@ -346,7 +351,8 @@ The password is set via environment variable (`APP_PASSWORD`), which:
 
 **Q**: Why use SQLite for sessions and connections?
 
-**A**: 
+**A**:
+
 1. **Zero configuration**: No separate database service needed
 2. **Single file**: Easy backup (`/data/s3explorer.db`)
 3. **Railway volumes**: Works perfectly with persistent volumes
@@ -369,6 +375,7 @@ SQLite handles thousands of requests/second - far more than a single user needs.
 4. **Railway-specific**: Volume snapshots might not include all files
 
 In higher security environments, the key could be:
+
 - Stored in a secrets manager
 - Derived from a hardware security module
 - Loaded from environment variable
@@ -381,13 +388,13 @@ In higher security environments, the key could be:
 
 **A**:
 
-| Feature | bcrypt | Argon2id |
-|---------|--------|----------|
-| Memory hardness | No | Yes (64MB default) |
-| GPU resistance | Moderate | Strong |
-| Side-channel resistance | No | Yes |
-| Modern standard | Legacy | PHC winner, OWASP recommended |
-| Tunability | Limited | Memory, time, parallelism |
+| Feature                 | bcrypt   | Argon2id                      |
+| ----------------------- | -------- | ----------------------------- |
+| Memory hardness         | No       | Yes (64MB default)            |
+| GPU resistance          | Moderate | Strong                        |
+| Side-channel resistance | No       | Yes                           |
+| Modern standard         | Legacy   | PHC winner, OWASP recommended |
+| Tunability              | Limited  | Memory, time, parallelism     |
 
 bcrypt was designed in 1999. Argon2 was designed specifically to resist modern GPU/ASIC attacks.
 
@@ -399,13 +406,13 @@ bcrypt was designed in 1999. Argon2 was designed specifically to resist modern G
 
 **A**: For a **single-user self-hosted app**, JWTs add complexity without benefit:
 
-| Concern | JWT | Server Session |
-|---------|-----|----------------|
-| Revocation | Complex (blacklists) | Simple (delete from DB) |
-| Size | Large (payload + signature) | Small (just session ID) |
-| Validation | Crypto on every request | DB lookup (cached) |
-| Scaling | Better for distributed | Fine for single instance |
-| Security | Token theft = full access until expiry | Can invalidate immediately |
+| Concern    | JWT                                    | Server Session             |
+| ---------- | -------------------------------------- | -------------------------- |
+| Revocation | Complex (blacklists)                   | Simple (delete from DB)    |
+| Size       | Large (payload + signature)            | Small (just session ID)    |
+| Validation | Crypto on every request                | DB lookup (cached)         |
+| Scaling    | Better for distributed                 | Fine for single instance   |
+| Security   | Token theft = full access until expiry | Can invalidate immediately |
 
 Server sessions are simpler and more secure for this use case.
 
@@ -446,14 +453,15 @@ Can be increased by changing `MAX_CONNECTIONS` constant if needed.
 
 **A**: Multi-connection support:
 
-| Feature | Env Vars | Database |
-|---------|----------|----------|
-| Multiple connections | Complex (S3_1_*, S3_2_*) | Natural (rows) |
-| Add at runtime | Requires restart | Instant |
-| Encryption | Plain text in env | AES-256-GCM |
-| Backup | External config mgmt | Part of /data volume |
+| Feature              | Env Vars                 | Database             |
+| -------------------- | ------------------------ | -------------------- |
+| Multiple connections | Complex (S3*1*_, S3*2*_) | Natural (rows)       |
+| Add at runtime       | Requires restart         | Instant              |
+| Encryption           | Plain text in env        | AES-256-GCM          |
+| Backup               | External config mgmt     | Part of /data volume |
 
 Environment variables are still used for `APP_PASSWORD` and `SESSION_SECRET` because:
+
 - They're instance-level secrets, not user data
 - They should never be stored in the database
 - They're set once at deploy time
@@ -470,24 +478,24 @@ Environment variables are still used for `APP_PASSWORD` and `SESSION_SECRET` bec
 
 ### Threats Mitigated
 
-| Threat | Mitigation |
-|--------|-----------|
-| **Unauthorized access** | Password authentication required |
-| **Brute force** | Rate limiting (10 attempts/15min, 30min lockout) |
-| **Session hijacking** | httpOnly, secure, sameSite=strict cookies |
-| **XSS credential theft** | Credentials never in browser/localStorage |
-| **Credential exposure in transit** | HTTPS only, credentials never in request body |
-| **Credential exposure at rest** | AES-256-GCM encryption |
-| **CSRF attacks** | sameSite=strict cookies |
-| **Clickjacking** | X-Frame-Options, CSP headers via Helmet |
+| Threat                             | Mitigation                                       |
+| ---------------------------------- | ------------------------------------------------ |
+| **Unauthorized access**            | Password authentication required                 |
+| **Brute force**                    | Rate limiting (10 attempts/15min, 30min lockout) |
+| **Session hijacking**              | httpOnly, secure, sameSite=strict cookies        |
+| **XSS credential theft**           | Credentials never in browser/localStorage        |
+| **Credential exposure in transit** | HTTPS only, credentials never in request body    |
+| **Credential exposure at rest**    | AES-256-GCM encryption                           |
+| **CSRF attacks**                   | sameSite=strict cookies                          |
+| **Clickjacking**                   | X-Frame-Options, CSP headers via Helmet          |
 
 ### Accepted Risks
 
-| Risk | Acceptance Rationale |
-|------|---------------------|
+| Risk                  | Acceptance Rationale                                                               |
+| --------------------- | ---------------------------------------------------------------------------------- |
 | **Server compromise** | If attacker has server access, all bets are off. Encryption key is on same volume. |
-| **Weak password** | User responsibility. Minimum requirements enforced (12+ chars, complexity). |
-| **Network MITM** | Requires HTTPS in production. User must configure TLS. |
+| **Weak password**     | User responsibility. Minimum requirements enforced (12+ chars, complexity).        |
+| **Network MITM**      | Requires HTTPS in production. User must configure TLS.                             |
 
 ---
 
@@ -495,35 +503,35 @@ Environment variables are still used for `APP_PASSWORD` and `SESSION_SECRET` bec
 
 ### New Files Created
 
-| File | Purpose |
-|------|---------|
-| `apps/server/src/services/db.ts` | SQLite database, session store, CRUD operations |
-| `apps/server/src/services/crypto.ts` | AES-256-GCM encryption/decryption |
-| `apps/server/src/middleware/auth.ts` | Argon2 verification, rate limiting, session management |
-| `apps/server/src/routes/auth.ts` | `/api/auth/login`, `/logout`, `/status` endpoints |
-| `apps/server/src/routes/connections.ts` | CRUD for encrypted S3 connections |
-| `apps/client/src/components/LoginPage.tsx` | Password login UI |
-| `apps/client/src/components/ConnectionManager.tsx` | S3 connection management UI |
+| File                                               | Purpose                                                |
+| -------------------------------------------------- | ------------------------------------------------------ |
+| `apps/server/src/services/db.ts`                   | SQLite database, session store, CRUD operations        |
+| `apps/server/src/services/crypto.ts`               | AES-256-GCM encryption/decryption                      |
+| `apps/server/src/middleware/auth.ts`               | Argon2 verification, rate limiting, session management |
+| `apps/server/src/routes/auth.ts`                   | `/api/auth/login`, `/logout`, `/status` endpoints      |
+| `apps/server/src/routes/connections.ts`            | CRUD for encrypted S3 connections                      |
+| `apps/client/src/components/LoginPage.tsx`         | Password login UI                                      |
+| `apps/client/src/components/ConnectionManager.tsx` | S3 connection management UI                            |
 
 ### Modified Files
 
-| File | Changes |
-|------|---------|
-| `apps/server/src/index.ts` | Added Helmet, sessions, auth middleware |
-| `apps/server/src/services/s3.ts` | Per-request client from encrypted DB credentials |
-| `apps/server/src/routes/buckets.ts` | Input validation, auth required |
-| `apps/server/src/routes/objects.ts` | Input validation, auth required |
-| `apps/client/src/api.ts` | `credentials: 'include'`, auth endpoints |
-| `apps/client/src/App.tsx` | Auth wrapper, removed localStorage credentials |
-| `Dockerfile` | Multi-stage build, /data volume |
-| `docker-compose.yml` | Required env vars, volume mount |
+| File                                | Changes                                          |
+| ----------------------------------- | ------------------------------------------------ |
+| `apps/server/src/index.ts`          | Added Helmet, sessions, auth middleware          |
+| `apps/server/src/services/s3.ts`    | Per-request client from encrypted DB credentials |
+| `apps/server/src/routes/buckets.ts` | Input validation, auth required                  |
+| `apps/server/src/routes/objects.ts` | Input validation, auth required                  |
+| `apps/client/src/api.ts`            | `credentials: 'include'`, auth endpoints         |
+| `apps/client/src/App.tsx`           | Auth wrapper, removed localStorage credentials   |
+| `Dockerfile`                        | Multi-stage build, /data volume                  |
+| `docker-compose.yml`                | Required env vars, volume mount                  |
 
 ### Deleted Files
 
-| File | Reason |
-|------|--------|
-| `apps/server/src/routes/config.ts` | Replaced by `/api/connections` with encryption |
-| `apps/client/src/components/modals/ConnectionManagerModal.tsx` | Replaced by `ConnectionManager.tsx` |
+| File                                                           | Reason                                         |
+| -------------------------------------------------------------- | ---------------------------------------------- |
+| `apps/server/src/routes/config.ts`                             | Replaced by `/api/connections` with encryption |
+| `apps/client/src/components/modals/ConnectionManagerModal.tsx` | Replaced by `ConnectionManager.tsx`            |
 
 ---
 
