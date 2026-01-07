@@ -268,11 +268,11 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
             )}
           </div>
         ) : (
-          <div className="flex-1 flex flex-col animate-fadeIn">
-            <div className="space-y-2.5">
+          <div className="flex-1 flex flex-col">
+            <div className="space-y-3">
               {/* Provider Selector */}
-              <div className="space-y-1">
-                <label className="text-xs text-foreground-muted">Provider</label>
+              <div className="space-y-1.5">
+                <label className="text-xs text-foreground-muted leading-none block">Provider</label>
                 <div className="relative">
                   <select
                     value={selectedProvider}
@@ -287,10 +287,10 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                 </div>
               </div>
 
-              {/* Profile Name & Endpoint Row */}
+              {/* Profile Name & Region Row */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs text-foreground-muted">Profile Name</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs text-foreground-muted leading-none block">Profile Name</label>
                   <input
                     type="text"
                     value={form.name}
@@ -299,8 +299,8 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                     className="input h-9 text-sm"
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs text-foreground-muted">Region</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs text-foreground-muted leading-none block">Region</label>
                   <div className="relative">
                     <select
                       value={form.region}
@@ -317,8 +317,8 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
               </div>
 
               {/* Endpoint */}
-              <div className="space-y-1">
-                <label className="text-xs text-foreground-muted">S3 Endpoint</label>
+              <div className="space-y-1.5">
+                <label className="text-xs text-foreground-muted leading-none block">S3 Endpoint</label>
                 <input
                   type="text"
                   value={form.endpoint}
@@ -330,8 +330,8 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
 
               {/* Keys Row */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs text-foreground-muted">Access Key</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs text-foreground-muted leading-none block">Access Key</label>
                   <input
                     type="text"
                     value={form.accessKey}
@@ -340,8 +340,8 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                     className="input font-mono h-9 text-sm"
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs text-foreground-muted">Secret Key</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs text-foreground-muted leading-none block">Secret Key</label>
                   <input
                     type="password"
                     value={form.secretKey}
@@ -353,7 +353,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
               </div>
 
               {/* Path Style & Test */}
-              <div className="flex items-center justify-between pt-1">
+              <div className="flex items-center justify-between">
                 <label className="flex items-center gap-2 cursor-pointer group">
                   <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
                     form.forcePathStyle
@@ -368,15 +368,15 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                     onChange={(e) => setForm({ ...form, forcePathStyle: e.target.checked })}
                     className="hidden"
                   />
-                  <span className="text-xs text-foreground-muted group-hover:text-foreground transition-colors">Path-style URLs</span>
+                  <span className="text-xs text-foreground-muted leading-none group-hover:text-foreground transition-colors">Path-style URLs</span>
                 </label>
 
                 <button
                   onClick={handleTest}
                   disabled={testing || !form.endpoint || (!editingId && (!form.accessKey || !form.secretKey))}
-                  className="text-xs text-foreground-muted hover:text-accent-purple transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                  className="group text-xs text-foreground-muted hover:text-accent-purple transition-colors flex items-center gap-1.5 disabled:opacity-50 px-2 py-1 rounded hover:bg-accent-purple/10"
                 >
-                  <RefreshCw className={`w-3 h-3 ${testing ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`w-3 h-3 ${testing ? 'animate-spin' : 'group-hover:rotate-45'} transition-transform`} />
                   Test
                 </button>
               </div>

@@ -30,7 +30,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
   return (
     <div className="fixed inset-0 bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-sm animate-fadeInUp">
+      <div className="w-full max-w-sm">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
           <div className="flex items-center justify-center mx-auto mb-4 sm:mb-5">
@@ -46,7 +46,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
         {/* Card */}
         <div className="bg-background-secondary border border-border rounded-xl p-4 sm:p-6">
-          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-3">
             <div className="space-y-2">
               <label className="text-sm text-foreground-secondary">Password</label>
               <div className="relative">
@@ -87,7 +87,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             </label>
 
             {error && (
-              <div className="p-3 rounded-lg bg-accent-red/10 border border-accent-red/20 text-accent-red text-sm flex items-center gap-2 animate-fadeIn">
+              <div className="p-3 rounded-lg bg-accent-red/10 border border-accent-red/20 text-accent-red text-sm flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 {error}
               </div>
