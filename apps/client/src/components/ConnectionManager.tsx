@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Check, Server, Edit2, ChevronDown, Globe, AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react';
+import { Plus, Trash2, Check, Server, ChevronDown, AlertCircle, RefreshCw, ChevronRight, Link } from 'lucide-react';
 import * as api from '../api';
 import type { Connection, ConnectionConfig } from '../api';
 import { Modal } from './Modal';
@@ -187,11 +187,11 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
 
         {view === 'list' ? (
           <div className="animate-fadeIn">
-            <p className="text-foreground-secondary text-sm mb-6">
-              Manage your S3-compatible storage connections.
+            <p className="text-foreground-secondary text-sm mb-6 leading-relaxed">
+              Manage your S3-compatible storage connections. Switch between staging, production, or different providers.
             </p>
 
-            <div className="space-y-2 max-h-[350px] overflow-y-auto">
+            <div className="space-y-3 max-h-[300px] overflow-y-auto">
               {loading ? (
                 <div className="flex items-center justify-center py-12 text-foreground-muted">
                   <RefreshCw className="w-5 h-5 animate-spin mr-2" />
@@ -204,89 +204,78 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                   <p className="text-foreground-muted text-sm mt-1">Add your first connection to get started</p>
                 </div>
               ) : (
-                connections.map((conn, index) => (
+                connections.map((conn) => (
                   <div
                     key={conn.id}
                     onClick={() => handleActivate(conn.id)}
-                    className={`group relative flex items-center justify-between p-4 rounded-lg border transition-all cursor-pointer ${
-                      conn.isActive
-                        ? 'bg-accent-pink/10 border-accent-pink/30'
-                        : 'bg-background border-border hover:border-border-hover hover:bg-background-hover'
-                    }`}
-                    style={{ animationDelay: `${index * 50}ms` }}
+                    className="group relative flex items-center justify-between p-3 pr-4 rounded-lg bg-background-tertiary border border-border hover:border-border-hover transition-all cursor-pointer overflow-hidden"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className={`w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center ${
-                        conn.isActive ? 'bg-accent-pink/20 text-accent-pink' : 'bg-background-tertiary text-foreground-muted'
+                    {/* Left accent border */}
+                    <div className={`absolute left-0 top-0 bottom-0 w-1 ${conn.isActive ? 'bg-accent-purple' : 'bg-transparent'}`} />
+
+                    <div className="flex items-center gap-3 min-w-0 pl-2">
+                      <div className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center ${
+                        conn.isActive ? 'bg-accent-purple/20 text-accent-purple' : 'bg-background-hover text-foreground-muted'
                       }`}>
-                        <Server className="w-4 h-4" />
+                        <Server className="w-5 h-5" />
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className={`font-medium text-sm truncate ${conn.isActive ? 'text-foreground' : 'text-foreground-secondary'}`}>
+                          <span className="font-medium text-sm text-foreground truncate">
                             {conn.name}
                           </span>
                           {conn.isActive && (
-                            <span className="px-1.5 py-0.5 rounded bg-accent-pink/20 text-accent-pink text-[10px] font-semibold uppercase">
+                            <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-accent-green/20 text-accent-green">
                               Active
                             </span>
                           )}
                         </div>
                         <p className="text-xs text-foreground-muted font-mono truncate mt-0.5" title={conn.endpoint}>
-                          {conn.endpoint || 'AWS S3'}
+                          {conn.endpoint || 'https://s3.amazonaws.com'}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1">
                       <button
                         onClick={(e) => startEdit(e, conn)}
-                        className="btn btn-ghost btn-icon"
+                        className="p-2 text-foreground-muted hover:text-foreground hover:bg-background-hover rounded-lg transition-colors"
                         title="Edit"
                       >
-                        <Edit2 className="w-4 h-4" />
+                        <Link className="w-4 h-4" />
                       </button>
                       <button
                         onClick={(e) => handleDelete(e, conn.id)}
-                        className="btn btn-ghost btn-icon text-accent-red hover:bg-accent-red/10"
+                        className="p-2 text-foreground-muted hover:text-accent-red hover:bg-accent-red/10 rounded-lg transition-colors"
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
+                      <ChevronRight className="w-4 h-4 text-foreground-muted ml-1" />
                     </div>
                   </div>
                 ))
               )}
             </div>
 
-            <div className="mt-4 pt-4 border-t border-border">
-              <button
-                onClick={() => { resetForm(); setView('form'); }}
-                className="btn btn-secondary w-full justify-center"
-              >
-                <Plus className="w-4 h-4" />
-                Add Connection
-              </button>
-            </div>
+            <button
+              onClick={() => { resetForm(); setView('form'); }}
+              className="w-full mt-4 py-3 px-4 rounded-lg border border-dashed border-border text-foreground-secondary hover:text-foreground hover:border-border-hover hover:bg-background-hover transition-all flex items-center justify-center gap-2 text-sm font-medium"
+            >
+              <Plus className="w-4 h-4" />
+              Add Connection
+            </button>
           </div>
         ) : (
           <div className="flex-1 flex flex-col animate-fadeIn">
-            <button
-              onClick={() => setView('list')}
-              className="flex items-center gap-1.5 text-foreground-muted hover:text-foreground text-sm mb-4 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </button>
-
-            <h3 className="text-base font-semibold text-foreground mb-5">
-              {editingId ? 'Edit Connection' : 'New Connection'}
-            </h3>
+            <p className="text-foreground-secondary text-sm mb-6 leading-relaxed">
+              Manage your S3-compatible storage connections. Switch between staging, production, or different providers.
+            </p>
 
             <div className="space-y-4 flex-1 overflow-y-auto">
               {/* Provider Selector */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-foreground-muted uppercase tracking-wide">Provider</label>
+              <div className="space-y-2">
+                <label className="text-sm text-foreground-secondary">Storage Provider</label>
                 <div className="relative">
                   <select
                     value={selectedProvider}
@@ -302,36 +291,33 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
               </div>
 
               {/* Profile Name */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-foreground-muted uppercase tracking-wide">Name</label>
+              <div className="space-y-2">
+                <label className="text-sm text-foreground-secondary">Profile Name</label>
                 <input
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="Production, Staging, etc."
+                  placeholder="e.g., Production, Staging, Local"
                   className="input"
                 />
               </div>
 
               {/* Endpoint */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-foreground-muted uppercase tracking-wide">Endpoint</label>
-                <div className="relative">
-                  <Globe className="w-4 h-4 text-foreground-muted absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    value={form.endpoint}
-                    onChange={(e) => setForm({ ...form, endpoint: e.target.value })}
-                    placeholder="https://s3.amazonaws.com"
-                    className="input pl-10 font-mono text-sm"
-                  />
-                </div>
+              <div className="space-y-2">
+                <label className="text-sm text-foreground-secondary">S3 Endpoint</label>
+                <input
+                  type="text"
+                  value={form.endpoint}
+                  onChange={(e) => setForm({ ...form, endpoint: e.target.value })}
+                  placeholder="https://s3.amazonaws.com"
+                  className="input font-mono text-sm"
+                />
               </div>
 
               {/* Keys Row */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground-muted uppercase tracking-wide">Access Key</label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm text-foreground-secondary">Access Key</label>
                   <input
                     type="text"
                     value={form.accessKey}
@@ -340,8 +326,8 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                     className="input font-mono text-sm"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground-muted uppercase tracking-wide">Secret Key</label>
+                <div className="space-y-2">
+                  <label className="text-sm text-foreground-secondary">Secret Key</label>
                   <input
                     type="password"
                     value={form.secretKey}
@@ -353,37 +339,27 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
               </div>
 
               {/* Region & Config */}
-              <div className="grid grid-cols-2 gap-3 items-end">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground-muted uppercase tracking-wide">Region</label>
-                  {selectedProvider === 'aws' ? (
-                    <div className="relative">
-                      <select
-                        value={form.region}
-                        onChange={(e) => setForm({ ...form, region: e.target.value })}
-                        className="input appearance-none cursor-pointer pr-10"
-                      >
-                        {AWS_REGIONS.map(r => (
-                          <option key={r.value} value={r.value}>{r.label}</option>
-                        ))}
-                      </select>
-                      <ChevronDown className="w-4 h-4 text-foreground-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    </div>
-                  ) : (
-                    <input
-                      type="text"
+              <div className="grid grid-cols-2 gap-4 items-end">
+                <div className="space-y-2">
+                  <label className="text-sm text-foreground-secondary">Region</label>
+                  <div className="relative">
+                    <select
                       value={form.region}
                       onChange={(e) => setForm({ ...form, region: e.target.value })}
-                      placeholder="us-east-1"
-                      className="input"
-                    />
-                  )}
+                      className="input appearance-none cursor-pointer pr-10"
+                    >
+                      {AWS_REGIONS.map(r => (
+                        <option key={r.value} value={r.value}>{r.label}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-foreground-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
                 </div>
 
-                <label className="flex items-center gap-2.5 py-2.5 cursor-pointer group">
+                <label className="flex items-center gap-2.5 h-[42px] cursor-pointer group">
                   <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${
                     form.forcePathStyle
-                      ? 'bg-accent-pink border-accent-pink'
+                      ? 'bg-accent-purple border-accent-purple'
                       : 'border-border bg-transparent group-hover:border-border-hover'
                   }`}>
                     {form.forcePathStyle && <Check className="w-3.5 h-3.5 text-white" />}
@@ -394,36 +370,36 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                     onChange={(e) => setForm({ ...form, forcePathStyle: e.target.checked })}
                     className="hidden"
                   />
-                  <span className="text-sm text-foreground-secondary group-hover:text-foreground transition-colors">Path-style</span>
+                  <span className="text-sm text-foreground-secondary group-hover:text-foreground transition-colors">Path-style URLs</span>
                 </label>
               </div>
-            </div>
 
-            <div className="mt-6 pt-4 flex items-center justify-between border-t border-border">
+              {/* Test Connection */}
               <button
                 onClick={handleTest}
                 disabled={testing || !form.endpoint || (!editingId && (!form.accessKey || !form.secretKey))}
-                className="btn btn-ghost"
+                className="text-sm text-foreground-muted hover:text-foreground transition-colors flex items-center gap-2 disabled:opacity-50"
               >
                 <RefreshCw className={`w-4 h-4 ${testing ? 'animate-spin' : ''}`} />
-                Test
+                Test Connection
               </button>
+            </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setView('list')}
-                  className="btn btn-secondary"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={saving || !form.name || !form.endpoint}
-                  className="btn btn-primary"
-                >
-                  {saving ? 'Saving...' : 'Save'}
-                </button>
-              </div>
+            {/* Action Buttons */}
+            <div className="grid grid-cols-2 gap-3 mt-6 pt-4 border-t border-border">
+              <button
+                onClick={() => setView('list')}
+                className="py-3 px-4 rounded-lg bg-background-tertiary text-foreground-secondary hover:text-foreground hover:bg-background-hover border border-border transition-all text-sm font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving || !form.name || !form.endpoint}
+                className="py-3 px-4 rounded-lg bg-accent-purple text-white hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium"
+              >
+                {saving ? 'Saving...' : 'Save Profile'}
+              </button>
             </div>
           </div>
         )}
