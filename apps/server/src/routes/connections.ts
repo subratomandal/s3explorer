@@ -75,8 +75,9 @@ router.post('/', async (req: Request, res: Response) => {
     try {
       await listBuckets(config);
     } catch (testErr: any) {
-      res.status(400).json({ error: `Connection test failed: ${testErr.message}` });
-      return;
+      console.warn(`Connection test failed for '${name}' but saving anyway:`, testErr.message);
+      // res.status(400).json({ error: `Connection test failed: ${testErr.message}` });
+      // return;
     }
 
     // Encrypt credentials
@@ -131,8 +132,9 @@ router.put('/:id', async (req: Request, res: Response) => {
     try {
       await listBuckets(config);
     } catch (testErr: any) {
-      res.status(400).json({ error: `Connection test failed: ${testErr.message}` });
-      return;
+      console.warn(`Connection test failed for '${name || existing.name}' but updating anyway:`, testErr.message);
+      // res.status(400).json({ error: `Connection test failed: ${testErr.message}` });
+      // return;
     }
 
     // Encrypt credentials
@@ -165,7 +167,7 @@ router.delete('/:id', (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     const existing = connections.getById(id);
-    
+
     if (!existing) {
       res.status(404).json({ error: 'Connection not found' });
       return;
@@ -184,7 +186,7 @@ router.post('/:id/activate', (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     const existing = connections.getById(id);
-    
+
     if (!existing) {
       res.status(404).json({ error: 'Connection not found' });
       return;
