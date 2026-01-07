@@ -1,7 +1,9 @@
+import 'dotenv/config';
 import express from 'express';
 import session from 'express-session';
 import helmet from 'helmet';
 import path from 'path';
+import fs from 'fs';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 
@@ -71,12 +73,19 @@ app.use('/api/objects', requireAuth, objectsRouter);
 app.use('/api/connections', requireAuth, connectionsRouter);
 
 // Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-  const publicPath = path.join(__dirname, '..', 'public');
+// Serve static files if they exist (Production / Docker)
+const publicPath = path.join(__dirname, '..', 'public');
+
+if (fs.existsSync(publicPath)) {
+  console.log(`Serving static files from: ${publicPath}`);
   app.use(express.static(publicPath));
+
+  // SPA catch-all
   app.get('*', (req, res) => {
     res.sendFile(path.join(publicPath, 'index.html'));
   });
+} else {
+  console.log(`Static files not found at ${publicPath} (Running in API-only/Dev mode)`);
 }
 
 app.listen(PORT, () => {
