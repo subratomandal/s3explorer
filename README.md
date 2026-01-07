@@ -1,8 +1,11 @@
 # S3 Explorer
 
-A web-based file manager for S3-compatible storage buckets.
+A secure, self-hosted web-based file manager for S3-compatible storage buckets.
 
-[![S3 Explorer](https://img.shields.io/badge/S3-Explorer%20-C049FF?style=for-the-badge)](https://s3explorer.up.railway.app/)
+[![S3 Explorer](https://img.shields.io/badge/S3-Explorer-C049FF?style=for-the-badge)](https://s3explorer.up.railway.app/)
+[![Deploy on Railway](https://img.shields.io/badge/Deploy-Railway-0B0D0E?style=for-the-badge&logo=railway)](https://railway.com/deploy/s3-explorer)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://hub.docker.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
 ---
 
@@ -10,26 +13,75 @@ A web-based file manager for S3-compatible storage buckets.
 
 Managing S3 buckets often requires command-line tools or provider-specific dashboards that vary significantly in usability. S3 Explorer unifies this experience by offering a single, consistent web interface to upload, download, and organize files across any S3-compatible provider.
 
-Supported providers include:
-
-- AWS S3  
-- Cloudflare R2  
-- MinIO  
-- DigitalOcean Spaces  
+**Supported Providers:**
+- AWS S3
+- Cloudflare R2
+- MinIO
+- DigitalOcean Spaces
+- Any S3-compatible storage
 
 <p>
-    <img src= "https://raw.githubusercontent.com/subratomandalme/s3-explorer/main/apps/client/public/images/main.png" />
-
+  <img src="https://raw.githubusercontent.com/subratomandalme/s3-explorer/main/apps/client/public/images/main.png" />
 </p>
 
 <p>
-    <img src= "https://raw.githubusercontent.com/subratomandalme/s3-explorer/main/apps/client/public/images/search.png" />
-
+  <img src="https://raw.githubusercontent.com/subratomandalme/s3-explorer/main/apps/client/public/images/search.png" />
+</p>
 
 <p>
-    <img src= "https://raw.githubusercontent.com/subratomandalme/s3-explorer/main/apps/client/public/images/connection.png" />
-
+  <img src="https://raw.githubusercontent.com/subratomandalme/s3-explorer/main/apps/client/public/images/connection.png" />
 </p>
+
+---
+
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph Client["Browser Client"]
+        UI["React + Tailwind UI"]
+        API["API Client"]
+    end
+
+    subgraph Server["Express Server"]
+        Auth["Auth Middleware"]
+        Routes["API Routes"]
+        Session["Session Store"]
+        Crypto["AES-256-GCM"]
+    end
+
+    subgraph Storage["Persistence Layer"]
+        SQLite[("SQLite DB")]
+        EncKey["Encryption Key"]
+    end
+
+    subgraph External["S3 Providers"]
+        S3["AWS S3 / R2 / MinIO"]
+    end
+
+    UI --> API
+    API -->|HTTPS + Cookies| Auth
+    Auth --> Routes
+    Routes --> Session
+    Routes --> Crypto
+    Session --> SQLite
+    Crypto --> EncKey
+    Crypto --> SQLite
+    Routes -->|S3 SDK| S3
+```
+
+---
+
+## Security Features
+
+| Feature | Description |
+|---------|-------------|
+| **Password Auth** | Single password via `APP_PASSWORD` env var (Argon2id hashed) |
+| **Encrypted Credentials** | S3 credentials encrypted at rest with AES-256-GCM |
+| **Secure Sessions** | Server-side SQLite sessions with httpOnly/secure/sameSite=strict cookies |
+| **Rate Limiting** | IP-based: 10 attempts per 15 min, 30 min lockout |
+| **Security Headers** | Helmet.js enabled (CSP, HSTS, etc.) |
+| **No Client Storage** | Credentials never stored in browser localStorage |
 
 ---
 
@@ -37,70 +89,97 @@ Supported providers include:
 
 ### File Management
 
-Perform common file operations directly from the browser:
-
 - Drag-and-drop file uploads
 - Create folders for organization
 - Rename files and folders
 - Delete files and folders with confirmation
 - Download files using secure presigned URLs
 
----
+### Multi-Connection Support
 
-### Multi-Environment Support
-
-Manage multiple S3 connections without redeploying the application:
-
-- **Default Environment**  
-  Configure a fallback S3 connection using environment variables for deployed instances.
-
-- **Local Profiles**  
-  Add and store multiple S3 connections locally in the browser.
-
-- **Instant Switching**  
-  Switch between staging, production, or personal buckets instantly.
-
-Local profiles are stored only in the browser and never sent to a centralized backend.
-
----
+- Store up to 100 S3 connections
+- Instant switching between connections
+- All credentials encrypted server-side
 
 ### Keyboard Navigation
 
-The interface is optimized for keyboard-driven workflows:
-
-- Global command palette for fast navigation
-- Perform actions without clicking through menus
-
----
-
-### Keyboard Shortcuts
-
-| Shortcut              | Action                     |
-|-----------------------|----------------------------|
-| `Cmd+K / Ctrl+K`      | Open command palette       |
-| `Cmd+, / Ctrl+,`      | Open connection manager    |
-| `Escape`              | Close active modal         |
+| Shortcut | Action |
+|----------|--------|
+| `Cmd+K` / `Ctrl+K` | Open command palette |
+| `Cmd+,` / `Ctrl+,` | Open connection manager |
+| `Escape` | Close active modal |
 
 ---
 
-## User Guide
+## Deployment
 
-### Connection Manager
+### Railway (Recommended)
 
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.com/deploy/s3-explorer)
 
-The Connection Manager allows you to connect to different S3-compatible storage providers without redeploying the application.
+Set required environment variables:
+- `APP_PASSWORD` - Strong password (12+ chars, mixed case, numbers, symbols)
+- `SESSION_SECRET` - Random 32+ character string
 
-### Adding a Connection
+### Docker
 
-To connect to a storage provider:
+```bash
+docker run -d \
+  -p 3000:3000 \
+  -e APP_PASSWORD='YourStr0ng!Pass#2024' \
+  -e SESSION_SECRET='your-random-32-char-session-secret' \
+  -v s3explorer_data:/data \
+  ghcr.io/subratomandalme/s3-explorer:latest
+```
 
-1. Open the settings menu  
-   - Press `Cmd + ,` or click the settings icon
-2. Click **Add Connection**
-3. Enter the provider details (see guides below)
-4. Save the profile to switch instantly
+### Docker Compose
 
-All credentials remain in your local browser storage and are never sent to a centralized backend.
+```yaml
+version: '3.8'
+services:
+  s3-explorer:
+    build: .
+    ports:
+      - '3000:3000'
+    environment:
+      - APP_PASSWORD=YourStr0ng!Pass#2024
+      - SESSION_SECRET=change-this-to-random-32-chars
+    volumes:
+      - s3explorer_data:/data
+
+volumes:
+  s3explorer_data:
+```
+
+### Local Development
+
+```bash
+# Install dependencies
+npm install
+cd apps/client && npm install
+cd ../server && npm install
+
+# Set environment
+export APP_PASSWORD='DevPassword123!'
+export SESSION_SECRET='dev-session-secret-32-characters!'
+export DATA_DIR='./data'
+
+# Run development servers
+cd apps/server && npm run dev  # Backend on :3000
+cd apps/client && npm run dev  # Frontend on :5173
+```
+
+---
+
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `APP_PASSWORD` | Yes | Application password (12+ chars, strong) |
+| `SESSION_SECRET` | Yes | Session signing secret (32+ chars) |
+| `DATA_DIR` | No | SQLite data directory (default: `/data`) |
+| `PORT` | No | Server port (default: `3000`) |
+| `NODE_ENV` | No | Environment (`production` / `development`) |
 
 ---
 
@@ -108,65 +187,35 @@ All credentials remain in your local browser storage and are never sent to a cen
 
 ### Cloudflare R2
 
-1. Go to **Cloudflare Dashboard → Storage and databases → R2 object storage**
-2. Click **Manage**
-3. Click **Create API Token**
-4. Select the **Admin Read & Write** template
-5. Create the token and copy the values into Connection manager:
-
-- **Endpoint**  
-  `S3 API`
-- **Access Key**  
-  Your R2 Access Key ID
-- **Secret Key**  
-  Your R2 Secret Access Key
-
----
+1. Go to **Cloudflare Dashboard → R2 Object Storage**
+2. Click **Manage R2 API Tokens**
+3. Create token with **Admin Read & Write** permissions
+4. Use values:
+   - **Endpoint**: `https://<account_id>.r2.cloudflarestorage.com`
+   - **Access Key**: Your R2 Access Key ID
+   - **Secret Key**: Your R2 Secret Access Key
 
 ### AWS S3
 
 1. Go to **AWS Console → IAM**
-2. Create a new user
-3. Attach the `AmazonS3FullAccess` policy  
-   (or a restricted bucket-level policy)
-4. Open the user's **Security Credentials** tab
-5. Click **Create Access Key**
-6. Copy the values into Railway Bucket Explorer:
+2. Create user with `AmazonS3FullAccess` policy
+3. Create access key under **Security Credentials**
+4. Use values:
+   - **Endpoint**: `https://s3.<region>.amazonaws.com`
+   - **Access Key**: Generated Access Key ID
+   - **Secret Key**: Generated Secret Access Key
 
-- **Endpoint**  
-  `https://s3.us-east-1.amazonaws.com`  
-  (replace `us-east-1` with your bucket’s region)
-- **Access Key**  
-  Generated Access Key ID (usually starts with `AKIA`)
-- **Secret Key**  
-  Generated Secret Access Key
+### MinIO
 
----
-
-### Railway Object Storage (MinIO)
-
-1. Open your **Object Storage / MinIO** service inside your Railway project
-2. Navigate to the **Variables** tab
-3. Copy the values into Railway Bucket Explorer:
-
-- **Endpoint**  
-  Public service domain  
-  Example: `https://minio-production.up.railway.app`
-- **Access Key**  
-  `MINIO_ROOT_USER` or `S3_ACCESS_KEY`
-- **Secret Key**  
-  `MINIO_ROOT_PASSWORD` or `S3_SECRET_KEY`
+1. Access your MinIO console
+2. Navigate to **Access Keys**
+3. Create new access key
+4. Use values:
+   - **Endpoint**: Your MinIO URL (e.g., `https://minio.example.com`)
+   - **Access Key**: Generated Access Key
+   - **Secret Key**: Generated Secret Key
 
 ---
-
-## Deployment
-
-The application is packaged as a Docker container and is ready to deploy on Railway.
-
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.com/deploy/s3-explorer)
-
----
-
 
 ## License
 
@@ -174,4 +223,4 @@ MIT
 
 ---
 
-Created by https://github.com/subratomandal
+Created by [@subratomandalme](https://github.com/subratomandalme)
