@@ -128,13 +128,13 @@ export function Header({
             <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 z-10">
                 {selectedBucket && (
                     <>
-                        <button onClick={onNewFolder} className="btn btn-secondary h-8 sm:h-9 px-2 sm:px-3">
-                            <FolderPlus className="w-4 h-4" />
+                        <button onClick={onNewFolder} className="btn btn-secondary h-9 sm:h-9 px-2 sm:px-3">
+                            <FolderPlus className="w-5 h-5 sm:w-4 sm:h-4" />
                             <span className="hidden md:inline text-sm">Folder</span>
                         </button>
 
-                        <label className="btn btn-primary cursor-pointer h-8 sm:h-9 px-2 sm:px-3">
-                            <Upload className="w-4 h-4" />
+                        <label className="btn btn-primary cursor-pointer h-9 sm:h-9 px-2 sm:px-3">
+                            <Upload className="w-5 h-5 sm:w-4 sm:h-4" />
                             <span className="hidden sm:inline text-sm">Upload</span>
                             <input
                                 type="file"
@@ -149,29 +149,29 @@ export function Header({
                 <button
                     onClick={handleRefresh}
                     disabled={!selectedBucket || loading}
-                    className="btn btn-ghost btn-icon w-8 h-8 sm:w-9 sm:h-9"
+                    className="btn btn-ghost btn-icon w-9 h-9"
                     title="Refresh"
                 >
-                    <RefreshCw className={`w-4 h-4 sm:w-5 sm:h-5 ${isSpinning ? 'animate-spin-once' : ''}`} />
+                    <RefreshCw className={`w-5 h-5 ${isSpinning ? 'animate-spin-once' : ''}`} />
                 </button>
 
                 {onOpenConnections && (
                     <button
                         onClick={onOpenConnections}
-                        className="btn btn-ghost btn-icon w-8 h-8 sm:w-9 sm:h-9"
+                        className="btn btn-ghost btn-icon w-9 h-9"
                         title={activeConnectionName ? `Connected: ${activeConnectionName}` : 'Connection Settings'}
                     >
-                        <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <Settings className="w-5 h-5" />
                     </button>
                 )}
 
                 {onLogout && (
                     <button
                         onClick={onLogout}
-                        className="btn btn-ghost btn-icon w-8 h-8 sm:w-9 sm:h-9 text-foreground-muted hover:text-accent-red"
+                        className="btn btn-ghost btn-icon w-9 h-9 text-foreground-muted hover:text-accent-red"
                         title="Logout"
                     >
-                        <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <LogOut className="w-5 h-5" />
                     </button>
                 )}
             </div>

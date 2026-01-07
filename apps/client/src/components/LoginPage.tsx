@@ -70,12 +70,12 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             </div>
 
             <label className="flex items-center gap-3 cursor-pointer group py-1">
-              <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${
+              <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
                 rememberMe
                   ? 'bg-accent-purple border-accent-purple'
                   : 'border-border bg-transparent group-hover:border-border-hover'
               }`}>
-                {rememberMe && <Check className="w-3.5 h-3.5 text-white" />}
+                {rememberMe && <Check className="w-3 h-3 text-white" />}
               </div>
               <input
                 type="checkbox"
@@ -116,9 +116,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           </form>
         </div>
 
-        <p className="text-center text-xs text-foreground-muted mt-4 sm:mt-6">
-          Protected with secure authentication
-        </p>
       </div>
     </div>
   );

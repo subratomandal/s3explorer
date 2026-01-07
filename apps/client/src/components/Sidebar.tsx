@@ -53,8 +53,16 @@ export function Sidebar({
 
             <aside className={`w-[280px] sm:w-64 flex flex-col border-r border-border bg-background-secondary flex-shrink-0 fixed md:relative inset-y-0 left-0 z-50 transform transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
 
+                {/* Close button - absolute positioned at top right on mobile */}
+                <button
+                    onClick={onCloseSidebar}
+                    className="absolute top-3 right-3 btn btn-ghost btn-icon w-9 h-9 md:hidden z-10"
+                >
+                    <X className="w-5 h-5" />
+                </button>
+
                 <div
-                    className="h-14 flex items-center justify-between px-4 border-b border-border cursor-pointer group transition-all duration-300 hover:bg-background-tertiary/30"
+                    className="h-14 flex items-center px-4 border-b border-border cursor-pointer group transition-all duration-300 hover:bg-background-tertiary/30"
                 >
                     <div className="flex items-center gap-2.5" onClick={onNavigateHome}>
                         <img
@@ -66,12 +74,6 @@ export function Sidebar({
                             S3 Explorer
                         </span>
                     </div>
-                    <button
-                        onClick={onCloseSidebar}
-                        className="btn btn-ghost btn-icon w-9 h-9 md:hidden"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
                 </div>
 
                 <div className="p-3">
