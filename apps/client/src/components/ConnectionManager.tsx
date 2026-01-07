@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Check, Server, Edit2, ChevronRight, Globe, Shield, RefreshCw } from 'lucide-react';
+import { Plus, Trash2, Check, Server, Edit2, ChevronDown, Globe, AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react';
 import * as api from '../api';
 import type { Connection, ConnectionConfig } from '../api';
 import { Modal } from './Modal';
@@ -23,7 +23,6 @@ const AWS_REGIONS = [
   { value: 'eu-central-1', label: 'EU (Frankfurt)' },
   { value: 'ap-southeast-1', label: 'Asia Pacific (Singapore)' },
   { value: 'ap-northeast-1', label: 'Asia Pacific (Tokyo)' },
-  // Add more as needed, keep list manageable
 ];
 
 interface ConnectionManagerProps {
@@ -180,189 +179,195 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
     <Modal isOpen={isOpen} onClose={onClose} title="Connection Manager" size="lg">
       <div className="min-h-[400px] flex flex-col">
         {error && (
-          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-md text-red-400 text-sm flex items-center gap-2">
-            <Shield className="w-4 h-4" />
+          <div className="mb-4 p-3 bg-accent-red/10 border border-accent-red/20 rounded-lg text-accent-red text-sm flex items-center gap-2 animate-fadeIn">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
             {error}
           </div>
         )}
 
         {view === 'list' ? (
-          <>
-            <div className="mb-6">
-              <p className="text-gray-400 text-sm leading-relaxed">
-                Manage your S3-compatible storage connections. Switch between staging, production, or different providers like AWS, MinIO, or Cloudflare R2.
-              </p>
-            </div>
+          <div className="animate-fadeIn">
+            <p className="text-foreground-secondary text-sm mb-6">
+              Manage your S3-compatible storage connections.
+            </p>
 
-            <div className="flex-1 space-y-3 overflow-y-auto max-h-[400px] pr-1 custom-scrollbar">
+            <div className="space-y-2 max-h-[350px] overflow-y-auto">
               {loading ? (
-                <div className="text-center py-12 text-gray-500">Loading connections...</div>
+                <div className="flex items-center justify-center py-12 text-foreground-muted">
+                  <RefreshCw className="w-5 h-5 animate-spin mr-2" />
+                  Loading...
+                </div>
               ) : connections.length === 0 ? (
-                <div className="text-center py-12 border border-dashed border-gray-800 rounded-lg bg-gray-900/30">
-                  <Server className="w-10 h-10 mx-auto mb-3 text-gray-600" />
-                  <p className="text-gray-400 font-medium">No connections yet</p>
-                  <p className="text-gray-500 text-sm mt-1">Add your first S3 provider to get started</p>
+                <div className="text-center py-12 border border-dashed border-border rounded-lg bg-background">
+                  <Server className="w-10 h-10 mx-auto mb-3 text-foreground-muted" />
+                  <p className="text-foreground-secondary font-medium">No connections</p>
+                  <p className="text-foreground-muted text-sm mt-1">Add your first connection to get started</p>
                 </div>
               ) : (
-                connections.map((conn) => (
+                connections.map((conn, index) => (
                   <div
                     key={conn.id}
                     onClick={() => handleActivate(conn.id)}
-                    className={`group relative flex items-center justify-between p-4 rounded-xl border transition-all duration-200 cursor-pointer ${conn.isActive
-                        ? 'bg-purple-500/10 border-purple-500/50 shadow-[0_0_20px_-10px_rgba(168,85,247,0.3)]'
-                        : 'bg-gray-900/40 border-gray-800 hover:border-gray-700 hover:bg-gray-900/80 hover:scale-[1.01] active:scale-[0.99]'
-                      }`}
+                    className={`group relative flex items-center justify-between p-4 rounded-lg border transition-all cursor-pointer ${
+                      conn.isActive
+                        ? 'bg-accent-pink/10 border-accent-pink/30'
+                        : 'bg-background border-border hover:border-border-hover hover:bg-background-hover'
+                    }`}
+                    style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <div className="flex items-center gap-4 overflow-hidden">
-                      <div className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center ${conn.isActive ? 'bg-purple-500/20 text-purple-400' : 'bg-gray-800 text-gray-500'
-                        }`}>
-                        <Server className="w-5 h-5" />
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center ${
+                        conn.isActive ? 'bg-accent-pink/20 text-accent-pink' : 'bg-background-tertiary text-foreground-muted'
+                      }`}>
+                        <Server className="w-4 h-4" />
                       </div>
-                      <div className="min-w-0 flex-1">
+                      <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <h3 className={`font-medium truncate ${conn.isActive ? 'text-white' : 'text-gray-300'}`}>
+                          <span className={`font-medium text-sm truncate ${conn.isActive ? 'text-foreground' : 'text-foreground-secondary'}`}>
                             {conn.name}
-                          </h3>
+                          </span>
                           {conn.isActive && (
-                            <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold uppercase tracking-wider flex-shrink-0">
+                            <span className="px-1.5 py-0.5 rounded bg-accent-pink/20 text-accent-pink text-[10px] font-semibold uppercase">
                               Active
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-gray-500 mt-0.5 font-mono truncate" title={conn.endpoint}>
-                          {conn.endpoint}
+                        <p className="text-xs text-foreground-muted font-mono truncate mt-0.5" title={conn.endpoint}>
+                          {conn.endpoint || 'AWS S3'}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 pl-2">
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={(e) => startEdit(e, conn)}
-                          className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
-                          title="Edit Configuration"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={(e) => handleDelete(e, conn.id)}
-                          className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                          title="Delete Configuration"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                      {!conn.isActive && (
-                        <ChevronRight className="w-4 h-4 text-gray-600 transition-opacity" />
-                      )}
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => startEdit(e, conn)}
+                        className="btn btn-ghost btn-icon"
+                        title="Edit"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={(e) => handleDelete(e, conn.id)}
+                        className="btn btn-ghost btn-icon text-accent-red hover:bg-accent-red/10"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 ))
               )}
             </div>
 
-            <div className="mt-6 pt-4 border-t border-gray-800">
+            <div className="mt-4 pt-4 border-t border-border">
               <button
                 onClick={() => { resetForm(); setView('form'); }}
-                className="w-full py-3 px-4 rounded-xl border border-dashed border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 hover:bg-gray-800/50 transition-all active:scale-[0.99] flex items-center justify-center gap-2 font-medium text-sm"
+                className="btn btn-secondary w-full justify-center"
               >
                 <Plus className="w-4 h-4" />
                 Add Connection
               </button>
             </div>
-          </>
+          </div>
         ) : (
-          <div className="flex-1 flex flex-col">
-            <h3 className="text-lg font-medium text-white mb-6">
-              {editingId ? 'Edit Profile' : 'New Profile'}
+          <div className="flex-1 flex flex-col animate-fadeIn">
+            <button
+              onClick={() => setView('list')}
+              className="flex items-center gap-1.5 text-foreground-muted hover:text-foreground text-sm mb-4 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </button>
+
+            <h3 className="text-base font-semibold text-foreground mb-5">
+              {editingId ? 'Edit Connection' : 'New Connection'}
             </h3>
 
-            <div className="space-y-5 flex-1 overflow-y-auto px-1">
-
+            <div className="space-y-4 flex-1 overflow-y-auto">
               {/* Provider Selector */}
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">Storage Provider</label>
+                <label className="text-xs font-medium text-foreground-muted uppercase tracking-wide">Provider</label>
                 <div className="relative">
                   <select
                     value={selectedProvider}
                     onChange={(e) => handleProviderChange(e.target.value)}
-                    className="w-full bg-gray-900 border border-gray-800 rounded-lg pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all appearance-none cursor-pointer hover:border-gray-700"
+                    className="input appearance-none cursor-pointer pr-10"
                   >
                     {PROVIDERS.map(p => (
                       <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
                   </select>
-                  <ChevronRight className="w-4 h-4 text-gray-500 absolute right-3 top-3 rotate-90 pointer-events-none" />
+                  <ChevronDown className="w-4 h-4 text-foreground-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
               </div>
 
               {/* Profile Name */}
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">Profile Name</label>
+                <label className="text-xs font-medium text-foreground-muted uppercase tracking-wide">Name</label>
                 <input
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="e.g., Production, Staging, Local"
-                  className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600"
+                  placeholder="Production, Staging, etc."
+                  className="input"
                 />
               </div>
 
               {/* Endpoint */}
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">S3 Endpoint</label>
+                <label className="text-xs font-medium text-foreground-muted uppercase tracking-wide">Endpoint</label>
                 <div className="relative">
-                  <Globe className="w-4 h-4 text-gray-500 absolute left-3 top-3" />
+                  <Globe className="w-4 h-4 text-foreground-muted absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={form.endpoint}
                     onChange={(e) => setForm({ ...form, endpoint: e.target.value })}
                     placeholder="https://s3.amazonaws.com"
-                    className="w-full bg-gray-900 border border-gray-800 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600 font-mono"
+                    className="input pl-10 font-mono text-sm"
                   />
                 </div>
               </div>
 
               {/* Keys Row */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">Access Key</label>
+                  <label className="text-xs font-medium text-foreground-muted uppercase tracking-wide">Access Key</label>
                   <input
                     type="text"
                     value={form.accessKey}
                     onChange={(e) => setForm({ ...form, accessKey: e.target.value })}
                     placeholder="AKIA..."
-                    className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600 font-mono"
+                    className="input font-mono text-sm"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">Secret Key</label>
+                  <label className="text-xs font-medium text-foreground-muted uppercase tracking-wide">Secret Key</label>
                   <input
                     type="password"
                     value={form.secretKey}
                     onChange={(e) => setForm({ ...form, secretKey: e.target.value })}
                     placeholder="••••••••"
-                    className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600 font-mono"
+                    className="input font-mono text-sm"
                   />
                 </div>
               </div>
 
               {/* Region & Config */}
-              <div className="grid grid-cols-2 gap-4 items-end">
+              <div className="grid grid-cols-2 gap-3 items-end">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">Region</label>
+                  <label className="text-xs font-medium text-foreground-muted uppercase tracking-wide">Region</label>
                   {selectedProvider === 'aws' ? (
                     <div className="relative">
                       <select
                         value={form.region}
                         onChange={(e) => setForm({ ...form, region: e.target.value })}
-                        className="w-full bg-gray-900 border border-gray-800 rounded-lg pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all appearance-none cursor-pointer"
+                        className="input appearance-none cursor-pointer pr-10"
                       >
                         {AWS_REGIONS.map(r => (
                           <option key={r.value} value={r.value}>{r.label}</option>
                         ))}
                       </select>
-                      <ChevronRight className="w-4 h-4 text-gray-500 absolute right-3 top-3 rotate-90 pointer-events-none" />
+                      <ChevronDown className="w-4 h-4 text-foreground-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                     </div>
                   ) : (
                     <input
@@ -370,16 +375,17 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                       value={form.region}
                       onChange={(e) => setForm({ ...form, region: e.target.value })}
                       placeholder="us-east-1"
-                      className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600"
+                      className="input"
                     />
                   )}
                 </div>
 
-                <label className="flex items-center gap-3 p-2.5 cursor-pointer group">
-                  <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${form.forcePathStyle
-                      ? 'bg-purple-600 border-purple-600 scale-100'
-                      : 'border-gray-600 bg-transparent group-hover:border-gray-500'
-                    }`}>
+                <label className="flex items-center gap-2.5 py-2.5 cursor-pointer group">
+                  <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${
+                    form.forcePathStyle
+                      ? 'bg-accent-pink border-accent-pink'
+                      : 'border-border bg-transparent group-hover:border-border-hover'
+                  }`}>
                     {form.forcePathStyle && <Check className="w-3.5 h-3.5 text-white" />}
                   </div>
                   <input
@@ -388,34 +394,34 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                     onChange={(e) => setForm({ ...form, forcePathStyle: e.target.checked })}
                     className="hidden"
                   />
-                  <span className="text-sm text-gray-300 group-hover:text-white transition-colors">Path-style URLs</span>
+                  <span className="text-sm text-foreground-secondary group-hover:text-foreground transition-colors">Path-style</span>
                 </label>
               </div>
             </div>
 
-            <div className="mt-8 pt-4 flex items-center justify-between border-t border-gray-800">
+            <div className="mt-6 pt-4 flex items-center justify-between border-t border-border">
               <button
                 onClick={handleTest}
                 disabled={testing || !form.endpoint || (!editingId && (!form.accessKey || !form.secretKey))}
-                className="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors flex items-center gap-2"
+                className="btn btn-ghost"
               >
                 <RefreshCw className={`w-4 h-4 ${testing ? 'animate-spin' : ''}`} />
-                Test Connection
+                Test
               </button>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => setView('list')}
-                  className="px-5 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+                  className="btn btn-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={saving || !form.name || !form.endpoint}
-                  className="px-6 py-2.5 rounded-lg text-sm font-medium text-white bg-purple-600 hover:bg-purple-500 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_15px_-5px_rgba(147,51,234,0.5)]"
+                  className="btn btn-primary"
                 >
-                  {saving ? 'Saving...' : 'Save Profile'}
+                  {saving ? 'Saving...' : 'Save'}
                 </button>
               </div>
             </div>

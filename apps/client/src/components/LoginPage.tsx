@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Lock, Eye, EyeOff, Shield, ArrowRight } from 'lucide-react';
+import { Lock, Eye, EyeOff, AlertCircle, ArrowRight, Check } from 'lucide-react';
 import * as api from '../api';
 
 interface LoginPageProps {
@@ -29,67 +29,62 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Ambience */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-900/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-900/10 rounded-full blur-[120px]" />
-      </div>
-
-      <div className="w-full max-w-sm relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="w-full max-w-sm animate-fadeInUp">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl backdrop-blur-sm">
-            <Lock className="w-5 h-5 text-gray-200" />
+          <div className="w-12 h-12 bg-background-secondary border border-border rounded-xl flex items-center justify-center mx-auto mb-4">
+            <Lock className="w-5 h-5 text-foreground-secondary" />
           </div>
-          <h1 className="text-xl font-medium text-white tracking-tight">Welcome Back</h1>
-          <p className="text-sm text-gray-500 mt-2">Enter your password to access S3 Explorer</p>
+          <h1 className="text-xl font-semibold text-foreground">Welcome back</h1>
+          <p className="text-sm text-foreground-muted mt-2">Enter your password to continue</p>
         </div>
 
         {/* Card */}
-        <div className="bg-gray-900/40 border border-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1">Password</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Shield className="h-4 w-4 text-gray-500 group-focus-within:text-purple-500 transition-colors" />
-                </div>
+        <div className="card p-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-foreground-muted uppercase tracking-wide">Password</label>
+              <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-10 py-2.5 bg-gray-950/50 border border-gray-800 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all text-sm"
-                  placeholder="admin123"
+                  className="input pr-10 font-mono"
+                  placeholder="Enter password"
                   required
                   autoFocus
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-300 transition-colors cursor-pointer"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-foreground-muted hover:text-foreground transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
 
-            <div className="flex items-center pt-2">
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${
+                rememberMe
+                  ? 'bg-accent-pink border-accent-pink'
+                  : 'border-border bg-transparent group-hover:border-border-hover'
+              }`}>
+                {rememberMe && <Check className="w-3.5 h-3.5 text-white" />}
+              </div>
               <input
-                id="remember-me"
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-700 bg-gray-800 text-purple-600 focus:ring-purple-500/50 focus:ring-offset-0 focus:ring-offset-transparent cursor-pointer"
+                className="hidden"
               />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-400 cursor-pointer hover:text-gray-300 transition-colors">
-                Remember password
-              </label>
-            </div>
+              <span className="text-sm text-foreground-secondary group-hover:text-foreground transition-colors">Remember me</span>
+            </label>
 
             {error && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
-                <Shield className="w-3 h-3" />
+              <div className="p-3 rounded-lg bg-accent-red/10 border border-accent-red/20 text-accent-red text-sm flex items-center gap-2 animate-fadeIn">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 {error}
               </div>
             )}
@@ -97,19 +92,28 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             <button
               type="submit"
               disabled={loading || !password}
-              className="w-full py-2.5 px-4 bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium rounded-xl transition-all shadow-[0_0_20px_-5px_rgba(147,51,234,0.3)] hover:shadow-[0_0_25px_-5px_rgba(147,51,234,0.5)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
+              className="btn btn-primary w-full justify-center"
             >
-              {loading ? 'Authenticating...' : (
-                <>
-                  Continue <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                </>
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Signing in...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  Continue
+                  <ArrowRight className="w-4 h-4" />
+                </span>
               )}
             </button>
           </form>
         </div>
 
-        <p className="text-center text-xs text-gray-600 mt-8">
-          Secured by AES-256 Encryption
+        <p className="text-center text-xs text-foreground-muted mt-6">
+          Protected with secure authentication
         </p>
       </div>
     </div>

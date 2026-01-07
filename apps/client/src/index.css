@@ -100,12 +100,13 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-pink) 100%);
+  background: var(--accent-pink);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-pink) 100%);
+  background: var(--accent-pink);
+  filter: brightness(1.1);
 }
 
 .btn-secondary {

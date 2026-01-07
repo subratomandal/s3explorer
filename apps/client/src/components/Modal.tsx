@@ -33,11 +33,11 @@ export function Modal({ title, children, onClose, isOpen = true, size = 'md' }: 
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop animate-fadeIn" onClick={onClose}>
-            <div className={`card w-full ${sizeClasses[size]} modal-content`} onClick={e => e.stopPropagation()}>
+            <div className={`w-full ${sizeClasses[size]} modal-content bg-background-secondary border border-border rounded-xl overflow-hidden shadow-2xl`} onClick={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-                    <h2 className="text-base font-semibold">{title}</h2>
-                    <button onClick={onClose} className="btn btn-ghost btn-icon">
-                        <X className="w-5 h-5" />
+                    <h2 className="text-base font-semibold text-foreground">{title}</h2>
+                    <button onClick={onClose} className="btn btn-ghost btn-icon text-foreground-muted hover:text-foreground">
+                        <X className="w-4 h-4" />
                     </button>
                 </div>
                 <div className="p-5">{children}</div>
