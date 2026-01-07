@@ -52,9 +52,9 @@ export function Header({
         : breadcrumbs;
 
     return (
-        <header className="h-14 flex items-center px-4 border-b border-border bg-background-secondary/50 flex-shrink-0">
+        <header className="h-14 flex items-center justify-between px-4 border-b border-border bg-background-secondary/50 flex-shrink-0 relative">
             {/* Left Section - Navigation */}
-            <div className="flex items-center gap-2 min-w-0 flex-shrink-0 max-w-[200px]">
+            <div className="flex items-center gap-2 min-w-0 flex-shrink-0 max-w-[200px] z-10">
                 <button onClick={onOpenSidebar} className="btn btn-ghost btn-icon md:hidden flex-shrink-0">
                     <Menu className="w-5 h-5" />
                 </button>
@@ -99,12 +99,12 @@ export function Header({
                 </nav>
             </div>
 
-            {/* Center Section - Search */}
-            <div className="flex-1 flex justify-center px-4">
-                {onOpenCommandPalette && (
+            {/* Center Section - Search (Absolutely positioned for true center) */}
+            {onOpenCommandPalette && (
+                <div className="absolute left-1/2 -translate-x-1/2 hidden sm:block">
                     <button
                         onClick={onOpenCommandPalette}
-                        className="hidden sm:flex items-center gap-2 px-4 py-1.5 text-sm text-foreground-muted hover:text-foreground bg-background-tertiary hover:bg-background-hover border border-border hover:border-border-hover rounded-lg transition-all max-w-[280px] w-full justify-center"
+                        className="flex items-center gap-2 px-3 py-1.5 text-sm text-foreground-muted hover:text-foreground bg-background-tertiary hover:bg-background-hover border border-border hover:border-border-hover rounded-lg transition-all w-[200px]"
                     >
                         <Search className="w-4 h-4 flex-shrink-0" />
                         <span className="text-xs">Search...</span>
@@ -113,11 +113,11 @@ export function Header({
                             <span>K</span>
                         </kbd>
                     </button>
-                )}
-            </div>
+                </div>
+            )}
 
             {/* Right Section - Actions */}
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-shrink-0 z-10">
                 {selectedBucket && (
                     <>
                         <button onClick={onNewFolder} className="btn btn-secondary h-9 px-3">

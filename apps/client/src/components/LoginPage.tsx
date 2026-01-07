@@ -33,11 +33,11 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       <div className="w-full max-w-sm animate-fadeInUp">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center mx-auto mb-5 group cursor-pointer">
+          <div className="flex items-center justify-center mx-auto mb-5">
             <img
               src="/logo.svg"
               alt="S3 Explorer"
-              className="w-12 h-12 invert transition-transform duration-500 group-hover:animate-spin"
+              className="w-12 h-12 invert"
             />
           </div>
           <h1 className="text-xl font-semibold text-foreground">Welcome back</h1>
@@ -45,10 +45,10 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         </div>
 
         {/* Card */}
-        <div className="card p-6">
+        <div className="bg-background-secondary border border-border rounded-xl p-6">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <label className="text-xs font-medium text-foreground-muted uppercase tracking-wide">Password</label>
+              <label className="text-sm text-foreground-secondary">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -72,7 +72,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             <label className="flex items-center gap-3 cursor-pointer group">
               <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${
                 rememberMe
-                  ? 'bg-accent-pink border-accent-pink'
+                  ? 'bg-accent-purple border-accent-purple'
                   : 'border-border bg-transparent group-hover:border-border-hover'
               }`}>
                 {rememberMe && <Check className="w-3.5 h-3.5 text-white" />}
@@ -96,7 +96,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             <button
               type="submit"
               disabled={loading || !password}
-              className="btn btn-primary w-full justify-center"
+              className="w-full py-3 px-4 rounded-lg bg-accent-purple text-white hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium flex items-center justify-center gap-2"
             >
               {loading ? (
                 <span className="flex items-center gap-2">

@@ -1,4 +1,5 @@
-import { Database, Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Database, Plus, Trash2, Copy, Check } from 'lucide-react';
 import type { Bucket } from '../types';
 
 interface SidebarProps {
@@ -28,9 +29,18 @@ export function Sidebar({
     onCloseSidebar,
     onNavigateHome,
 }: SidebarProps) {
+    const [copiedBucket, setCopiedBucket] = useState<string | null>(null);
+
     const filteredBuckets = buckets.filter(b =>
         !searchQuery.trim() || b.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    const handleCopyBucketName = (e: React.MouseEvent, bucketName: string) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(bucketName);
+        setCopiedBucket(bucketName);
+        setTimeout(() => setCopiedBucket(null), 2000);
+    };
 
     return (
         <>
@@ -87,12 +97,26 @@ export function Sidebar({
                             >
                                 <Database className="sidebar-icon w-4 h-4 flex-shrink-0" />
                                 <span className="flex-1 truncate">{bucket.name}</span>
-                                <button
-                                    onClick={e => { e.stopPropagation(); onDeleteBucket(bucket.name); }}
-                                    className="opacity-0 group-hover:opacity-100 btn btn-ghost btn-icon hover:text-accent-red"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
+                                <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                        onClick={e => handleCopyBucketName(e, bucket.name)}
+                                        className="btn btn-ghost btn-icon hover:text-accent-purple"
+                                        title="Copy bucket name"
+                                    >
+                                        {copiedBucket === bucket.name ? (
+                                            <Check className="w-4 h-4 text-accent-green" />
+                                        ) : (
+                                            <Copy className="w-4 h-4" />
+                                        )}
+                                    </button>
+                                    <button
+                                        onClick={e => { e.stopPropagation(); onDeleteBucket(bucket.name); }}
+                                        className="btn btn-ghost btn-icon hover:text-accent-red"
+                                        title="Delete bucket"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>

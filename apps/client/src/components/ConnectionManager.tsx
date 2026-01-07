@@ -209,7 +209,9 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                   <div
                     key={conn.id}
                     onClick={() => handleActivate(conn.id)}
-                    className="group relative flex items-center justify-between p-3 pr-4 rounded-lg bg-background-tertiary border border-dashed border-border hover:border-border-hover transition-all cursor-pointer overflow-hidden"
+                    className={`group relative flex items-center justify-between p-3 pr-4 rounded-lg bg-background-tertiary border border-dashed transition-all cursor-pointer overflow-hidden ${
+                      conn.isActive ? 'border-accent-purple/50' : 'border-border hover:border-accent-purple/30'
+                    }`}
                   >
                     {/* Left accent border */}
                     <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-lg ${conn.isActive ? 'bg-accent-purple' : 'bg-transparent'}`} />
@@ -240,7 +242,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                     <div className="flex items-center gap-1">
                       <button
                         onClick={(e) => startEdit(e, conn)}
-                        className="p-2 text-foreground-muted hover:text-foreground hover:bg-background-hover rounded-lg border border-dashed border-transparent hover:border-border transition-colors"
+                        className="p-2 text-foreground-muted hover:text-accent-purple hover:bg-accent-purple/10 rounded-lg border border-dashed border-transparent hover:border-accent-purple/30 transition-colors"
                         title="Edit"
                       >
                         <Link className="w-4 h-4" />
@@ -261,7 +263,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
 
             <button
               onClick={() => { resetForm(); setView('form'); }}
-              className="w-full mt-4 py-3 px-4 rounded-lg border border-dashed border-border text-foreground-secondary hover:text-foreground hover:border-border-hover hover:bg-background-hover transition-all flex items-center justify-center gap-2 text-sm font-medium"
+              className="w-full mt-4 py-3 px-4 rounded-lg border border-dashed border-border text-foreground-secondary hover:text-accent-purple hover:border-accent-purple/30 hover:bg-accent-purple/5 transition-all flex items-center justify-center gap-2 text-sm font-medium"
             >
               <Plus className="w-4 h-4" />
               Add Connection
