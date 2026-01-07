@@ -119,9 +119,14 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       </div>
 
       {/* Footer */}
-      <p className="absolute bottom-6 left-0 right-0 text-center text-xs text-foreground-muted">
-        Made with <span className="text-accent-red">❤</span> by Subrato
-      </p>
+      <a
+        href="https://github.com/subratomandal/s3-explorer"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-4 left-0 right-0 text-center text-xs text-foreground-muted hover:text-foreground transition-colors"
+      >
+        Made with <span className="text-accent-purple">♡</span> by Subrato
+      </a>
     </div>
   );
 }

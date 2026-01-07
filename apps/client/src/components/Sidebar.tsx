@@ -140,10 +140,15 @@ export function Sidebar({
                 </div>
 
                 {/* Footer - mobile only */}
-                <div className="p-4 border-t border-border md:hidden">
-                    <p className="text-xs text-foreground-muted text-center">
-                        Made with <span className="text-accent-red">❤</span> by Subrato
-                    </p>
+                <div className="mt-auto p-4 border-t border-border md:hidden">
+                    <a
+                        href="https://github.com/subratomandal/s3-explorer"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-foreground-muted text-center block hover:text-foreground transition-colors"
+                    >
+                        Made with <span className="text-accent-purple">♡</span> by Subrato
+                    </a>
                 </div>
             </aside>
         </>
