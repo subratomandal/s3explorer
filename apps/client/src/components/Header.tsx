@@ -51,10 +51,16 @@ export function Header({
         ? breadcrumbs.slice(-maxBreadcrumbs)
         : breadcrumbs;
 
+    // Truncate text after ~20 characters
+    const truncateText = (text: string, maxLen: number = 20) => {
+        if (text.length <= maxLen) return text;
+        return text.slice(0, maxLen) + '...';
+    };
+
     return (
         <header className="h-14 flex items-center justify-between px-4 border-b border-border bg-background-secondary/50 flex-shrink-0 relative">
             {/* Left Section - Navigation */}
-            <div className="flex items-center gap-2 min-w-0 flex-shrink-0 max-w-[200px] z-10">
+            <div className="flex items-center gap-2 min-w-0 flex-shrink-0 max-w-[280px] z-10">
                 <button onClick={onOpenSidebar} className="btn btn-ghost btn-icon md:hidden flex-shrink-0">
                     <Menu className="w-5 h-5" />
                 </button>
@@ -68,10 +74,10 @@ export function Header({
                 <nav className="flex items-center gap-1 text-sm min-w-0 overflow-hidden">
                     <button
                         onClick={onNavigateToRoot}
-                        className={`truncate max-w-[80px] flex-shrink-0 ${currentPath ? 'text-foreground-muted hover:text-foreground' : 'font-medium'}`}
+                        className={`flex-shrink-0 ${currentPath ? 'text-foreground-muted hover:text-foreground' : 'font-medium'}`}
                         title={selectedBucket || undefined}
                     >
-                        {selectedBucket || 'Select bucket'}
+                        {selectedBucket ? truncateText(selectedBucket, 20) : 'Select bucket'}
                     </button>
 
                     {showEllipsis && (
@@ -88,10 +94,10 @@ export function Header({
                                 <span className="text-foreground-muted flex-shrink-0">/</span>
                                 <button
                                     onClick={() => onNavigateToBreadcrumb(actualIndex)}
-                                    className={`truncate max-w-[60px] ${actualIndex === breadcrumbs.length - 1 ? 'font-medium' : 'text-foreground-muted hover:text-foreground'}`}
+                                    className={`${actualIndex === breadcrumbs.length - 1 ? 'font-medium' : 'text-foreground-muted hover:text-foreground'}`}
                                     title={part}
                                 >
-                                    {part}
+                                    {truncateText(part, 20)}
                                 </button>
                             </span>
                         );

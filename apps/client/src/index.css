@@ -38,13 +38,20 @@
   box-sizing: border-box;
 }
 
-body {
+html, body {
   margin: 0;
+  padding: 0;
+  min-height: 100%;
   background: var(--background);
   color: var(--foreground);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  background: var(--background);
 }
 
 ::-webkit-scrollbar {
@@ -76,7 +83,7 @@ body {
   border-radius: 0.5rem;
   border: none;
   cursor: pointer;
-  transition: background 150ms ease, border-color 150ms ease, filter 150ms ease, opacity 150ms ease;
+  transition: all 50ms ease;
   outline: none;
   white-space: nowrap;
 }
@@ -154,7 +161,7 @@ body {
   border-radius: 0.5rem;
   color: var(--foreground);
   font-size: 0.875rem;
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  transition: all 50ms ease;
   outline: none;
 }
 
@@ -199,7 +206,7 @@ select.input option {
   padding: 0.625rem 0.875rem;
   border-radius: 0.5rem;
   cursor: pointer;
-  transition: all 150ms ease;
+  transition: all 50ms ease;
   color: var(--foreground-secondary);
   font-size: 0.875rem;
   border: 1px solid transparent;
@@ -250,11 +257,11 @@ select.input option {
   padding: 0.75rem 1rem;
   font-size: 0.875rem;
   border-bottom: 1px solid var(--border);
-  transition: background 100ms ease;
+  transition: background 30ms ease;
 }
 
 .table tbody tr {
-  transition: background 100ms ease;
+  transition: background 30ms ease;
 }
 
 .table tbody tr:hover {
@@ -263,7 +270,7 @@ select.input option {
 
 .table tbody tr .row-actions {
   opacity: 0;
-  transition: opacity 100ms ease;
+  transition: opacity 30ms ease;
 }
 
 .table tbody tr:hover .row-actions {
@@ -283,13 +290,13 @@ select.input option {
 }
 
 .file-icon {
-  transition: color 150ms ease;
+  transition: color 50ms ease;
 }
 
 .file-chevron {
   opacity: 0;
   transform: translateX(-4px);
-  transition: all 150ms ease;
+  transition: all 50ms ease;
 }
 
 .file-row.is-folder:hover .file-chevron {
@@ -303,27 +310,27 @@ select.input option {
 }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-6px); }
+  from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.96); }
+  from { opacity: 0; transform: scale(0.98); }
   to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-8px); }
+  from { opacity: 0; transform: translateX(-4px); }
   to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes slideInRight {
-  from { opacity: 0; transform: translateX(8px); }
+  from { opacity: 0; transform: translateX(4px); }
   to { opacity: 1; transform: translateX(0); }
 }
 
@@ -355,17 +362,17 @@ select.input option {
   animation: spin 1s linear infinite;
 }
 
-.animate-fadeIn { animation: fadeIn 150ms ease; }
-.animate-fadeInUp { animation: fadeInUp 200ms ease; }
-.animate-fadeInDown { animation: fadeInDown 200ms ease; }
-.animate-scaleIn { animation: scaleIn 150ms ease; }
-.animate-slideInLeft { animation: slideInLeft 200ms ease; }
-.animate-slideInRight { animation: slideInRight 200ms ease; }
+.animate-fadeIn { animation: fadeIn 75ms ease; }
+.animate-fadeInUp { animation: fadeInUp 100ms ease; }
+.animate-fadeInDown { animation: fadeInDown 100ms ease; }
+.animate-scaleIn { animation: scaleIn 75ms ease; }
+.animate-slideInLeft { animation: slideInLeft 100ms ease; }
+.animate-slideInRight { animation: slideInRight 100ms ease; }
 .animate-spin { animation: spin 1s linear infinite; }
 
 .stagger-item {
   opacity: 0;
-  animation: fadeInUp 200ms ease forwards;
+  animation: fadeInUp 100ms ease forwards;
 }
 
 .modal-backdrop {
@@ -374,16 +381,16 @@ select.input option {
 }
 
 .modal-content {
-  animation: scaleIn 150ms ease;
+  animation: scaleIn 75ms ease;
 }
 
 .context-menu {
-  animation: scaleIn 100ms ease;
+  animation: scaleIn 50ms ease;
   transform-origin: top left;
 }
 
 .context-menu-item {
-  transition: background 100ms ease;
+  transition: background 30ms ease;
 }
 
 .progress-bar {
@@ -397,7 +404,7 @@ select.input option {
   height: 100%;
   background: linear-gradient(90deg, var(--accent-purple), var(--accent-pink));
   border-radius: 9999px;
-  transition: width 200ms ease;
+  transition: width 100ms ease;
 }
 
 .skeleton {
@@ -408,15 +415,15 @@ select.input option {
 }
 
 .empty-state {
-  animation: fadeInUp 300ms ease;
+  animation: fadeInUp 150ms ease;
 }
 
 .empty-state-icon {
-  animation: fadeInUp 300ms ease 100ms both;
+  animation: fadeInUp 150ms ease 50ms both;
 }
 
 .toast {
-  animation: slideInRight 200ms ease;
+  animation: slideInRight 100ms ease;
 }
 
 /* Command Palette Styles */
@@ -426,7 +433,7 @@ select.input option {
 }
 
 .command-palette-content {
-  animation: commandPaletteIn 150ms ease;
+  animation: commandPaletteIn 75ms ease;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.05),
     0 25px 50px -12px rgba(0, 0, 0, 0.5),
@@ -436,7 +443,7 @@ select.input option {
 @keyframes commandPaletteIn {
   from {
     opacity: 0;
-    transform: scale(0.96) translateY(-10px);
+    transform: scale(0.98) translateY(-6px);
   }
   to {
     opacity: 1;
@@ -463,7 +470,7 @@ select.input option {
   border: 1px solid var(--border);
   border-radius: 1rem;
   padding: 1.5rem;
-  transition: all 200ms ease;
+  transition: all 75ms ease;
 }
 
 .bento-item:hover {
@@ -490,7 +497,7 @@ select.input option {
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   opacity: 0;
-  transition: opacity 200ms ease;
+  transition: opacity 75ms ease;
 }
 
 .gradient-border:hover::before {
@@ -523,7 +530,7 @@ textarea:focus-visible {
     bottom: 0;
     z-index: 50;
     transform: translateX(-100%);
-    transition: transform 200ms ease;
+    transition: transform 100ms ease;
   }
 
   .sidebar.open {
