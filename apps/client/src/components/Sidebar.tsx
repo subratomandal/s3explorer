@@ -138,6 +138,13 @@ export function Sidebar({
                         </div>
                     )}
                 </div>
+
+                {/* Footer - mobile only */}
+                <div className="p-4 border-t border-border md:hidden">
+                    <p className="text-xs text-foreground-muted text-center">
+                        Made with <span className="text-accent-red">❤</span> by Subrato
+                    </p>
+                </div>
             </aside>
         </>
     );

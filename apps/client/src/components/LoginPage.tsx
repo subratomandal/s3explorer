@@ -117,6 +117,11 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         </div>
 
       </div>
+
+      {/* Footer */}
+      <p className="absolute bottom-6 left-0 right-0 text-center text-xs text-foreground-muted">
+        Made with <span className="text-accent-red">❤</span> by Subrato
+      </p>
     </div>
   );
 }
