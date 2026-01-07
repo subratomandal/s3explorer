@@ -1,11 +1,20 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Check, Server, Edit2, ChevronRight, Shield } from 'lucide-react';
+import { Plus, Trash2, Check, Server, Edit2, ChevronRight, Globe, Shield, RefreshCw } from 'lucide-react';
 import * as api from '../api';
 import type { Connection, ConnectionConfig } from '../api';
 import { Modal } from './Modal';
 
-// Combined regions list for the "Region" dropdown to support multiple providers
-const REGIONS = [
+// Provider Presets
+const PROVIDERS = [
+  { id: 'aws', name: 'Amazon S3', defaultRegion: 'us-east-1', defaultEndpoint: '' },
+  { id: 'cloudflare', name: 'Cloudflare R2', defaultRegion: 'auto', defaultEndpoint: 'https://<accountid>.r2.cloudflarestorage.com' },
+  { id: 'digitalocean', name: 'DigitalOcean Spaces', defaultRegion: 'nyc3', defaultEndpoint: 'https://nyc3.digitaloceanspaces.com' },
+  { id: 'railway', name: 'Railway Volume', defaultRegion: 'us-west-1', defaultEndpoint: 'http://localhost:4444' },
+  { id: 'minio', name: 'MinIO (Self-hosted)', defaultRegion: 'us-east-1', defaultEndpoint: 'http://localhost:9000' },
+  { id: 'custom', name: 'Custom / Other', defaultRegion: 'us-east-1', defaultEndpoint: '' },
+];
+
+const AWS_REGIONS = [
   { value: 'us-east-1', label: 'US East (N. Virginia)' },
   { value: 'us-east-2', label: 'US East (Ohio)' },
   { value: 'us-west-1', label: 'US West (N. California)' },
@@ -14,9 +23,7 @@ const REGIONS = [
   { value: 'eu-central-1', label: 'EU (Frankfurt)' },
   { value: 'ap-southeast-1', label: 'Asia Pacific (Singapore)' },
   { value: 'ap-northeast-1', label: 'Asia Pacific (Tokyo)' },
-  { value: 'nyc3', label: 'DigitalOcean NYC3' },
-  { value: 'auto', label: 'Auto (Cloudflare R2)' },
-  { value: 'other', label: 'Other / Custom' }
+  // Add more as needed, keep list manageable
 ];
 
 interface ConnectionManagerProps {
@@ -32,8 +39,10 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
   const [view, setView] = useState<'list' | 'form'>('list');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
 
   // Form State
+  const [selectedProvider, setSelectedProvider] = useState<string>('custom');
   const [form, setForm] = useState<ConnectionConfig>({
     name: '',
     endpoint: '',
@@ -73,8 +82,42 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
       forcePathStyle: true,
     });
     setEditingId(null);
+    setSelectedProvider('custom');
     setView('list');
     setError(null);
+  }
+
+  function handleProviderChange(providerId: string) {
+    setSelectedProvider(providerId);
+    const provider = PROVIDERS.find(p => p.id === providerId);
+    if (provider) {
+      setForm(prev => ({
+        ...prev,
+        region: provider.defaultRegion,
+        endpoint: provider.defaultEndpoint,
+        // Cloudflare/DO/MinIO often need path style
+        forcePathStyle: providerId === 'minio' || providerId === 'railway',
+      }));
+    }
+  }
+
+  async function handleTest() {
+    setTesting(true);
+    setError(null);
+    try {
+      const result = await api.testConnection({
+        endpoint: form.endpoint,
+        accessKey: form.accessKey,
+        secretKey: form.secretKey,
+        region: form.region,
+        forcePathStyle: form.forcePathStyle,
+      });
+      alert(`Connection successful! Found ${result.bucketCount} buckets.`);
+    } catch (err: any) {
+      alert(`Connection failed: ${err.message}`);
+    } finally {
+      setTesting(false);
+    }
   }
 
   async function handleSave() {
@@ -129,6 +172,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
       forcePathStyle: conn.forcePathStyle,
     });
     setEditingId(conn.id);
+    setSelectedProvider('custom'); // Or try to infer from endpoint? Keeping simple for now.
     setView('form');
   }
 
@@ -165,8 +209,8 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                     key={conn.id}
                     onClick={() => handleActivate(conn.id)}
                     className={`group relative flex items-center justify-between p-4 rounded-xl border transition-all duration-200 cursor-pointer ${conn.isActive
-                      ? 'bg-purple-500/10 border-purple-500/50 shadow-[0_0_20px_-10px_rgba(168,85,247,0.3)]'
-                      : 'bg-gray-900/40 border-gray-800 hover:border-gray-700 hover:bg-gray-900/80 hover:scale-[1.01] active:scale-[0.99]'
+                        ? 'bg-purple-500/10 border-purple-500/50 shadow-[0_0_20px_-10px_rgba(168,85,247,0.3)]'
+                        : 'bg-gray-900/40 border-gray-800 hover:border-gray-700 hover:bg-gray-900/80 hover:scale-[1.01] active:scale-[0.99]'
                       }`}
                   >
                     <div className="flex items-center gap-4 overflow-hidden">
@@ -233,10 +277,28 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
               {editingId ? 'Edit Profile' : 'New Profile'}
             </h3>
 
-            <div className="space-y-4 flex-1 overflow-y-auto px-1">
+            <div className="space-y-5 flex-1 overflow-y-auto px-1">
+
+              {/* Provider Selector */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">Storage Provider</label>
+                <div className="relative">
+                  <select
+                    value={selectedProvider}
+                    onChange={(e) => handleProviderChange(e.target.value)}
+                    className="w-full bg-gray-900 border border-gray-800 rounded-lg pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all appearance-none cursor-pointer hover:border-gray-700"
+                  >
+                    {PROVIDERS.map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                  <ChevronRight className="w-4 h-4 text-gray-500 absolute right-3 top-3 rotate-90 pointer-events-none" />
+                </div>
+              </div>
+
               {/* Profile Name */}
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-400">Profile Name</label>
+                <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">Profile Name</label>
                 <input
                   type="text"
                   value={form.name}
@@ -248,20 +310,23 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
 
               {/* Endpoint */}
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-400">S3 Endpoint</label>
-                <input
-                  type="text"
-                  value={form.endpoint}
-                  onChange={(e) => setForm({ ...form, endpoint: e.target.value })}
-                  placeholder="https://s3.amazonaws.com"
-                  className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600 font-mono"
-                />
+                <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">S3 Endpoint</label>
+                <div className="relative">
+                  <Globe className="w-4 h-4 text-gray-500 absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    value={form.endpoint}
+                    onChange={(e) => setForm({ ...form, endpoint: e.target.value })}
+                    placeholder="https://s3.amazonaws.com"
+                    className="w-full bg-gray-900 border border-gray-800 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600 font-mono"
+                  />
+                </div>
               </div>
 
               {/* Keys Row */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-400">Access Key</label>
+                  <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">Access Key</label>
                   <input
                     type="text"
                     value={form.accessKey}
@@ -271,7 +336,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-400">Secret Key</label>
+                  <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">Secret Key</label>
                   <input
                     type="password"
                     value={form.secretKey}
@@ -283,55 +348,76 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
               </div>
 
               {/* Region & Config */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-400">Region</label>
-                <div className="flex gap-4">
-                  <div className="relative flex-1">
-                    <select
+              <div className="grid grid-cols-2 gap-4 items-end">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">Region</label>
+                  {selectedProvider === 'aws' ? (
+                    <div className="relative">
+                      <select
+                        value={form.region}
+                        onChange={(e) => setForm({ ...form, region: e.target.value })}
+                        className="w-full bg-gray-900 border border-gray-800 rounded-lg pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all appearance-none cursor-pointer"
+                      >
+                        {AWS_REGIONS.map(r => (
+                          <option key={r.value} value={r.value}>{r.label}</option>
+                        ))}
+                      </select>
+                      <ChevronRight className="w-4 h-4 text-gray-500 absolute right-3 top-3 rotate-90 pointer-events-none" />
+                    </div>
+                  ) : (
+                    <input
+                      type="text"
                       value={form.region}
                       onChange={(e) => setForm({ ...form, region: e.target.value })}
-                      className="w-full bg-gray-900 border border-gray-800 rounded-lg pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all appearance-none cursor-pointer"
-                    >
-                      {REGIONS.map(r => (
-                        <option key={r.value} value={r.value}>{r.label}</option>
-                      ))}
-                    </select>
-                    <ChevronRight className="w-4 h-4 text-gray-500 absolute right-3 top-3 rotate-90 pointer-events-none" />
-                  </div>
+                      placeholder="us-east-1"
+                      className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600"
+                    />
+                  )}
+                </div>
 
-                  <label className="flex items-center gap-3 p-2.5 cursor-pointer group flex-shrink-0">
-                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${form.forcePathStyle
+                <label className="flex items-center gap-3 p-2.5 cursor-pointer group">
+                  <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${form.forcePathStyle
                       ? 'bg-purple-600 border-purple-600 scale-100'
                       : 'border-gray-600 bg-transparent group-hover:border-gray-500'
-                      }`}>
-                      {form.forcePathStyle && <Check className="w-3.5 h-3.5 text-white" />}
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={form.forcePathStyle}
-                      onChange={(e) => setForm({ ...form, forcePathStyle: e.target.checked })}
-                      className="hidden"
-                    />
-                    <span className="text-sm text-gray-300 group-hover:text-white transition-colors">Path-style URLs</span>
-                  </label>
-                </div>
+                    }`}>
+                    {form.forcePathStyle && <Check className="w-3.5 h-3.5 text-white" />}
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={form.forcePathStyle}
+                    onChange={(e) => setForm({ ...form, forcePathStyle: e.target.checked })}
+                    className="hidden"
+                  />
+                  <span className="text-sm text-gray-300 group-hover:text-white transition-colors">Path-style URLs</span>
+                </label>
               </div>
             </div>
 
-            <div className="mt-8 flex items-center gap-3">
+            <div className="mt-8 pt-4 flex items-center justify-between border-t border-gray-800">
               <button
-                onClick={() => setView('list')}
-                className="w-full px-5 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-colors bg-gray-900 border border-gray-800"
+                onClick={handleTest}
+                disabled={testing || !form.endpoint || (!editingId && (!form.accessKey || !form.secretKey))}
+                className="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors flex items-center gap-2"
               >
-                Cancel
+                <RefreshCw className={`w-4 h-4 ${testing ? 'animate-spin' : ''}`} />
+                Test Connection
               </button>
-              <button
-                onClick={handleSave}
-                disabled={saving || !form.name || !form.endpoint}
-                className="w-full px-6 py-2.5 rounded-lg text-sm font-medium text-white bg-purple-600 hover:bg-purple-500 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_15px_-5px_rgba(147,51,234,0.5)]"
-              >
-                {saving ? 'Saving...' : 'Save Profile'}
-              </button>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setView('list')}
+                  className="px-5 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={saving || !form.name || !form.endpoint}
+                  className="px-6 py-2.5 rounded-lg text-sm font-medium text-white bg-purple-600 hover:bg-purple-500 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_15px_-5px_rgba(147,51,234,0.5)]"
+                >
+                  {saving ? 'Saving...' : 'Save Profile'}
+                </button>
+              </div>
             </div>
           </div>
         )}
