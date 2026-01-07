@@ -153,8 +153,7 @@ body {
 
 .input {
   width: 100%;
-  padding-left: 0.875rem;
-  padding-right: 0.875rem;
+  padding: 0.625rem 0.875rem;
   background: var(--background);
   border: 1px solid var(--border);
   border-radius: 0.5rem;
@@ -162,12 +161,6 @@ body {
   font-size: 0.875rem;
   transition: all 50ms ease;
   outline: none;
-}
-
-/* Ensure text is vertically centered in inputs */
-input.input,
-select.input {
-  line-height: normal;
 }
 
 .input:hover:not(:focus) {

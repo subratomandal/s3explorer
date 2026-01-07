@@ -11,7 +11,7 @@ const PROVIDERS = [
   { id: 'digitalocean', name: 'DigitalOcean Spaces', defaultRegion: 'nyc3', defaultEndpoint: 'https://nyc3.digitaloceanspaces.com' },
   { id: 'railway', name: 'Railway Volume', defaultRegion: 'us-west-1', defaultEndpoint: 'http://localhost:4444' },
   { id: 'minio', name: 'MinIO (Self-hosted)', defaultRegion: 'us-east-1', defaultEndpoint: 'http://localhost:9000' },
-  { id: 'custom', name: 'Custom / Other', defaultRegion: 'us-east-1', defaultEndpoint: '' },
+  { id: 'custom', name: 'Custom', defaultRegion: 'us-east-1', defaultEndpoint: '' },
 ];
 
 const AWS_REGIONS = [
