@@ -29,7 +29,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 safe-area-inset">
+    <div className="fixed inset-0 bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-sm animate-fadeInUp">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
@@ -70,12 +70,12 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             </div>
 
             <label className="flex items-center gap-3 cursor-pointer group min-h-[44px]">
-              <div className={`w-6 h-6 sm:w-5 sm:h-5 rounded border flex items-center justify-center transition-all ${
+              <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${
                 rememberMe
                   ? 'bg-accent-purple border-accent-purple'
                   : 'border-border bg-transparent group-hover:border-border-hover'
               }`}>
-                {rememberMe && <Check className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-white" />}
+                {rememberMe && <Check className="w-3.5 h-3.5 text-white" />}
               </div>
               <input
                 type="checkbox"
@@ -96,7 +96,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             <button
               type="submit"
               disabled={loading || !password}
-              className="w-full py-3.5 sm:py-3 px-4 rounded-lg bg-accent-purple text-white hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-base sm:text-sm font-medium flex items-center justify-center gap-2 min-h-[48px] sm:min-h-0"
+              className="w-full py-3 px-4 rounded-lg bg-accent-purple text-white hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium flex items-center justify-center gap-2"
             >
               {loading ? (
                 <span className="flex items-center gap-2">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Settings } from 'lucide-react';
+import { X, ArrowRight } from 'lucide-react';
 
 interface WelcomeMessageProps {
   onConfigure: () => void;
@@ -37,41 +37,38 @@ export function WelcomeMessage({ onConfigure }: WelcomeMessageProps) {
 
   return (
     <div
-      className={`fixed bottom-3 sm:bottom-5 left-3 right-3 sm:left-auto sm:right-5 z-50 sm:max-w-sm transition-all duration-300 ${
+      className={`fixed bottom-3 sm:bottom-5 left-3 right-3 sm:left-auto sm:right-5 z-50 sm:max-w-xs transition-all duration-300 ${
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
       }`}
     >
-      <div className="bg-background-secondary border border-dashed border-border rounded-xl p-3 sm:p-4 shadow-xl">
+      <div
+        onClick={handleConfigure}
+        className="group bg-background-secondary border border-border rounded-xl p-4 shadow-xl cursor-pointer transition-all duration-200 hover:border-accent-purple/50 hover:bg-background-tertiary"
+      >
         <button
-          onClick={handleDismiss}
-          className="absolute top-2 right-2 sm:top-3 sm:right-3 p-1.5 text-foreground-muted hover:text-foreground transition-colors"
+          onClick={(e) => { e.stopPropagation(); handleDismiss(); }}
+          className="absolute top-2 right-2 p-1.5 text-foreground-muted hover:text-foreground transition-colors z-10"
         >
-          <X className="w-5 h-5 sm:w-4 sm:h-4" />
+          <X className="w-4 h-4" />
         </button>
 
-        <div className="flex items-start gap-3">
-          <div className="flex-shrink-0 hidden sm:block">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-accent-purple/10 flex items-center justify-center flex-shrink-0 group-hover:bg-accent-purple/20 transition-colors">
             <img
               src="/logo.svg"
-              alt="S3 Explorer"
-              className="w-10 h-10 invert"
+              alt=""
+              className="w-6 h-6 invert opacity-80 group-hover:opacity-100 transition-opacity"
             />
           </div>
-          <div className="flex-1 min-w-0 pr-6 sm:pr-4">
-            <h4 className="text-sm font-medium text-foreground mb-1">
+          <div className="flex-1 min-w-0 pr-4">
+            <h4 className="text-sm font-medium text-foreground group-hover:text-accent-purple transition-colors">
               Welcome to S3 Explorer
             </h4>
-            <p className="text-xs text-foreground-muted leading-relaxed mb-3">
-              Get started by connecting your S3-compatible storage.
+            <p className="text-xs text-foreground-muted mt-0.5">
+              Click to configure your connection
             </p>
-            <button
-              onClick={handleConfigure}
-              className="inline-flex items-center gap-2 px-4 py-2.5 sm:py-2 rounded-lg border border-dashed border-border text-foreground-secondary hover:text-foreground hover:border-border-hover hover:bg-background-hover transition-all text-sm font-medium min-h-[44px] sm:min-h-0"
-            >
-              <Settings className="w-4 h-4" />
-              Configure
-            </button>
           </div>
+          <ArrowRight className="w-4 h-4 text-foreground-muted group-hover:text-accent-purple group-hover:translate-x-0.5 transition-all flex-shrink-0" />
         </div>
       </div>
     </div>
