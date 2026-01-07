@@ -12,6 +12,8 @@ import {
   DeleteObjectsCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { connections, ConnectionRecord } from './db.js';
+import { unpackAndDecrypt } from './crypto.js';
 import type { BucketInfo, ObjectInfo, ObjectMetadata } from '../types/index.js';
 
 export type { BucketInfo, ObjectInfo, ObjectMetadata };
@@ -24,41 +26,41 @@ export interface S3ConnectionConfig {
   forcePathStyle?: boolean;
 }
 
-let activeConnection: S3ConnectionConfig | null = null;
-
-export function setActiveConnection(config: S3ConnectionConfig | null): void {
-  activeConnection = config;
-}
-
-export function getActiveConnection(): S3ConnectionConfig | null {
-  return activeConnection;
-}
-
-const getS3Client = (configOverride?: S3ConnectionConfig) => {
-  const config = configOverride || activeConnection;
-
-  if (config) {
+// Get S3 client - uses active connection from DB or provided config
+function getS3Client(configOverride?: S3ConnectionConfig): S3Client {
+  if (configOverride) {
     return new S3Client({
-      endpoint: config.endpoint,
-      region: config.region || 'us-east-1',
+      endpoint: configOverride.endpoint,
+      region: configOverride.region || 'us-east-1',
       credentials: {
-        accessKeyId: config.accessKey,
-        secretAccessKey: config.secretKey,
+        accessKeyId: configOverride.accessKey,
+        secretAccessKey: configOverride.secretKey,
       },
-      forcePathStyle: config.forcePathStyle ?? true,
+      forcePathStyle: configOverride.forcePathStyle ?? true,
     });
   }
 
+  // Get active connection from DB
+  const active = connections.getActive();
+  
+  if (!active) {
+    throw new Error('No active S3 connection. Please add and activate a connection.');
+  }
+
+  // Decrypt credentials
+  const accessKey = unpackAndDecrypt(active.access_key_enc);
+  const secretKey = unpackAndDecrypt(active.secret_key_enc);
+
   return new S3Client({
-    endpoint: process.env.S3_ENDPOINT,
-    region: process.env.S3_REGION || 'us-east-1',
+    endpoint: active.endpoint,
+    region: active.region || 'us-east-1',
     credentials: {
-      accessKeyId: process.env.S3_ACCESS_KEY || '',
-      secretAccessKey: process.env.S3_SECRET_KEY || '',
+      accessKeyId: accessKey,
+      secretAccessKey: secretKey,
     },
-    forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+    forcePathStyle: !!active.force_path_style,
   });
-};
+}
 
 export async function listBuckets(config?: S3ConnectionConfig): Promise<BucketInfo[]> {
   const client = getS3Client(config);

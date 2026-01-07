@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Folder, Database, Download, Edit3, Trash2, Heart, X } from 'lucide-react';
+import { Folder, Database, Download, Edit3, Trash2, Heart } from 'lucide-react';
 import * as api from './api';
-import type { Bucket, S3Object, ToastState, ContextMenuState, ConnectionProfile } from './types';
+import type { Bucket, S3Object, ToastState, ContextMenuState } from './types';
 import { getFileName } from './utils/fileUtils';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
@@ -18,17 +18,25 @@ import { CreateFolderModal } from './components/modals/CreateFolderModal';
 import { RenameModal } from './components/modals/RenameModal';
 import { DeleteModal } from './components/modals/DeleteModal';
 import { DeleteBucketModal } from './components/modals/DeleteBucketModal';
-import { ConnectionManagerModal } from './components/modals/ConnectionManagerModal';
 import { CommandPalette } from './components/CommandPalette';
+import { LoginPage } from './components/LoginPage';
+import { ConnectionManager } from './components/ConnectionManager';
+import type { Connection } from './api';
 
 const STORAGE_KEYS = {
-  PROFILES: 'railway-bucket-explorer-profiles',
-  ACTIVE_PROFILE: 'railway-bucket-explorer-active-profile',
-  THEME: 'railway-bucket-explorer-theme',
-  WELCOME_SHOWN: 'railway-bucket-explorer-welcome-shown',
+  THEME: 's3-explorer-theme',
 };
 
 export default function App() {
+  // Auth state
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  // Connection state
+  const [activeConnection, setActiveConnection] = useState<Connection | null>(null);
+  const [showConnectionManager, setShowConnectionManager] = useState(false);
+
+  // Bucket/Object state
   const [buckets, setBuckets] = useState<Bucket[]>([]);
   const [selectedBucket, setSelectedBucket] = useState<string | null>(null);
   const [objects, setObjects] = useState<S3Object[]>([]);
@@ -41,6 +49,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Modal state
   const [showNewBucket, setShowNewBucket] = useState(false);
   const [showNewFolder, setShowNewFolder] = useState(false);
   const [showRename, setShowRename] = useState<S3Object | null>(null);
@@ -48,91 +57,68 @@ export default function App() {
   const [showDeleteBucket, setShowDeleteBucket] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
-
-  const [showConnectionManager, setShowConnectionManager] = useState(false);
-  const [connectionProfiles, setConnectionProfiles] = useState<ConnectionProfile[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.PROFILES);
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-  const [activeProfileId, setActiveProfileId] = useState<string | null>(() => {
-    return localStorage.getItem(STORAGE_KEYS.ACTIVE_PROFILE);
-  });
-
-  const [folderCache, setFolderCache] = useState<Record<string, S3Object[]>>({});
-
-  const getCacheKey = (bucket: string, path: string) => `${bucket}:${path}`;
-
-  const invalidateCache = useCallback((bucket: string, path: string) => {
-    setFolderCache(prev => {
-      const next = { ...prev };
-      delete next[getCacheKey(bucket, path)];
-      return next;
-    });
-  }, []);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
 
   const [theme] = useState<'dark' | 'light'>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.THEME);
     return (saved === 'light' || saved === 'dark') ? saved : 'dark';
   });
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Check auth on mount
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  async function checkAuth() {
+    try {
+      const status = await api.getAuthStatus();
+      setAuthenticated(status.authenticated);
+      if (status.authenticated) {
+        loadActiveConnection();
+      }
+    } catch (err) {
+      setAuthenticated(false);
+    } finally {
+      setCheckingAuth(false);
+    }
+  }
+
+  async function loadActiveConnection() {
+    try {
+      const conn = await api.getActiveConnection();
+      setActiveConnection(conn);
+      if (conn) {
+        loadBuckets();
+      }
+    } catch (err) {
+      console.error('Failed to load active connection:', err);
+    }
+  }
+
+  function handleLogin() {
+    setAuthenticated(true);
+    loadActiveConnection();
+  }
+
+  async function handleLogout() {
+    try {
+      await api.logout();
+      setAuthenticated(false);
+      setBuckets([]);
+      setSelectedBucket(null);
+      setObjects([]);
+      setActiveConnection(null);
+    } catch (err: any) {
+      showToastMsg('Logout failed', 'error');
+    }
+  }
+
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem(STORAGE_KEYS.THEME, theme);
   }, [theme]);
-
-  const [showCommandPalette, setShowCommandPalette] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(() => {
-    return !localStorage.getItem(STORAGE_KEYS.WELCOME_SHOWN);
-  });
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const dismissWelcome = () => {
-    setShowWelcome(false);
-    localStorage.setItem(STORAGE_KEYS.WELCOME_SHOWN, 'true');
-  };
-
-  const openConnectionsFromWelcome = () => {
-    dismissWelcome();
-    setShowConnectionManager(true);
-  };
-
-  const showToast = (message: string, type: 'success' | 'error' = 'success') => setToast({ message, type });
-
-  const saveProfiles = useCallback((profiles: ConnectionProfile[]) => {
-    setConnectionProfiles(profiles);
-    localStorage.setItem(STORAGE_KEYS.PROFILES, JSON.stringify(profiles));
-  }, []);
-
-  const handleConnectProfile = useCallback(async (profileId: string) => {
-    const profile = connectionProfiles.find(p => p.id === profileId);
-    if (!profile) return;
-
-    try {
-      await api.connectToS3({
-        endpoint: profile.endpoint,
-        accessKey: profile.accessKey,
-        secretKey: profile.secretKey,
-        region: profile.region,
-        forcePathStyle: profile.forcePathStyle,
-      });
-
-      setActiveProfileId(profileId);
-      localStorage.setItem(STORAGE_KEYS.ACTIVE_PROFILE, profileId);
-
-      setSelectedBucket(null);
-      setObjects([]);
-      setCurrentPath('');
-      await loadBuckets();
-
-      showToast(`Connected to ${profile.name}`);
-    } catch (err: any) {
-      showToast(`Connection failed: ${err.message}`, 'error');
-    }
-  }, [connectionProfiles]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -145,10 +131,11 @@ export default function App() {
         setShowConnectionManager(true);
       }
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  const showToastMsg = (message: string, type: 'success' | 'error' = 'success') => setToast({ message, type });
 
   const loadBuckets = useCallback(async () => {
     try {
@@ -157,57 +144,33 @@ export default function App() {
       const data = await api.listBuckets();
       setBuckets(data);
     } catch (err: any) {
-      setError(err.message);
+      if (err.message?.includes('No active S3 connection')) {
+        setShowConnectionManager(true);
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const loadObjects = useCallback(async (refresh = false) => {
+  const loadObjects = useCallback(async () => {
     if (!selectedBucket) return;
-    const cacheKey = getCacheKey(selectedBucket, currentPath);
-
-    if (!refresh && folderCache[cacheKey]) {
-      setObjects(folderCache[cacheKey]);
-      return;
-    }
-
     try {
-      setLoading(!refresh && !folderCache[cacheKey]); // Only show loading if no cache or force refresh
+      setLoading(true);
       setError(null);
       const data = await api.listObjects(selectedBucket, currentPath);
       setObjects(data);
-      setFolderCache(prev => ({ ...prev, [cacheKey]: data }));
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [selectedBucket, currentPath, folderCache]);
+  }, [selectedBucket, currentPath]);
 
-  useEffect(() => {
-    const restoreConnection = async () => {
-      if (activeProfileId) {
-        const profile = connectionProfiles.find(p => p.id === activeProfileId);
-        if (profile) {
-          try {
-            await api.connectToS3({
-              endpoint: profile.endpoint,
-              accessKey: profile.accessKey,
-              secretKey: profile.secretKey,
-              region: profile.region,
-              forcePathStyle: profile.forcePathStyle,
-            });
-            await loadBuckets();
-          } catch (err) {
-            console.error('Failed to restore connection:', err);
-          }
-        }
-      }
-    };
-    restoreConnection();
-  }, []);
-  useEffect(() => { if (selectedBucket) loadObjects(); }, [selectedBucket, currentPath, loadObjects]);
+  useEffect(() => { 
+    if (selectedBucket && authenticated) loadObjects(); 
+  }, [selectedBucket, currentPath, authenticated]);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (!selectedBucket || acceptedFiles.length === 0) return;
@@ -218,17 +181,16 @@ export default function App() {
       await api.uploadFiles(selectedBucket, currentPath, acceptedFiles);
       clearInterval(interval);
       setUploadProgress(100);
-      invalidateCache(selectedBucket, currentPath);
       setTimeout(() => {
         setUploading(false);
         setUploadProgress(0);
-        loadObjects(true);
-        showToast(`${acceptedFiles.length} file${acceptedFiles.length > 1 ? 's' : ''} uploaded`);
+        loadObjects();
+        showToastMsg(`${acceptedFiles.length} file${acceptedFiles.length > 1 ? 's' : ''} uploaded`);
       }, 400);
     } catch (err: any) {
       setError(err.message);
       setUploading(false);
-      showToast('Upload failed', 'error');
+      showToastMsg('Upload failed', 'error');
     }
   }, [selectedBucket, currentPath, loadObjects]);
 
@@ -243,9 +205,9 @@ export default function App() {
       setNewName('');
       loadBuckets();
       setSelectedBucket(name);
-      showToast(`Bucket "${name}" created`);
+      showToastMsg(`Bucket "${name}" created`);
     } catch (err: any) {
-      showToast('Failed to create bucket', 'error');
+      showToastMsg('Failed to create bucket', 'error');
     }
   };
 
@@ -258,9 +220,9 @@ export default function App() {
         setCurrentPath('');
       }
       loadBuckets();
-      showToast(`Bucket deleted`);
+      showToastMsg(`Bucket deleted`);
     } catch (err: any) {
-      showToast('Failed to delete bucket', 'error');
+      showToastMsg('Failed to delete bucket', 'error');
     }
   };
 
@@ -279,7 +241,7 @@ export default function App() {
       const url = await api.getDownloadUrl(selectedBucket!, obj.key);
       window.open(url, '_blank');
     } catch (err: any) {
-      showToast('Download failed', 'error');
+      showToastMsg('Download failed', 'error');
     }
   };
 
@@ -289,12 +251,10 @@ export default function App() {
       await api.createFolder(selectedBucket, currentPath + newName.trim());
       setShowNewFolder(false);
       setNewName('');
-      setNewName('');
-      invalidateCache(selectedBucket, currentPath);
-      loadObjects(true);
-      showToast(`Folder created`);
+      loadObjects();
+      showToastMsg(`Folder created`);
     } catch (err: any) {
-      showToast('Failed to create folder', 'error');
+      showToastMsg('Failed to create folder', 'error');
     }
   };
 
@@ -315,14 +275,10 @@ export default function App() {
       await api.renameObject(selectedBucket, showRename.key, newKey);
       setShowRename(null);
       setNewName('');
-      setNewName('');
-      invalidateCache(selectedBucket, currentPath); // Invalidate current path (where rename happened)
-      // Note: Ideally we should invalidate the parent of the old key too if it was a move,
-      // but simplistic invalidation of current view covers most UX needs for now.
-      loadObjects(true);
-      showToast(`Renamed`);
+      loadObjects();
+      showToastMsg(`Renamed`);
     } catch (err: any) {
-      showToast('Rename failed', 'error');
+      showToastMsg('Rename failed', 'error');
     }
   };
 
@@ -331,12 +287,10 @@ export default function App() {
     try {
       await api.deleteObject(selectedBucket, showDelete.key, showDelete.isFolder);
       setShowDelete(null);
-      setShowDelete(null);
-      invalidateCache(selectedBucket, currentPath);
-      loadObjects(true);
-      showToast(`Deleted`);
+      loadObjects();
+      showToastMsg(`Deleted`);
     } catch (err: any) {
-      showToast('Delete failed', 'error');
+      showToastMsg('Delete failed', 'error');
     }
   };
 
@@ -345,8 +299,28 @@ export default function App() {
     setContextMenu({ x: e.clientX, y: e.clientY, object: obj });
   };
 
+  const handleConnectionChange = () => {
+    loadActiveConnection();
+    loadBuckets();
+  };
+
   const breadcrumbs = currentPath.split('/').filter(Boolean);
 
+  // Loading state
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-gray-400">Loading...</div>
+      </div>
+    );
+  }
+
+  // Not authenticated - show login
+  if (!authenticated) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
+
+  // Authenticated - show app
   return (
     <div className="h-screen flex bg-background overflow-hidden">
       <Sidebar
@@ -370,16 +344,17 @@ export default function App() {
           selectedBucket={selectedBucket}
           currentPath={currentPath}
           loading={loading}
-          activeConnectionName={connectionProfiles.find(p => p.id === activeProfileId)?.name}
+          activeConnectionName={activeConnection?.name}
           onOpenSidebar={() => setSidebarOpen(true)}
           onGoBack={handleGoBack}
           onNavigateToRoot={() => setCurrentPath('')}
           onNavigateToBreadcrumb={(i) => setCurrentPath(breadcrumbs.slice(0, i + 1).join('/') + '/')}
-          onRefresh={() => loadObjects(true)}
+          onRefresh={() => loadObjects()}
           onNewFolder={() => setShowNewFolder(true)}
           onUpload={onDrop}
           onOpenCommandPalette={() => setShowCommandPalette(true)}
           onOpenConnections={() => setShowConnectionManager(true)}
+          onLogout={handleLogout}
         />
 
         <ErrorBanner error={error} onDismiss={() => setError(null)} />
@@ -387,7 +362,21 @@ export default function App() {
         <DropOverlay isDragActive={isDragActive} />
 
         <div className="flex-1 overflow-y-auto">
-          {!selectedBucket ? (
+          {!activeConnection ? (
+            <EmptyState 
+              icon={Database} 
+              title="No connection configured" 
+              description="Add an S3 connection to get started"
+              action={
+                <button 
+                  onClick={() => setShowConnectionManager(true)}
+                  className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                >
+                  Add Connection
+                </button>
+              }
+            />
+          ) : !selectedBucket ? (
             <EmptyState icon={Database} title="No bucket selected" description="Select a bucket from the sidebar" />
           ) : objects.length === 0 && !loading ? (
             <EmptyState icon={Folder} title="Empty folder" description="Drop files here to upload" />
@@ -464,13 +453,10 @@ export default function App() {
         onDelete={() => { handleDeleteBucket(showDeleteBucket!); setShowDeleteBucket(null); }}
       />
 
-      <ConnectionManagerModal
+      <ConnectionManager
         isOpen={showConnectionManager}
-        profiles={connectionProfiles}
-        activeProfileId={activeProfileId}
         onClose={() => setShowConnectionManager(false)}
-        onSave={saveProfiles}
-        onConnect={handleConnectProfile}
+        onConnectionChange={handleConnectionChange}
       />
 
       <CommandPalette
@@ -482,7 +468,7 @@ export default function App() {
         onSelectBucket={(name) => { setSelectedBucket(name); setCurrentPath(''); }}
         onNavigateToRoot={() => setCurrentPath('')}
         onGoBack={handleGoBack}
-        onRefresh={() => loadObjects(true)}
+        onRefresh={() => loadObjects()}
         onNewFolder={() => setShowNewFolder(true)}
         onUpload={() => fileInputRef.current?.click()}
         onOpenConnections={() => setShowConnectionManager(true)}
@@ -502,38 +488,9 @@ export default function App() {
         }}
       />
 
-      {/* Welcome popup for first-time users */}
-      {showWelcome && (
-        <div className="fixed bottom-5 right-4 w-80 bg-background-secondary border border-border rounded-xl shadow-2xl animate-fadeIn z-50">
-          <div className="p-4">
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <img src="/logo.svg" alt="" className="w-8 h-8 invert" />
-                <h3 className="font-semibold text-sm">Welcome!</h3>
-              </div>
-              <button
-                onClick={dismissWelcome}
-                className="p-1 hover:bg-background-hover rounded transition-colors"
-              >
-                <X className="w-4 h-4 text-foreground-muted" />
-              </button>
-            </div>
-            <p className="text-sm text-foreground-secondary mb-4">
-              Configure your S3 credentials in the Connection Manager to get started.
-            </p>
-            <button
-              onClick={openConnectionsFromWelcome}
-              className="w-full btn btn-primary text-sm"
-            >
-              Open Connection Manager
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Footer */}
       <a
-        href="https://github.com/subratomandalme/railway-bucket-explorer"
+        href="https://github.com/subratomandalme/s3-explorer"
         target="_blank"
         rel="noopener noreferrer"
         className="group fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-2 text-xs text-foreground-muted hover:text-foreground bg-background-secondary/80 backdrop-blur border border-border hover:border-border-hover rounded-full transition-all"

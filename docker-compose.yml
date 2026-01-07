@@ -1,15 +1,16 @@
-version: '3.8'
+version: "3.8"
 
 services:
+  # Local MinIO for development
   minio:
     image: minio/minio:latest
-    container_name: railway-minio
+    container_name: s3explorer-minio
     ports:
       - "9000:9000"
       - "9001:9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin123}
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
@@ -21,20 +22,30 @@ services:
 
   app:
     build: .
-    container_name: railway-bucket-explorer
+    container_name: s3explorer
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=development
-      - S3_ENDPOINT=http://minio:9000
-      - S3_ACCESS_KEY=minioadmin
-      - S3_SECRET_KEY=minioadmin
-      - S3_REGION=us-east-1
-      - S3_FORCE_PATH_STYLE=true
+      - NODE_ENV=production
+      - PORT=3000
+      - DATA_DIR=/data
+      # REQUIRED: Set a strong password (12+ chars, upper, lower, number, special)
+      - APP_PASSWORD=${APP_PASSWORD}
+      # REQUIRED: Set a random session secret (use: openssl rand -hex 32)
+      - SESSION_SECRET=${SESSION_SECRET}
+    volumes:
+      - app_data:/data
     depends_on:
       - minio
 
 volumes:
   minio_data:
-
-# v 1.0
+  app_data:
+# Usage:
+# 1. Create .env file with:
+#    APP_PASSWORD=YourSecureP@ssw0rd!
+#    SESSION_SECRET=$(openssl rand -hex 32)
+#    MINIO_ROOT_USER=minioadmin
+#    MINIO_ROOT_PASSWORD=minioadmin123
+#
+# 2. docker-compose up -d

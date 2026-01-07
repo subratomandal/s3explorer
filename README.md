@@ -14,7 +14,6 @@ A secure, self-hosted web-based file manager for S3-compatible storage buckets.
 Managing S3 buckets often requires command-line tools or provider-specific dashboards that vary significantly in usability. S3 Explorer unifies this experience by offering a single, consistent web interface to upload, download, and organize files across any S3-compatible provider.
 
 **Supported Providers:**
-
 - AWS S3
 - Cloudflare R2
 - MinIO
@@ -76,7 +75,7 @@ flowchart TB
 ## Security Features
 
 | Feature                   | Description                                                              |
-| ------------------------- | ------------------------------------------------------------------------ |
+|---------------------------|--------------------------------------------------------------------------|
 | **Password Auth**         | Single password via `APP_PASSWORD` env var (Argon2id hashed)             |
 | **Encrypted Credentials** | S3 credentials encrypted at rest with AES-256-GCM                        |
 | **Secure Sessions**       | Server-side SQLite sessions with httpOnly/secure/sameSite=strict cookies |
@@ -105,7 +104,7 @@ flowchart TB
 ### Keyboard Navigation
 
 | Shortcut           | Action                  |
-| ------------------ | ----------------------- |
+|--------------------|-------------------------|
 | `Cmd+K` / `Ctrl+K` | Open command palette    |
 | `Cmd+,` / `Ctrl+,` | Open connection manager |
 | `Escape`           | Close active modal      |
@@ -118,10 +117,12 @@ flowchart TB
 
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.com/deploy/s3-explorer)
 
-Set required environment variables:
-
-- `APP_PASSWORD` - Strong password (12+ chars, mixed case, numbers, symbols)
-- `SESSION_SECRET` - Random 32+ character string
+1. Fork repo
+2. New project → Deploy from GitHub
+3. Add volume: mount path `/data`
+4. Set environment variables:
+   - `APP_PASSWORD` - Strong password (12+ chars, mixed case, numbers, symbols)
+   - `SESSION_SECRET` - Random 32+ character string (use `openssl rand -hex 32`)
 
 ### Docker
 
@@ -175,13 +176,13 @@ cd apps/client && npm run dev  # Frontend on :5173
 
 ## Environment Variables
 
-| Variable         | Required | Description                                |
-| ---------------- | -------- | ------------------------------------------ |
-| `APP_PASSWORD`   | Yes      | Application password (12+ chars, strong)   |
-| `SESSION_SECRET` | Yes      | Session signing secret (32+ chars)         |
-| `DATA_DIR`       | No       | SQLite data directory (default: `/data`)   |
-| `PORT`           | No       | Server port (default: `3000`)              |
-| `NODE_ENV`       | No       | Environment (`production` / `development`) |
+| Variable         | Required | Description                                                               |
+|------------------|----------|---------------------------------------------------------------------------|
+| `APP_PASSWORD`   | Yes      | Login password. Must be 12+ chars with upper, lower, number, special char |
+| `SESSION_SECRET` | Yes      | Session signing key. Use `openssl rand -hex 32`                           |
+| `DATA_DIR`       | No       | SQLite/key storage path. Default: `/data`                                 |
+| `PORT`           | No       | Server port. Default: `3000`                                              |
+| `NODE_ENV`       | No       | Environment (`production` / `development`)                                |
 
 ---
 
@@ -216,6 +217,15 @@ cd apps/client && npm run dev  # Frontend on :5173
    - **Endpoint**: Your MinIO URL (e.g., `https://minio.example.com`)
    - **Access Key**: Generated Access Key
    - **Secret Key**: Generated Secret Key
+
+---
+
+## Stack
+
+- **Frontend**: React, Tailwind, Vite
+- **Backend**: Express, TypeScript
+- **Database**: SQLite (better-sqlite3)
+- **Auth**: Argon2, express-session
 
 ---
 

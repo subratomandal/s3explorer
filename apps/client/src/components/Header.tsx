@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, RefreshCw, FolderPlus, Upload, Menu, Search, Command, Settings } from 'lucide-react';
+import { ChevronLeft, RefreshCw, FolderPlus, Upload, Menu, Search, Command, Settings, LogOut } from 'lucide-react';
 
 interface HeaderProps {
     selectedBucket: string | null;
@@ -15,6 +15,7 @@ interface HeaderProps {
     onUpload: (files: File[]) => void;
     onOpenCommandPalette?: () => void;
     onOpenConnections?: () => void;
+    onLogout?: () => void;
 }
 
 export function Header({
@@ -31,6 +32,7 @@ export function Header({
     onUpload,
     onOpenCommandPalette,
     onOpenConnections,
+    onLogout,
 }: HeaderProps) {
     const [isSpinning, setIsSpinning] = useState(false);
 
@@ -129,6 +131,16 @@ export function Header({
                             />
                         </label>
                     </>
+                )}
+
+                {onLogout && (
+                    <button
+                        onClick={onLogout}
+                        className="btn btn-ghost btn-icon text-foreground-muted hover:text-red-400"
+                        title="Logout"
+                    >
+                        <LogOut className="w-5 h-5" />
+                    </button>
                 )}
             </div>
         </header>

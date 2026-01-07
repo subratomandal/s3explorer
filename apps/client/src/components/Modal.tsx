@@ -5,10 +5,13 @@ interface ModalProps {
     title: string;
     children: React.ReactNode;
     onClose: () => void;
+    isOpen?: boolean;
+    size?: 'sm' | 'md' | 'lg';
 }
 
-export function Modal({ title, children, onClose }: ModalProps) {
+export function Modal({ title, children, onClose, isOpen = true, size = 'md' }: ModalProps) {
     useEffect(() => {
+        if (!isOpen) return;
         const handleEscape = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
 
         document.body.style.overflow = 'hidden';
@@ -18,11 +21,19 @@ export function Modal({ title, children, onClose }: ModalProps) {
             document.body.style.overflow = '';
             window.removeEventListener('keydown', handleEscape);
         };
-    }, [onClose]);
+    }, [onClose, isOpen]);
+
+    if (!isOpen) return null;
+
+    const sizeClasses = {
+        sm: 'max-w-sm',
+        md: 'max-w-md',
+        lg: 'max-w-lg',
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop animate-fadeIn" onClick={onClose}>
-            <div className="card w-full max-w-md modal-content" onClick={e => e.stopPropagation()}>
+            <div className={`card w-full ${sizeClasses[size]} modal-content`} onClick={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between px-5 py-4 border-b border-border">
                     <h2 className="text-base font-semibold">{title}</h2>
                     <button onClick={onClose} className="btn btn-ghost btn-icon">

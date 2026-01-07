@@ -21,16 +21,6 @@ export interface ContextMenuState {
   object: S3Object;
 }
 
-export interface ConnectionProfile {
-  id: string;
-  name: string;
-  endpoint: string;
-  accessKey: string;
-  secretKey: string;
-  region: string;
-  forcePathStyle: boolean;
-}
-
 export interface CommandAction {
   id: string;
   label: string;
