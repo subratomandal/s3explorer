@@ -44,6 +44,6 @@ USER node
 
 EXPOSE 3000
 
-VOLUME ["/data"]
+
 
 CMD ["node", "dist/index.js"]
