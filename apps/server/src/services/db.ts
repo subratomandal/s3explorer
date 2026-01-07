@@ -1,6 +1,7 @@
 import Database, { Database as DatabaseType, Statement } from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
+import { EventEmitter } from 'events';
 
 const DATA_DIR = process.env.DATA_DIR || '/data';
 const DB_PATH = path.join(DATA_DIR, 's3explorer.db');
@@ -54,12 +55,18 @@ db.exec(`
 
 export default db;
 
-// Session store for express-session
-export class SQLiteStore {
+// Session store for express-session (must extend EventEmitter)
+export class SQLiteStore extends EventEmitter {
   private getStmt = db.prepare('SELECT sess FROM sessions WHERE sid = ? AND expired > ?');
   private setStmt = db.prepare('INSERT OR REPLACE INTO sessions (sid, sess, expired) VALUES (?, ?, ?)');
   private destroyStmt = db.prepare('DELETE FROM sessions WHERE sid = ?');
   private clearExpiredStmt = db.prepare('DELETE FROM sessions WHERE expired < ?');
+
+  constructor() {
+    super();
+    // Emit connect event on next tick (required by express-session)
+    process.nextTick(() => this.emit('connect'));
+  }
 
   get(sid: string, callback: (err: any, session?: any) => void) {
     try {
