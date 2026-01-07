@@ -236,4 +236,4 @@ MIT
 
 ---
 
-Created by [@subratomandalme](https://github.com/subratomandalme)
+Created by [@subratomandalme](https://github.com/subratomandal)
