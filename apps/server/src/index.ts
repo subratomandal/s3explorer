@@ -26,7 +26,8 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
+      fontSrc: ["'self'", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "blob:"],
       connectSrc: ["'self'"],
     },
@@ -37,7 +38,21 @@ app.use(helmet({
 app.set('trust proxy', 1);
 
 // Body parsing
+// Body parsing
 app.use(express.json());
+
+// Global error logging for debugging
+app.use((req, res, next) => {
+  const originalJson = res.json;
+  // @ts-ignore
+  res.json = function (body) {
+    if (res.statusCode >= 500) {
+      console.error(`[${req.method}] ${req.url} returned ${res.statusCode}:`, body);
+    }
+    return originalJson.call(this, body);
+  };
+  next();
+});
 
 // Session configuration
 const sessionSecret = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
@@ -68,9 +83,18 @@ app.get('/api/health', (req, res) => {
 });
 
 // Protected API routes
+// Protected API routes
 app.use('/api/buckets', requireAuth, bucketsRouter);
 app.use('/api/objects', requireAuth, objectsRouter);
 app.use('/api/connections', requireAuth, connectionsRouter);
+
+// Global Error Handler
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('Unhandled Server Error:', err);
+  if (!res.headersSent) {
+    res.status(500).json({ error: 'Internal Server Error', details: err.message });
+  }
+});
 
 // Serve static files in production
 // Serve static files if they exist (Production / Docker)

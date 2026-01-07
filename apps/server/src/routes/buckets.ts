@@ -13,8 +13,12 @@ router.get('/', async (req: Request, res: Response) => {
     const buckets = await s3.listBuckets();
     res.json({ buckets });
   } catch (error: any) {
-    console.error('Error listing buckets:', error);
-    res.status(500).json({ error: 'Failed to list buckets' });
+    console.warn('Error listing buckets:', error.message);
+    // If no connection, return empty bucket list with special status
+    if (error.message && error.message.includes('No active S3 connection')) {
+      return res.json({ buckets: [] });
+    }
+    res.status(500).json({ error: 'Failed to list buckets', details: error.message });
   }
 });
 
@@ -27,7 +31,7 @@ router.post('/', async (req: Request, res: Response) => {
     if (!isValidBucketName(name)) {
       return res.status(400).json({ error: 'Invalid bucket name. Use lowercase letters, numbers, and hyphens.' });
     }
-    
+
     await s3.createBucket(name);
     res.json({ success: true, message: 'Bucket created' });
   } catch (error: any) {
@@ -42,7 +46,7 @@ router.delete('/:name', async (req: Request, res: Response) => {
     if (!isValidBucketName(name)) {
       return res.status(400).json({ error: 'Invalid bucket name' });
     }
-    
+
     await s3.deleteBucket(name);
     res.json({ success: true, message: 'Bucket deleted' });
   } catch (error: any) {
