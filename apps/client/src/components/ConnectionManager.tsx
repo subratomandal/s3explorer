@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Check, Server, Edit2, ChevronRight, Globe, Shield, RefreshCw, X } from 'lucide-react';
+import { Plus, Trash2, Check, Server, Edit2, ChevronRight, Shield } from 'lucide-react';
 import * as api from '../api';
 import type { Connection, ConnectionConfig } from '../api';
 import { Modal } from './Modal';
@@ -32,7 +32,6 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
   const [view, setView] = useState<'list' | 'form'>('list');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
-  const [testing, setTesting] = useState(false);
 
   // Form State
   const [form, setForm] = useState<ConnectionConfig>({
@@ -76,25 +75,6 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
     setEditingId(null);
     setView('list');
     setError(null);
-  }
-
-  async function handleTest() {
-    setTesting(true);
-    setError(null);
-    try {
-      const result = await api.testConnection({
-        endpoint: form.endpoint,
-        accessKey: form.accessKey,
-        secretKey: form.secretKey,
-        region: form.region,
-        forcePathStyle: form.forcePathStyle,
-      });
-      alert(`Connection successful! Found ${result.bucketCount} buckets.`);
-    } catch (err: any) {
-      alert(`Connection failed: ${err.message}`);
-    } finally {
-      setTesting(false);
-    }
   }
 
   async function handleSave() {
@@ -185,8 +165,8 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                     key={conn.id}
                     onClick={() => handleActivate(conn.id)}
                     className={`group relative flex items-center justify-between p-4 rounded-xl border transition-all duration-200 cursor-pointer ${conn.isActive
-                        ? 'bg-purple-500/10 border-purple-500/50 shadow-[0_0_20px_-10px_rgba(168,85,247,0.3)]'
-                        : 'bg-gray-900/40 border-gray-800 hover:border-gray-700 hover:bg-gray-900/80 hover:scale-[1.01] active:scale-[0.99]'
+                      ? 'bg-purple-500/10 border-purple-500/50 shadow-[0_0_20px_-10px_rgba(168,85,247,0.3)]'
+                      : 'bg-gray-900/40 border-gray-800 hover:border-gray-700 hover:bg-gray-900/80 hover:scale-[1.01] active:scale-[0.99]'
                       }`}
                   >
                     <div className="flex items-center gap-4 overflow-hidden">
@@ -321,8 +301,8 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
 
                   <label className="flex items-center gap-3 p-2.5 cursor-pointer group flex-shrink-0">
                     <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${form.forcePathStyle
-                        ? 'bg-purple-600 border-purple-600 scale-100'
-                        : 'border-gray-600 bg-transparent group-hover:border-gray-500'
+                      ? 'bg-purple-600 border-purple-600 scale-100'
+                      : 'border-gray-600 bg-transparent group-hover:border-gray-500'
                       }`}>
                       {form.forcePathStyle && <Check className="w-3.5 h-3.5 text-white" />}
                     </div>
