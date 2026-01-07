@@ -2,6 +2,7 @@ import Database, { Database as DatabaseType, Statement } from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 import { EventEmitter } from 'events';
+import session from 'express-session';
 
 const DATA_DIR = process.env.DATA_DIR || '/data';
 const DB_PATH = path.join(DATA_DIR, 's3explorer.db');
@@ -55,8 +56,8 @@ db.exec(`
 
 export default db;
 
-// Session store for express-session (must extend EventEmitter)
-export class SQLiteStore extends EventEmitter {
+// Session store for express-session (must extend Store)
+export class SQLiteStore extends session.Store {
   private getStmt = db.prepare('SELECT sess FROM sessions WHERE sid = ? AND expired > ?');
   private setStmt = db.prepare('INSERT OR REPLACE INTO sessions (sid, sess, expired) VALUES (?, ?, ?)');
   private destroyStmt = db.prepare('DELETE FROM sessions WHERE sid = ?');
@@ -140,7 +141,7 @@ export const connections = {
   getAll: () => connGetAll.all() as ConnectionRecord[],
   getById: (id: number) => connGetById.get(id) as ConnectionRecord | undefined,
   getActive: () => connGetActive.get() as ConnectionRecord | undefined,
-  
+
   count: () => {
     const row = db.prepare('SELECT COUNT(*) as count FROM connections').get() as { count: number };
     return row.count;
