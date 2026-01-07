@@ -56,7 +56,7 @@ export function Sidebar({
                 {/* Close button - absolute positioned at top right on mobile */}
                 <button
                     onClick={onCloseSidebar}
-                    className="absolute top-3 right-3 btn btn-ghost btn-icon w-9 h-9 md:hidden z-10"
+                    className="absolute top-2 right-2 btn btn-ghost btn-icon w-10 h-10 md:hidden z-10"
                 >
                     <X className="w-5 h-5" />
                 </button>

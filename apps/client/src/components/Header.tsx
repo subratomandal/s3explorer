@@ -73,10 +73,10 @@ export function Header({
                     </button>
                 )}
 
-                <nav className="flex items-center gap-1 text-xs sm:text-sm min-w-0 overflow-hidden">
+                <nav className="flex items-center gap-1 text-sm min-w-0 overflow-hidden">
                     <button
                         onClick={onNavigateToRoot}
-                        className={`flex-shrink-0 truncate max-w-[80px] sm:max-w-none ${currentPath ? 'text-foreground-muted hover:text-foreground' : 'font-medium'}`}
+                        className={`flex-shrink-0 truncate max-w-[100px] sm:max-w-none ${currentPath ? 'text-foreground-muted hover:text-foreground' : 'font-medium'}`}
                         title={selectedBucket || undefined}
                     >
                         {selectedBucket ? truncateText(selectedBucket, 20) : 'Select bucket'}
