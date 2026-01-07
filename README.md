@@ -21,6 +21,8 @@ Managing S3 buckets often requires command-line tools or provider-specific dashb
 - DigitalOcean Spaces
 - Any S3-compatible storage
 
+---
+
 ## Screenshots
 
 <p>
@@ -242,4 +244,4 @@ MIT
 
 ---
 
-Created by [@subratomandalme](https://github.com/subratomandal)
+Created by [@subratomandal](https://github.com/subratomandal)
