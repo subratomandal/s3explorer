@@ -14,6 +14,7 @@ A secure, self-hosted web-based file manager for S3-compatible storage buckets.
 Managing S3 buckets often requires command-line tools or provider-specific dashboards that vary significantly in usability. S3 Explorer unifies this experience by offering a single, consistent web interface to upload, download, and organize files across any S3-compatible provider.
 
 **Supported Providers:**
+
 - AWS S3
 - Cloudflare R2
 - MinIO
@@ -74,14 +75,14 @@ flowchart TB
 
 ## Security Features
 
-| Feature | Description |
-|---------|-------------|
-| **Password Auth** | Single password via `APP_PASSWORD` env var (Argon2id hashed) |
-| **Encrypted Credentials** | S3 credentials encrypted at rest with AES-256-GCM |
-| **Secure Sessions** | Server-side SQLite sessions with httpOnly/secure/sameSite=strict cookies |
-| **Rate Limiting** | IP-based: 10 attempts per 15 min, 30 min lockout |
-| **Security Headers** | Helmet.js enabled (CSP, HSTS, etc.) |
-| **No Client Storage** | Credentials never stored in browser localStorage |
+| Feature                   | Description                                                              |
+| ------------------------- | ------------------------------------------------------------------------ |
+| **Password Auth**         | Single password via `APP_PASSWORD` env var (Argon2id hashed)             |
+| **Encrypted Credentials** | S3 credentials encrypted at rest with AES-256-GCM                        |
+| **Secure Sessions**       | Server-side SQLite sessions with httpOnly/secure/sameSite=strict cookies |
+| **Rate Limiting**         | IP-based: 10 attempts per 15 min, 30 min lockout                         |
+| **Security Headers**      | Helmet.js enabled (CSP, HSTS, etc.)                                      |
+| **No Client Storage**     | Credentials never stored in browser localStorage                         |
 
 ---
 
@@ -103,11 +104,11 @@ flowchart TB
 
 ### Keyboard Navigation
 
-| Shortcut | Action |
-|----------|--------|
-| `Cmd+K` / `Ctrl+K` | Open command palette |
+| Shortcut           | Action                  |
+| ------------------ | ----------------------- |
+| `Cmd+K` / `Ctrl+K` | Open command palette    |
 | `Cmd+,` / `Ctrl+,` | Open connection manager |
-| `Escape` | Close active modal |
+| `Escape`           | Close active modal      |
 
 ---
 
@@ -118,6 +119,7 @@ flowchart TB
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.com/deploy/s3-explorer)
 
 Set required environment variables:
+
 - `APP_PASSWORD` - Strong password (12+ chars, mixed case, numbers, symbols)
 - `SESSION_SECRET` - Random 32+ character string
 
@@ -135,12 +137,12 @@ docker run -d \
 ### Docker Compose
 
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   s3-explorer:
     build: .
     ports:
-      - '3000:3000'
+      - "3000:3000"
     environment:
       - APP_PASSWORD=YourStr0ng!Pass#2024
       - SESSION_SECRET=change-this-to-random-32-chars
@@ -173,13 +175,13 @@ cd apps/client && npm run dev  # Frontend on :5173
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `APP_PASSWORD` | Yes | Application password (12+ chars, strong) |
-| `SESSION_SECRET` | Yes | Session signing secret (32+ chars) |
-| `DATA_DIR` | No | SQLite data directory (default: `/data`) |
-| `PORT` | No | Server port (default: `3000`) |
-| `NODE_ENV` | No | Environment (`production` / `development`) |
+| Variable         | Required | Description                                |
+| ---------------- | -------- | ------------------------------------------ |
+| `APP_PASSWORD`   | Yes      | Application password (12+ chars, strong)   |
+| `SESSION_SECRET` | Yes      | Session signing secret (32+ chars)         |
+| `DATA_DIR`       | No       | SQLite data directory (default: `/data`)   |
+| `PORT`           | No       | Server port (default: `3000`)              |
+| `NODE_ENV`       | No       | Environment (`production` / `development`) |
 
 ---
 
