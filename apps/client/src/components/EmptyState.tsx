@@ -13,7 +13,7 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
             </div>
             <h3 className="text-base font-medium mb-1.5">{title}</h3>
             <p className="text-sm text-foreground-muted max-w-[220px]">{description}</p>
-            {action}
+            {action && <div className="flex justify-center w-full">{action}</div>}
         </div>
     );
 }

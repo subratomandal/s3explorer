@@ -299,13 +299,13 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                     className="input h-10 text-sm"
                   />
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 min-w-0">
                   <label className="text-xs text-foreground-muted leading-none block">Region</label>
                   <div className="relative">
                     <select
                       value={form.region}
                       onChange={(e) => setForm({ ...form, region: e.target.value })}
-                      className="input appearance-none cursor-pointer pr-10 h-10 text-sm"
+                      className="input appearance-none cursor-pointer pr-10 h-10 text-sm truncate"
                     >
                       {AWS_REGIONS.map(r => (
                         <option key={r.value} value={r.value}>{r.label}</option>

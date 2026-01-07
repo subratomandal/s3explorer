@@ -37,7 +37,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             <img
               src="/logo.svg"
               alt="S3 Explorer"
-              className="w-10 h-10 sm:w-12 sm:h-12 invert"
+              className="w-14 h-14 sm:w-16 sm:h-16 invert"
             />
           </div>
           <h1 className="text-lg sm:text-xl font-semibold text-foreground">Welcome back</h1>
@@ -46,15 +46,15 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
         {/* Card */}
         <div className="bg-background-secondary border border-border rounded-xl p-4 sm:p-6">
-          <form onSubmit={handleSubmit} className="space-y-2.5">
-            <div className="space-y-2">
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="space-y-1.5">
               <label className="text-sm text-foreground-secondary">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input pr-12 font-mono h-11 sm:h-auto text-base sm:text-sm"
+                  className="input pr-12 font-mono h-11 sm:h-10 text-base sm:text-sm"
                   placeholder="Enter password"
                   required
                   autoFocus
@@ -69,7 +69,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               </div>
             </div>
 
-            <label className="flex items-center gap-3 cursor-pointer group min-h-[44px]">
+            <label className="flex items-center gap-3 cursor-pointer group py-1">
               <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${
                 rememberMe
                   ? 'bg-accent-purple border-accent-purple'

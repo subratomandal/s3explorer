@@ -310,7 +310,7 @@ export default function App() {
   // Loading state
   if (checkingAuth) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
         <div className="text-foreground-muted">Loading...</div>
       </div>
     );
