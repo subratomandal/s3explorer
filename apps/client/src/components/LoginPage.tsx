@@ -46,7 +46,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
         {/* Card */}
         <div className="bg-background-secondary border border-border rounded-xl p-4 sm:p-6">
-          <form onSubmit={handleSubmit} className="space-y-3">
+          <form onSubmit={handleSubmit} className="space-y-2.5">
             <div className="space-y-2">
               <label className="text-sm text-foreground-secondary">Password</label>
               <div className="relative">

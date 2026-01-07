@@ -277,7 +277,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                   <select
                     value={selectedProvider}
                     onChange={(e) => handleProviderChange(e.target.value)}
-                    className="input appearance-none cursor-pointer pr-10 h-9 text-sm"
+                    className="input appearance-none cursor-pointer pr-10 h-10 text-sm"
                   >
                     {PROVIDERS.map(p => (
                       <option key={p.id} value={p.id}>{p.name}</option>
@@ -296,7 +296,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     placeholder="Production"
-                    className="input h-9 text-sm"
+                    className="input h-10 text-sm"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -305,7 +305,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                     <select
                       value={form.region}
                       onChange={(e) => setForm({ ...form, region: e.target.value })}
-                      className="input appearance-none cursor-pointer pr-10 h-9 text-sm"
+                      className="input appearance-none cursor-pointer pr-10 h-10 text-sm"
                     >
                       {AWS_REGIONS.map(r => (
                         <option key={r.value} value={r.value}>{r.label}</option>
@@ -337,7 +337,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                     value={form.accessKey}
                     onChange={(e) => setForm({ ...form, accessKey: e.target.value })}
                     placeholder="AKIA..."
-                    className="input font-mono h-9 text-sm"
+                    className="input font-mono h-10 text-sm"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -347,7 +347,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                     value={form.secretKey}
                     onChange={(e) => setForm({ ...form, secretKey: e.target.value })}
                     placeholder="••••••••"
-                    className="input font-mono h-9 text-sm"
+                    className="input font-mono h-10 text-sm"
                   />
                 </div>
               </div>

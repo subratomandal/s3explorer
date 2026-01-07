@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, ArrowRight } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface WelcomeMessageProps {
   onConfigure: () => void;
@@ -60,7 +60,7 @@ export function WelcomeMessage({ onConfigure }: WelcomeMessageProps) {
               className="w-6 h-6 invert opacity-80 group-hover:opacity-100 transition-opacity"
             />
           </div>
-          <div className="flex-1 min-w-0 pr-4">
+          <div className="flex-1 min-w-0">
             <h4 className="text-sm font-medium text-foreground group-hover:text-accent-purple transition-colors">
               Welcome to S3 Explorer
             </h4>
@@ -68,7 +68,6 @@ export function WelcomeMessage({ onConfigure }: WelcomeMessageProps) {
               Click to configure your connection
             </p>
           </div>
-          <ArrowRight className="w-4 h-4 text-foreground-muted group-hover:text-accent-purple group-hover:translate-x-0.5 transition-all flex-shrink-0" />
         </div>
       </div>
     </div>

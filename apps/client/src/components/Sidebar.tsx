@@ -60,9 +60,9 @@ export function Sidebar({
                         <img
                             src="/logo.svg"
                             alt=""
-                            className="w-7 h-7 invert logo-spin transition-all duration-300 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
+                            className="w-7 h-7 invert logo-spin transition-all duration-300 group-hover:drop-shadow-[0_0_4px_rgba(255,255,255,0.25)]"
                         />
-                        <span className="font-semibold text-base transition-all duration-300 group-hover:text-foreground group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
+                        <span className="font-semibold text-base transition-all duration-300 group-hover:text-foreground group-hover:drop-shadow-[0_0_4px_rgba(255,255,255,0.15)]">
                             S3 Explorer
                         </span>
                     </div>

@@ -371,9 +371,8 @@ export default function App() {
               action={
                 <button
                   onClick={() => setShowConnectionManager(true)}
-                  className="group mt-6 px-6 py-3 rounded-lg border border-dashed border-border text-foreground-secondary hover:text-accent-purple hover:border-accent-purple/50 hover:bg-accent-purple/5 transition-all flex items-center gap-2 text-sm font-medium"
+                  className="group mt-6 px-6 py-3 rounded-lg border border-dashed border-border text-foreground-secondary hover:text-accent-purple hover:border-accent-purple/50 hover:bg-accent-purple/5 transition-all text-sm font-medium"
                 >
-                  <span className="text-lg group-hover:scale-110 transition-transform">+</span>
                   Add Connection
                 </button>
               }
