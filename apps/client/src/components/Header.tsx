@@ -44,75 +44,80 @@ export function Header({
         setTimeout(() => setIsSpinning(false), 500);
     };
 
-    return (
-        <header className="h-14 flex items-center justify-between px-4 border-b border-border bg-background-secondary/50 flex-shrink-0">
+    // Truncate breadcrumbs if too many
+    const maxBreadcrumbs = 2;
+    const showEllipsis = breadcrumbs.length > maxBreadcrumbs;
+    const displayBreadcrumbs = showEllipsis
+        ? breadcrumbs.slice(-maxBreadcrumbs)
+        : breadcrumbs;
 
-            <div className="flex items-center gap-3 min-w-0">
-                <button onClick={onOpenSidebar} className="btn btn-ghost btn-icon md:hidden">
+    return (
+        <header className="h-14 flex items-center px-4 border-b border-border bg-background-secondary/50 flex-shrink-0">
+            {/* Left Section - Navigation */}
+            <div className="flex items-center gap-2 min-w-0 flex-shrink-0 max-w-[200px]">
+                <button onClick={onOpenSidebar} className="btn btn-ghost btn-icon md:hidden flex-shrink-0">
                     <Menu className="w-5 h-5" />
                 </button>
 
                 {currentPath && (
-                    <button onClick={onGoBack} className="btn btn-ghost btn-icon">
+                    <button onClick={onGoBack} className="btn btn-ghost btn-icon flex-shrink-0">
                         <ChevronLeft className="w-5 h-5" />
                     </button>
                 )}
 
-                <nav className="flex items-center gap-1 text-sm min-w-0">
+                <nav className="flex items-center gap-1 text-sm min-w-0 overflow-hidden">
                     <button
                         onClick={onNavigateToRoot}
-                        className={`truncate max-w-[120px] ${currentPath ? 'text-foreground-muted hover:text-foreground' : 'font-medium'}`}
+                        className={`truncate max-w-[80px] flex-shrink-0 ${currentPath ? 'text-foreground-muted hover:text-foreground' : 'font-medium'}`}
+                        title={selectedBucket || undefined}
                     >
                         {selectedBucket || 'Select bucket'}
                     </button>
 
-                    {breadcrumbs.map((part, i) => (
-                        <span key={i} className="flex items-center gap-1 min-w-0">
-                            <span className="text-foreground-muted flex-shrink-0">/</span>
-                            <button
-                                onClick={() => onNavigateToBreadcrumb(i)}
-                                className={`truncate max-w-[100px] ${i === breadcrumbs.length - 1 ? 'font-medium' : 'text-foreground-muted hover:text-foreground'}`}
-                            >
-                                {part}
-                            </button>
+                    {showEllipsis && (
+                        <span className="flex items-center gap-1 text-foreground-muted flex-shrink-0">
+                            <span>/</span>
+                            <span>...</span>
                         </span>
-                    ))}
+                    )}
+
+                    {displayBreadcrumbs.map((part, i) => {
+                        const actualIndex = showEllipsis ? breadcrumbs.length - maxBreadcrumbs + i : i;
+                        return (
+                            <span key={actualIndex} className="flex items-center gap-1 min-w-0">
+                                <span className="text-foreground-muted flex-shrink-0">/</span>
+                                <button
+                                    onClick={() => onNavigateToBreadcrumb(actualIndex)}
+                                    className={`truncate max-w-[60px] ${actualIndex === breadcrumbs.length - 1 ? 'font-medium' : 'text-foreground-muted hover:text-foreground'}`}
+                                    title={part}
+                                >
+                                    {part}
+                                </button>
+                            </span>
+                        );
+                    })}
                 </nav>
             </div>
 
-            <div className="flex items-center gap-2">
+            {/* Center Section - Search */}
+            <div className="flex-1 flex justify-center px-4">
                 {onOpenCommandPalette && (
                     <button
                         onClick={onOpenCommandPalette}
-                        className="hidden sm:flex items-center gap-2 px-3 py-1.5 text-sm text-foreground-muted hover:text-foreground bg-background-tertiary hover:bg-background-hover border border-border hover:border-border-hover rounded-lg transition-all"
+                        className="hidden sm:flex items-center gap-2 px-4 py-1.5 text-sm text-foreground-muted hover:text-foreground bg-background-tertiary hover:bg-background-hover border border-border hover:border-border-hover rounded-lg transition-all max-w-[280px] w-full justify-center"
                     >
-                        <Search className="w-4 h-4" />
+                        <Search className="w-4 h-4 flex-shrink-0" />
                         <span className="text-xs">Search...</span>
-                        <kbd className="flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium bg-background border border-border rounded ml-2">
+                        <kbd className="flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium bg-background border border-border rounded ml-auto">
                             <Command className="w-2.5 h-2.5" />
                             <span>K</span>
                         </kbd>
                     </button>
                 )}
+            </div>
 
-                {onOpenConnections && (
-                    <button
-                        onClick={onOpenConnections}
-                        className="btn btn-ghost btn-icon"
-                        title={activeConnectionName ? `Connected: ${activeConnectionName}` : 'Connection Settings'}
-                    >
-                        <Settings className="w-5 h-5" />
-                    </button>
-                )}
-
-                <button
-                    onClick={handleRefresh}
-                    disabled={!selectedBucket || loading}
-                    className="btn btn-ghost btn-icon"
-                >
-                    <RefreshCw className={`w-5 h-5 ${isSpinning ? 'animate-spin-once' : ''}`} />
-                </button>
-
+            {/* Right Section - Actions */}
+            <div className="flex items-center gap-2 flex-shrink-0">
                 {selectedBucket && (
                     <>
                         <button onClick={onNewFolder} className="btn btn-secondary h-9 px-3">
@@ -133,10 +138,29 @@ export function Header({
                     </>
                 )}
 
+                <button
+                    onClick={handleRefresh}
+                    disabled={!selectedBucket || loading}
+                    className="btn btn-ghost btn-icon"
+                    title="Refresh"
+                >
+                    <RefreshCw className={`w-5 h-5 ${isSpinning ? 'animate-spin-once' : ''}`} />
+                </button>
+
+                {onOpenConnections && (
+                    <button
+                        onClick={onOpenConnections}
+                        className="btn btn-ghost btn-icon"
+                        title={activeConnectionName ? `Connected: ${activeConnectionName}` : 'Connection Settings'}
+                    >
+                        <Settings className="w-5 h-5" />
+                    </button>
+                )}
+
                 {onLogout && (
                     <button
                         onClick={onLogout}
-                        className="btn btn-ghost btn-icon text-foreground-muted hover:text-red-400"
+                        className="btn btn-ghost btn-icon text-foreground-muted hover:text-accent-red"
                         title="Logout"
                     >
                         <LogOut className="w-5 h-5" />

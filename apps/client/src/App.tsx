@@ -21,6 +21,7 @@ import { DeleteBucketModal } from './components/modals/DeleteBucketModal';
 import { CommandPalette } from './components/CommandPalette';
 import { LoginPage } from './components/LoginPage';
 import { ConnectionManager } from './components/ConnectionManager';
+import { WelcomeMessage } from './components/WelcomeMessage';
 import type { Connection } from './api';
 
 const STORAGE_KEYS = {
@@ -363,15 +364,16 @@ export default function App() {
 
         <div className="flex-1 overflow-y-auto">
           {!activeConnection ? (
-            <EmptyState 
-              icon={Database} 
-              title="No connection configured" 
+            <EmptyState
+              icon={Database}
+              title="No connection configured"
               description="Add an S3 connection to get started"
               action={
-                <button 
+                <button
                   onClick={() => setShowConnectionManager(true)}
-                  className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                  className="mt-6 px-6 py-3 rounded-lg border border-dashed border-border text-foreground-secondary hover:text-foreground hover:border-border-hover hover:bg-background-hover transition-all flex items-center gap-2 text-sm font-medium"
                 >
+                  <span className="text-lg">+</span>
                   Add Connection
                 </button>
               }
@@ -487,6 +489,11 @@ export default function App() {
           }
         }}
       />
+
+      {/* Welcome message for new users */}
+      {!activeConnection && (
+        <WelcomeMessage onConfigure={() => setShowConnectionManager(true)} />
+      )}
 
       {/* Footer */}
       <a

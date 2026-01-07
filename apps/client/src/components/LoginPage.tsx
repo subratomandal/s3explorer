@@ -33,11 +33,11 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       <div className="w-full max-w-sm animate-fadeInUp">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-background-secondary border border-border rounded-2xl flex items-center justify-center mx-auto mb-4 group cursor-pointer">
+          <div className="flex items-center justify-center mx-auto mb-5 group cursor-pointer">
             <img
               src="/logo.svg"
               alt="S3 Explorer"
-              className="w-7 h-7 invert transition-transform duration-500 group-hover:animate-spin"
+              className="w-12 h-12 invert transition-transform duration-500 group-hover:animate-spin"
             />
           </div>
           <h1 className="text-xl font-semibold text-foreground">Welcome back</h1>

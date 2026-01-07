@@ -155,6 +155,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
       await api.activateConnection(id);
       await loadConnections();
       onConnectionChange();
+      onClose(); // Close modal after activating connection
     } catch (err: any) {
       setError(err.message);
     }
@@ -177,7 +178,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Connection Manager" size="lg">
-      <div className="min-h-[400px] flex flex-col">
+      <div className="flex flex-col">
         {error && (
           <div className="mb-4 p-3 bg-accent-red/10 border border-accent-red/20 rounded-lg text-accent-red text-sm flex items-center gap-2 animate-fadeIn">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -187,18 +188,18 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
 
         {view === 'list' ? (
           <div className="animate-fadeIn">
-            <p className="text-foreground-secondary text-sm mb-6 leading-relaxed">
+            <p className="text-foreground-secondary text-sm mb-5 leading-relaxed">
               Manage your S3-compatible storage connections. Switch between staging, production, or different providers.
             </p>
 
             <div className="space-y-3 max-h-[300px] overflow-y-auto">
               {loading ? (
-                <div className="flex items-center justify-center py-12 text-foreground-muted">
+                <div className="flex items-center justify-center py-8 text-foreground-muted">
                   <RefreshCw className="w-5 h-5 animate-spin mr-2" />
                   Loading...
                 </div>
               ) : connections.length === 0 ? (
-                <div className="text-center py-12 border border-dashed border-border rounded-lg bg-background">
+                <div className="text-center py-8 border border-dashed border-border rounded-lg bg-background">
                   <Server className="w-10 h-10 mx-auto mb-3 text-foreground-muted" />
                   <p className="text-foreground-secondary font-medium">No connections</p>
                   <p className="text-foreground-muted text-sm mt-1">Add your first connection to get started</p>
@@ -208,10 +209,10 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                   <div
                     key={conn.id}
                     onClick={() => handleActivate(conn.id)}
-                    className="group relative flex items-center justify-between p-3 pr-4 rounded-lg bg-background-tertiary border border-border hover:border-border-hover transition-all cursor-pointer overflow-hidden"
+                    className="group relative flex items-center justify-between p-3 pr-4 rounded-lg bg-background-tertiary border border-dashed border-border hover:border-border-hover transition-all cursor-pointer overflow-hidden"
                   >
                     {/* Left accent border */}
-                    <div className={`absolute left-0 top-0 bottom-0 w-1 ${conn.isActive ? 'bg-accent-purple' : 'bg-transparent'}`} />
+                    <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-lg ${conn.isActive ? 'bg-accent-purple' : 'bg-transparent'}`} />
 
                     <div className="flex items-center gap-3 min-w-0 pl-2">
                       <div className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center ${
@@ -239,14 +240,14 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                     <div className="flex items-center gap-1">
                       <button
                         onClick={(e) => startEdit(e, conn)}
-                        className="p-2 text-foreground-muted hover:text-foreground hover:bg-background-hover rounded-lg transition-colors"
+                        className="p-2 text-foreground-muted hover:text-foreground hover:bg-background-hover rounded-lg border border-dashed border-transparent hover:border-border transition-colors"
                         title="Edit"
                       >
                         <Link className="w-4 h-4" />
                       </button>
                       <button
                         onClick={(e) => handleDelete(e, conn.id)}
-                        className="p-2 text-foreground-muted hover:text-accent-red hover:bg-accent-red/10 rounded-lg transition-colors"
+                        className="p-2 text-foreground-muted hover:text-accent-red hover:bg-accent-red/10 rounded-lg border border-dashed border-transparent hover:border-accent-red/30 transition-colors"
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />
