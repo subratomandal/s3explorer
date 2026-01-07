@@ -522,6 +522,48 @@ textarea:focus-visible {
   outline: none;
 }
 
+/* Safe area for notched phones */
+.safe-area-inset {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+/* Mobile-first touch targets */
+@media (max-width: 640px) {
+  /* Ensure minimum touch target sizes (44px per Apple HIG) */
+  .btn-icon {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Larger table cells for easier tapping */
+  .table td {
+    padding: 0.625rem 0.75rem;
+  }
+
+  .table th {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.7rem;
+  }
+
+  /* Sidebar items need larger touch targets */
+  .sidebar-item {
+    min-height: 44px;
+    padding: 0.75rem;
+  }
+
+  /* Context menu items */
+  .context-menu-item {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+  }
+}
+
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;
@@ -544,30 +586,35 @@ textarea:focus-visible {
     z-index: 40;
   }
 
-  .table th:nth-child(2),
-  .table td:nth-child(2),
-  .table th:nth-child(3),
-  .table td:nth-child(3) {
-    display: none;
-  }
-
-  .table th:first-child,
-  .table td:first-child {
-    width: 100%;
-  }
-
   .btn {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
   }
 
   .btn span.hidden {
     display: none !important;
   }
+
+  /* Row actions always visible on mobile */
+  .table tbody tr .row-actions {
+    opacity: 1;
+  }
 }
 
 @media (max-width: 480px) {
   .header-breadcrumb {
-    max-width: 120px;
+    max-width: 100px;
+  }
+
+  /* Even smaller font on very small screens */
+  .btn {
+    font-size: 0.75rem;
+  }
+
+  .input {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  select.input {
+    font-size: 16px; /* Prevent zoom on iOS */
   }
 }

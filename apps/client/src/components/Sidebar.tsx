@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Database, Plus, Trash2, Copy, Check } from 'lucide-react';
+import { Database, Plus, Trash2, Copy, Check, X } from 'lucide-react';
 import type { Bucket } from '../types';
 
 interface SidebarProps {
@@ -51,20 +51,27 @@ export function Sidebar({
                 />
             )}
 
-            <aside className={`w-64 flex flex-col border-r border-border bg-background-secondary flex-shrink-0 fixed md:relative inset-y-0 left-0 z-50 transform transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+            <aside className={`w-[280px] sm:w-64 flex flex-col border-r border-border bg-background-secondary flex-shrink-0 fixed md:relative inset-y-0 left-0 z-50 transform transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
 
                 <div
-                    className="h-14 flex items-center gap-2.5 px-4 border-b border-border cursor-pointer group transition-all duration-300 hover:bg-background-tertiary/30"
-                    onClick={onNavigateHome}
+                    className="h-14 flex items-center justify-between px-4 border-b border-border cursor-pointer group transition-all duration-300 hover:bg-background-tertiary/30"
                 >
-                    <img
-                        src="/logo.svg"
-                        alt=""
-                        className="w-7 h-7 invert logo-spin transition-all duration-300 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
-                    />
-                    <span className="font-semibold text-base transition-all duration-300 group-hover:text-foreground group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
-                        S3 Explorer
-                    </span>
+                    <div className="flex items-center gap-2.5" onClick={onNavigateHome}>
+                        <img
+                            src="/logo.svg"
+                            alt=""
+                            className="w-7 h-7 invert logo-spin transition-all duration-300 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
+                        />
+                        <span className="font-semibold text-base transition-all duration-300 group-hover:text-foreground group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
+                            S3 Explorer
+                        </span>
+                    </div>
+                    <button
+                        onClick={onCloseSidebar}
+                        className="btn btn-ghost btn-icon w-9 h-9 md:hidden"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
                 </div>
 
                 <div className="p-3">
@@ -73,16 +80,16 @@ export function Sidebar({
                         placeholder="Search buckets..."
                         value={searchQuery}
                         onChange={e => onSearchChange(e.target.value)}
-                        className="input"
+                        className="input h-10 text-base sm:text-sm sm:h-auto"
                     />
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-3">
+                <div className="flex-1 overflow-y-auto px-3 pb-safe">
                     <div className="flex items-center justify-between pl-2 py-2">
                         <span className="text-xs font-semibold text-foreground-muted uppercase tracking-wider">
                             Buckets
                         </span>
-                        <button onClick={onNewBucket} className="btn btn-ghost btn-icon">
+                        <button onClick={onNewBucket} className="btn btn-ghost btn-icon w-9 h-9">
                             <Plus className="w-4 h-4" />
                         </button>
                     </div>
@@ -91,16 +98,16 @@ export function Sidebar({
                         {filteredBuckets.map((bucket, i) => (
                             <div
                                 key={bucket.name}
-                                className={`sidebar-item group stagger-item ${selectedBucket === bucket.name ? 'active' : ''}`}
+                                className={`sidebar-item group stagger-item min-h-[44px] ${selectedBucket === bucket.name ? 'active' : ''}`}
                                 style={{ animationDelay: `${i * 30}ms` }}
                                 onClick={() => onBucketSelect(bucket.name)}
                             >
                                 <Database className="sidebar-icon w-4 h-4 flex-shrink-0" />
-                                <span className="flex-1 truncate">{bucket.name}</span>
-                                <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span className="flex-1 truncate text-sm">{bucket.name}</span>
+                                <div className="flex items-center md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={e => handleCopyBucketName(e, bucket.name)}
-                                        className="btn btn-ghost btn-icon hover:text-accent-purple"
+                                        className="btn btn-ghost btn-icon w-9 h-9 hover:text-accent-purple"
                                         title="Copy bucket name"
                                     >
                                         {copiedBucket === bucket.name ? (
@@ -111,7 +118,7 @@ export function Sidebar({
                                     </button>
                                     <button
                                         onClick={e => { e.stopPropagation(); onDeleteBucket(bucket.name); }}
-                                        className="btn btn-ghost btn-icon hover:text-accent-red"
+                                        className="btn btn-ghost btn-icon w-9 h-9 hover:text-accent-red"
                                         title="Delete bucket"
                                     >
                                         <Trash2 className="w-4 h-4" />

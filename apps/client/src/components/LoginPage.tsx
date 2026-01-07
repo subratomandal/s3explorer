@@ -29,24 +29,24 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 safe-area-inset">
       <div className="w-full max-w-sm animate-fadeInUp">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mx-auto mb-5">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex items-center justify-center mx-auto mb-4 sm:mb-5">
             <img
               src="/logo.svg"
               alt="S3 Explorer"
-              className="w-12 h-12 invert"
+              className="w-10 h-10 sm:w-12 sm:h-12 invert"
             />
           </div>
-          <h1 className="text-xl font-semibold text-foreground">Welcome back</h1>
-          <p className="text-sm text-foreground-muted mt-2">Enter your password to continue</p>
+          <h1 className="text-lg sm:text-xl font-semibold text-foreground">Welcome back</h1>
+          <p className="text-sm text-foreground-muted mt-1.5 sm:mt-2">Enter your password to continue</p>
         </div>
 
         {/* Card */}
-        <div className="bg-background-secondary border border-border rounded-xl p-6">
-          <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="bg-background-secondary border border-border rounded-xl p-4 sm:p-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             <div className="space-y-2">
               <label className="text-sm text-foreground-secondary">Password</label>
               <div className="relative">
@@ -54,7 +54,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input pr-10 font-mono"
+                  className="input pr-12 font-mono h-11 sm:h-auto text-base sm:text-sm"
                   placeholder="Enter password"
                   required
                   autoFocus
@@ -62,20 +62,20 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-foreground-muted hover:text-foreground transition-colors"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-foreground-muted hover:text-foreground transition-colors w-11"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? <EyeOff className="h-5 w-5 sm:h-4 sm:w-4" /> : <Eye className="h-5 w-5 sm:h-4 sm:w-4" />}
                 </button>
               </div>
             </div>
 
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${
+            <label className="flex items-center gap-3 cursor-pointer group min-h-[44px]">
+              <div className={`w-6 h-6 sm:w-5 sm:h-5 rounded border flex items-center justify-center transition-all ${
                 rememberMe
                   ? 'bg-accent-purple border-accent-purple'
                   : 'border-border bg-transparent group-hover:border-border-hover'
               }`}>
-                {rememberMe && <Check className="w-3.5 h-3.5 text-white" />}
+                {rememberMe && <Check className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-white" />}
               </div>
               <input
                 type="checkbox"
@@ -96,7 +96,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             <button
               type="submit"
               disabled={loading || !password}
-              className="w-full py-3 px-4 rounded-lg bg-accent-purple text-white hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium flex items-center justify-center gap-2"
+              className="w-full py-3.5 sm:py-3 px-4 rounded-lg bg-accent-purple text-white hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-base sm:text-sm font-medium flex items-center justify-center gap-2 min-h-[48px] sm:min-h-0"
             >
               {loading ? (
                 <span className="flex items-center gap-2">
@@ -116,7 +116,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           </form>
         </div>
 
-        <p className="text-center text-xs text-foreground-muted mt-6">
+        <p className="text-center text-xs text-foreground-muted mt-4 sm:mt-6">
           Protected with secure authentication
         </p>
       </div>

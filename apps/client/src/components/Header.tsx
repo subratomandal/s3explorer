@@ -44,37 +44,39 @@ export function Header({
         setTimeout(() => setIsSpinning(false), 500);
     };
 
-    // Truncate breadcrumbs if too many
-    const maxBreadcrumbs = 2;
+    // Truncate breadcrumbs if too many - fewer on mobile
+    const maxBreadcrumbs = typeof window !== 'undefined' && window.innerWidth < 640 ? 1 : 2;
     const showEllipsis = breadcrumbs.length > maxBreadcrumbs;
     const displayBreadcrumbs = showEllipsis
         ? breadcrumbs.slice(-maxBreadcrumbs)
         : breadcrumbs;
 
-    // Truncate text after ~20 characters
+    // Truncate text - shorter on mobile
     const truncateText = (text: string, maxLen: number = 20) => {
-        if (text.length <= maxLen) return text;
-        return text.slice(0, maxLen) + '...';
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+        const limit = isMobile ? Math.min(maxLen, 12) : maxLen;
+        if (text.length <= limit) return text;
+        return text.slice(0, limit) + '...';
     };
 
     return (
-        <header className="h-14 flex items-center justify-between px-4 border-b border-border bg-background-secondary/50 flex-shrink-0 relative">
+        <header className="h-14 flex items-center justify-between px-2 sm:px-4 border-b border-border bg-background-secondary/50 flex-shrink-0 relative">
             {/* Left Section - Navigation */}
-            <div className="flex items-center gap-2 min-w-0 flex-shrink-0 max-w-[280px] z-10">
-                <button onClick={onOpenSidebar} className="btn btn-ghost btn-icon md:hidden flex-shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-shrink-0 max-w-[45%] sm:max-w-[280px] z-10">
+                <button onClick={onOpenSidebar} className="btn btn-ghost btn-icon md:hidden flex-shrink-0 w-9 h-9">
                     <Menu className="w-5 h-5" />
                 </button>
 
                 {currentPath && (
-                    <button onClick={onGoBack} className="btn btn-ghost btn-icon flex-shrink-0">
+                    <button onClick={onGoBack} className="btn btn-ghost btn-icon flex-shrink-0 w-9 h-9">
                         <ChevronLeft className="w-5 h-5" />
                     </button>
                 )}
 
-                <nav className="flex items-center gap-1 text-sm min-w-0 overflow-hidden">
+                <nav className="flex items-center gap-1 text-xs sm:text-sm min-w-0 overflow-hidden">
                     <button
                         onClick={onNavigateToRoot}
-                        className={`flex-shrink-0 ${currentPath ? 'text-foreground-muted hover:text-foreground' : 'font-medium'}`}
+                        className={`flex-shrink-0 truncate max-w-[80px] sm:max-w-none ${currentPath ? 'text-foreground-muted hover:text-foreground' : 'font-medium'}`}
                         title={selectedBucket || undefined}
                     >
                         {selectedBucket ? truncateText(selectedBucket, 20) : 'Select bucket'}
@@ -94,7 +96,7 @@ export function Header({
                                 <span className="text-foreground-muted flex-shrink-0">/</span>
                                 <button
                                     onClick={() => onNavigateToBreadcrumb(actualIndex)}
-                                    className={`${actualIndex === breadcrumbs.length - 1 ? 'font-medium' : 'text-foreground-muted hover:text-foreground'}`}
+                                    className={`truncate max-w-[60px] sm:max-w-none ${actualIndex === breadcrumbs.length - 1 ? 'font-medium' : 'text-foreground-muted hover:text-foreground'}`}
                                     title={part}
                                 >
                                     {truncateText(part, 20)}
@@ -107,7 +109,7 @@ export function Header({
 
             {/* Center Section - Search (Absolutely positioned for true center) */}
             {onOpenCommandPalette && (
-                <div className="absolute left-1/2 -translate-x-1/2 hidden sm:block">
+                <div className="absolute left-1/2 -translate-x-1/2 hidden md:block">
                     <button
                         onClick={onOpenCommandPalette}
                         className="flex items-center gap-2 px-3 py-1.5 text-sm text-foreground-muted hover:text-foreground bg-background-tertiary hover:bg-background-hover border border-border hover:border-border-hover rounded-lg transition-all w-[200px]"
@@ -123,17 +125,17 @@ export function Header({
             )}
 
             {/* Right Section - Actions */}
-            <div className="flex items-center gap-2 flex-shrink-0 z-10">
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 z-10">
                 {selectedBucket && (
                     <>
-                        <button onClick={onNewFolder} className="btn btn-secondary h-9 px-3">
+                        <button onClick={onNewFolder} className="btn btn-secondary h-8 sm:h-9 px-2 sm:px-3">
                             <FolderPlus className="w-4 h-4" />
-                            <span className="hidden sm:inline text-sm">Folder</span>
+                            <span className="hidden md:inline text-sm">Folder</span>
                         </button>
 
-                        <label className="btn btn-primary cursor-pointer h-9 px-3">
+                        <label className="btn btn-primary cursor-pointer h-8 sm:h-9 px-2 sm:px-3">
                             <Upload className="w-4 h-4" />
-                            <span className="text-sm">Upload</span>
+                            <span className="hidden sm:inline text-sm">Upload</span>
                             <input
                                 type="file"
                                 multiple
@@ -147,29 +149,29 @@ export function Header({
                 <button
                     onClick={handleRefresh}
                     disabled={!selectedBucket || loading}
-                    className="btn btn-ghost btn-icon"
+                    className="btn btn-ghost btn-icon w-8 h-8 sm:w-9 sm:h-9"
                     title="Refresh"
                 >
-                    <RefreshCw className={`w-5 h-5 ${isSpinning ? 'animate-spin-once' : ''}`} />
+                    <RefreshCw className={`w-4 h-4 sm:w-5 sm:h-5 ${isSpinning ? 'animate-spin-once' : ''}`} />
                 </button>
 
                 {onOpenConnections && (
                     <button
                         onClick={onOpenConnections}
-                        className="btn btn-ghost btn-icon"
+                        className="btn btn-ghost btn-icon w-8 h-8 sm:w-9 sm:h-9"
                         title={activeConnectionName ? `Connected: ${activeConnectionName}` : 'Connection Settings'}
                     >
-                        <Settings className="w-5 h-5" />
+                        <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                 )}
 
                 {onLogout && (
                     <button
                         onClick={onLogout}
-                        className="btn btn-ghost btn-icon text-foreground-muted hover:text-accent-red"
+                        className="btn btn-ghost btn-icon w-8 h-8 sm:w-9 sm:h-9 text-foreground-muted hover:text-accent-red"
                         title="Logout"
                     >
-                        <LogOut className="w-5 h-5" />
+                        <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                 )}
             </div>

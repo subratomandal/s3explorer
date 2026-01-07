@@ -495,12 +495,12 @@ export default function App() {
         <WelcomeMessage onConfigure={() => setShowConnectionManager(true)} />
       )}
 
-      {/* Footer */}
+      {/* Footer - hidden on mobile when welcome message is shown */}
       <a
         href="https://github.com/subratomandalme/s3-explorer"
         target="_blank"
         rel="noopener noreferrer"
-        className="group fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-2 text-xs text-foreground-muted hover:text-foreground bg-background-secondary/80 backdrop-blur border border-border hover:border-border-hover rounded-full transition-all"
+        className={`group fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-2 text-xs text-foreground-muted hover:text-foreground bg-background-secondary/80 backdrop-blur border border-border hover:border-border-hover rounded-full transition-all ${!activeConnection ? 'hidden sm:flex' : ''}`}
       >
         <span>Made with</span>
         <Heart className="w-3 h-3 text-foreground-muted group-hover:text-accent-pink transition-colors" />
