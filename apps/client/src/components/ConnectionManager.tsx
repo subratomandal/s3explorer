@@ -14,16 +14,93 @@ const PROVIDERS = [
   { id: 'custom', name: 'Custom', defaultRegion: 'us-east-1', defaultEndpoint: '' },
 ];
 
+// AWS S3 Regions (Complete list)
 const AWS_REGIONS = [
+  // US Regions
   { value: 'us-east-1', label: 'US East (N. Virginia)' },
   { value: 'us-east-2', label: 'US East (Ohio)' },
   { value: 'us-west-1', label: 'US West (N. California)' },
   { value: 'us-west-2', label: 'US West (Oregon)' },
-  { value: 'eu-west-1', label: 'EU (Ireland)' },
-  { value: 'eu-central-1', label: 'EU (Frankfurt)' },
+  // Africa
+  { value: 'af-south-1', label: 'Africa (Cape Town)' },
+  // Asia Pacific
+  { value: 'ap-east-1', label: 'Asia Pacific (Hong Kong)' },
+  { value: 'ap-south-1', label: 'Asia Pacific (Mumbai)' },
+  { value: 'ap-south-2', label: 'Asia Pacific (Hyderabad)' },
   { value: 'ap-southeast-1', label: 'Asia Pacific (Singapore)' },
+  { value: 'ap-southeast-2', label: 'Asia Pacific (Sydney)' },
+  { value: 'ap-southeast-3', label: 'Asia Pacific (Jakarta)' },
+  { value: 'ap-southeast-4', label: 'Asia Pacific (Melbourne)' },
+  { value: 'ap-southeast-5', label: 'Asia Pacific (Malaysia)' },
   { value: 'ap-northeast-1', label: 'Asia Pacific (Tokyo)' },
+  { value: 'ap-northeast-2', label: 'Asia Pacific (Seoul)' },
+  { value: 'ap-northeast-3', label: 'Asia Pacific (Osaka)' },
+  // Canada
+  { value: 'ca-central-1', label: 'Canada (Central)' },
+  { value: 'ca-west-1', label: 'Canada West (Calgary)' },
+  // Europe
+  { value: 'eu-central-1', label: 'Europe (Frankfurt)' },
+  { value: 'eu-central-2', label: 'Europe (Zurich)' },
+  { value: 'eu-west-1', label: 'Europe (Ireland)' },
+  { value: 'eu-west-2', label: 'Europe (London)' },
+  { value: 'eu-west-3', label: 'Europe (Paris)' },
+  { value: 'eu-south-1', label: 'Europe (Milan)' },
+  { value: 'eu-south-2', label: 'Europe (Spain)' },
+  { value: 'eu-north-1', label: 'Europe (Stockholm)' },
+  // Israel
+  { value: 'il-central-1', label: 'Israel (Tel Aviv)' },
+  // Middle East
+  { value: 'me-south-1', label: 'Middle East (Bahrain)' },
+  { value: 'me-central-1', label: 'Middle East (UAE)' },
+  // South America
+  { value: 'sa-east-1', label: 'South America (São Paulo)' },
 ];
+
+// Cloudflare R2 Region
+const R2_REGIONS = [
+  { value: 'auto', label: 'Auto (Recommended)' },
+  { value: 'wnam', label: 'Western North America' },
+  { value: 'enam', label: 'Eastern North America' },
+  { value: 'weur', label: 'Western Europe' },
+  { value: 'eeur', label: 'Eastern Europe' },
+  { value: 'apac', label: 'Asia Pacific' },
+];
+
+// DigitalOcean Spaces Regions
+const DO_REGIONS = [
+  { value: 'nyc3', label: 'New York (NYC3)' },
+  { value: 'sfo3', label: 'San Francisco (SFO3)' },
+  { value: 'ams3', label: 'Amsterdam (AMS3)' },
+  { value: 'sgp1', label: 'Singapore (SGP1)' },
+  { value: 'fra1', label: 'Frankfurt (FRA1)' },
+  { value: 'syd1', label: 'Sydney (SYD1)' },
+  { value: 'blr1', label: 'Bangalore (BLR1)' },
+];
+
+// Generic regions for MinIO, Railway, Custom
+const GENERIC_REGIONS = [
+  { value: 'us-east-1', label: 'US East 1 (Default)' },
+  { value: 'us-west-1', label: 'US West 1' },
+  { value: 'eu-west-1', label: 'EU West 1' },
+  { value: 'ap-southeast-1', label: 'AP Southeast 1' },
+];
+
+// Helper to get regions based on provider
+function getRegionsForProvider(providerId: string) {
+  switch (providerId) {
+    case 'aws':
+      return AWS_REGIONS;
+    case 'cloudflare':
+      return R2_REGIONS;
+    case 'digitalocean':
+      return DO_REGIONS;
+    case 'minio':
+    case 'railway':
+    case 'custom':
+    default:
+      return GENERIC_REGIONS;
+  }
+}
 
 interface ConnectionManagerProps {
   isOpen: boolean;
@@ -97,6 +174,19 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
         // Cloudflare/DO/MinIO often need path style
         forcePathStyle: providerId === 'minio' || providerId === 'railway',
       }));
+    }
+  }
+
+  function handleRegionChange(region: string) {
+    // For DigitalOcean Spaces, update endpoint to match region
+    if (selectedProvider === 'digitalocean') {
+      setForm(prev => ({
+        ...prev,
+        region,
+        endpoint: `https://${region}.digitaloceanspaces.com`,
+      }));
+    } else {
+      setForm(prev => ({ ...prev, region }));
     }
   }
 
@@ -304,10 +394,10 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                   <div className="relative">
                     <select
                       value={form.region}
-                      onChange={(e) => setForm({ ...form, region: e.target.value })}
+                      onChange={(e) => handleRegionChange(e.target.value)}
                       className="input appearance-none cursor-pointer pr-10 h-10 text-sm truncate"
                     >
-                      {AWS_REGIONS.map(r => (
+                      {getRegionsForProvider(selectedProvider).map(r => (
                         <option key={r.value} value={r.value}>{r.label}</option>
                       ))}
                     </select>
