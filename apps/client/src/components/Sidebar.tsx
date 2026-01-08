@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Database, Plus, Trash2, Copy, Check, X } from 'lucide-react';
+import { Database, Plus, Trash2, Copy, Check, X, Github } from 'lucide-react';
 import type { Bucket } from '../types';
 
 interface SidebarProps {
@@ -100,7 +100,7 @@ export function Sidebar({
                         {filteredBuckets.map((bucket, i) => (
                             <div
                                 key={bucket.name}
-                                className={`sidebar-item group stagger-item min-h-[44px] ${selectedBucket === bucket.name ? 'active' : ''}`}
+                                className={`sidebar-item group stagger-item min-h-[36px] ${selectedBucket === bucket.name ? 'active' : ''}`}
                                 style={{ animationDelay: `${i * 30}ms` }}
                                 onClick={() => onBucketSelect(bucket.name)}
                             >
@@ -109,21 +109,21 @@ export function Sidebar({
                                 <div className="flex items-center md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={e => handleCopyBucketName(e, bucket.name)}
-                                        className="btn btn-ghost btn-icon w-9 h-9 hover:text-accent-purple"
+                                        className="btn btn-ghost btn-icon w-7 h-7 hover:text-accent-purple"
                                         title="Copy bucket name"
                                     >
                                         {copiedBucket === bucket.name ? (
-                                            <Check className="w-4 h-4 text-accent-green" />
+                                            <Check className="w-3.5 h-3.5 text-accent-green" />
                                         ) : (
-                                            <Copy className="w-4 h-4" />
+                                            <Copy className="w-3.5 h-3.5" />
                                         )}
                                     </button>
                                     <button
                                         onClick={e => { e.stopPropagation(); onDeleteBucket(bucket.name); }}
-                                        className="btn btn-ghost btn-icon w-9 h-9 hover:text-accent-red"
+                                        className="btn btn-ghost btn-icon w-7 h-7 hover:text-accent-red"
                                         title="Delete bucket"
                                     >
-                                        <Trash2 className="w-4 h-4" />
+                                        <Trash2 className="w-3.5 h-3.5" />
                                     </button>
                                 </div>
                             </div>
@@ -139,15 +139,16 @@ export function Sidebar({
                     )}
                 </div>
 
-                {/* Footer - mobile only */}
-                <div className="mt-auto p-4 border-t border-border md:hidden">
+                {/* GitHub link */}
+                <div className="mt-auto p-3 border-t border-border">
                     <a
-                        href="https://github.com/subratomandal/s3-explorer"
+                        href="https://github.com/subratomandal"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-foreground-muted text-center block hover:text-foreground transition-colors"
+                        className="w-9 h-9 flex items-center justify-center rounded-full bg-background-tertiary hover:bg-background-hover text-foreground-muted hover:text-foreground transition-all"
+                        title="GitHub"
                     >
-                        Made with <span className="text-accent-purple">♡</span> by Subrato
+                        <Github className="w-5 h-5" />
                     </a>
                 </div>
             </aside>

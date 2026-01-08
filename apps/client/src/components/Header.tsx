@@ -112,11 +112,11 @@ export function Header({
                 <div className="absolute left-1/2 -translate-x-1/2 hidden md:block">
                     <button
                         onClick={onOpenCommandPalette}
-                        className="flex items-center gap-2 px-3 py-1.5 text-sm text-foreground-muted hover:text-foreground bg-background-tertiary hover:bg-background-hover border border-border hover:border-border-hover rounded-lg transition-all w-[200px]"
+                        className="flex items-center gap-1.5 px-2.5 py-1 text-sm text-foreground-muted hover:text-foreground bg-background-tertiary hover:bg-background-hover border border-border hover:border-border-hover rounded-md transition-all w-[170px]"
                     >
-                        <Search className="w-4 h-4 flex-shrink-0" />
+                        <Search className="w-3.5 h-3.5 flex-shrink-0" />
                         <span className="text-xs">Search...</span>
-                        <kbd className="flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium bg-background border border-border rounded ml-auto">
+                        <kbd className="flex items-center gap-0.5 px-1 py-0.5 text-[10px] font-medium bg-background border border-border rounded ml-auto">
                             <Command className="w-2.5 h-2.5" />
                             <span>K</span>
                         </kbd>
