@@ -36,6 +36,7 @@
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
@@ -125,7 +126,7 @@ body {
 }
 
 .btn:active:not(:disabled) {
-  opacity: 0.8;
+  transform: scale(0.98);
 }
 
 .btn-primary {
@@ -136,6 +137,20 @@ body {
 .btn-primary:hover:not(:disabled) {
   background: var(--accent-pink);
   filter: brightness(1.1);
+}
+
+.btn-primary:active:not(:disabled) {
+  filter: brightness(0.95);
+  opacity: 1;
+}
+
+/* Fix for label acting as button (upload) */
+label.btn {
+  -webkit-tap-highlight-color: transparent;
+}
+
+label.btn:focus-within {
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--accent-pink);
 }
 
 .btn-secondary {
@@ -160,6 +175,11 @@ body {
   color: var(--foreground);
 }
 
+.btn-ghost:active:not(:disabled) {
+  background: var(--background-hover);
+  opacity: 1;
+}
+
 .btn-danger {
   background: var(--accent-red);
   color: white;
@@ -173,6 +193,19 @@ body {
 .btn-icon {
   padding: 0.5rem;
   border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure icon buttons have consistent background coverage */
+.btn-icon:hover:not(:disabled) {
+  background: var(--background-hover);
+}
+
+.btn-icon:active:not(:disabled) {
+  background: var(--background-hover);
+  opacity: 0.9;
 }
 
 .input {

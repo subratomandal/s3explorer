@@ -145,9 +145,9 @@ export function Header({
                             <span className="hidden md:inline text-sm">Folder</span>
                         </button>
 
-                        <label className="btn btn-primary cursor-pointer h-9 sm:h-9 px-2 sm:px-3" tabIndex={0} role="button" aria-label="Upload files">
-                            <Upload className="w-5 h-5 sm:w-4 sm:h-4" aria-hidden="true" />
-                            <span className="hidden sm:inline text-sm">Upload</span>
+                        <label className="btn btn-primary cursor-pointer h-9 sm:h-9 px-2 sm:px-3 select-none" role="button" aria-label="Upload files">
+                            <Upload className="w-5 h-5 sm:w-4 sm:h-4 pointer-events-none" aria-hidden="true" />
+                            <span className="hidden sm:inline text-sm pointer-events-none">Upload</span>
                             <input
                                 type="file"
                                 multiple

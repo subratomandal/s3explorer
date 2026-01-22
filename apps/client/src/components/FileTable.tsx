@@ -37,8 +37,8 @@ export function FileTable({ objects, loading, onNavigate, onDownload, onContextM
             <thead>
                 <tr>
                     <th scope="col">Name</th>
-                    <th scope="col" className="w-20 hidden sm:table-cell">Size</th>
-                    <th scope="col" className="w-24 hidden md:table-cell">Modified</th>
+                    <th scope="col" className="w-16 hidden sm:table-cell text-right">Size</th>
+                    <th scope="col" className="w-20 hidden md:table-cell">Modified</th>
                     <th scope="col" className="w-12 sm:w-16"><span className="sr-only">Actions</span></th>
                 </tr>
             </thead>
@@ -78,16 +78,16 @@ export function FileTable({ objects, loading, onNavigate, onDownload, onContextM
                                 </div>
                             </td>
 
-                            <td className="text-foreground-muted text-[13px] hidden sm:table-cell">
+                            <td className="text-foreground-muted text-[13px] hidden sm:table-cell text-right whitespace-nowrap">
                                 {obj.isFolder ? '—' : formatBytes(obj.size)}
                             </td>
 
-                            <td className="text-foreground-muted text-[13px] hidden md:table-cell">
+                            <td className="text-foreground-muted text-[13px] hidden md:table-cell whitespace-nowrap">
                                 {obj.isFolder ? '—' : formatDate(obj.lastModified)}
                             </td>
 
                             <td className="py-1.5 sm:py-2">
-                                <div className="row-actions flex items-center justify-end gap-0.5 sm:opacity-0 sm:group-hover:opacity-100">
+                                <div className="row-actions flex items-center justify-end gap-0.5">
                                     {!obj.isFolder && (
                                         <button
                                             onClick={e => { e.stopPropagation(); onDownload(obj); }}
