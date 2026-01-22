@@ -60,7 +60,7 @@ body {
   position: relative;
 }
 
-/* Hide scrollbars but allow scrolling */
+/* Hide scrollbars by default but allow scrolling */
 * {
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
@@ -68,6 +68,30 @@ body {
 
 *::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
+}
+
+/* Show thin scrollbar for bucket list */
+.bucket-scrollable {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--border-hover) transparent;
+}
+
+.bucket-scrollable::-webkit-scrollbar {
+  display: block;
+  width: 4px;
+}
+
+.bucket-scrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.bucket-scrollable::-webkit-scrollbar-thumb {
+  background: var(--border-hover);
+  border-radius: 4px;
+}
+
+.bucket-scrollable::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground-muted);
 }
 
 .btn {
@@ -418,6 +442,21 @@ select.input option {
 
 .empty-state-icon {
   animation: fadeInUp 150ms ease 50ms both;
+}
+
+/* Prevent layout shift during loading */
+.content-stable {
+  min-height: 200px;
+}
+
+/* Sidebar stable layout */
+aside {
+  contain: layout;
+}
+
+/* Ensure header doesn't shift */
+header {
+  contain: layout;
 }
 
 .toast {
