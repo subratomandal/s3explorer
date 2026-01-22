@@ -3,8 +3,6 @@
 A secure, self-hosted web-based file manager for S3-compatible storage buckets.
 
 [![Deploy on Railway](https://img.shields.io/badge/Deploy-Railway-0B0D0E?style=for-the-badge&logo=railway)](https://railway.com/deploy/s3-explorer)
-[![S3 Explorer](https://img.shields.io/badge/S3-Explorer-C049FF?style=for-the-badge)](https://s3explorer.up.railway.app/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://hub.docker.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
 ---
