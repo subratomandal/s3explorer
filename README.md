@@ -26,19 +26,19 @@ Managing S3 buckets often requires command-line tools or provider-specific dashb
 ## Screenshots
 
 <p>
-  <img src="https://raw.githubusercontent.com/subratomandalme/s3-explorer/main/apps/client/public/images/main.png" />
+  <img src="https://raw.githubusercontent.com/subratomandal/s3explorer/main/apps/client/public/images/main.png" />
 </p>
 
 ---
 
 <p>
-  <img src="https://raw.githubusercontent.com/subratomandalme/s3-explorer/main/apps/client/public/images/search.png" />
+  <img src="https://raw.githubusercontent.com/subratomandal/s3explorer/main/apps/client/public/images/search.png" />
 </p>
 
 ---
 
 <p>
-  <img src="https://raw.githubusercontent.com/subratomandalme/s3-explorer/main/apps/client/public/images/connection.png" />
+  <img src="https://raw.githubusercontent.com/subratomandal/s3explorer/main/apps/client/public/images/connection.png" />
 </p>
 
 ---
