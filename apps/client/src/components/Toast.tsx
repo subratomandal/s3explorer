@@ -20,8 +20,12 @@ export function Toast({ message, type = 'success', onClose }: ToastProps) {
     const iconBg = isSuccess ? 'bg-accent-green' : 'bg-accent-red';
 
     return (
-        <div className={`toast fixed bottom-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium ${bgColor} ${textColor} border ${borderColor}`}>
-            <div className={`w-5 h-5 rounded-full flex items-center justify-center ${iconBg}`}>
+        <div
+            className={`toast fixed bottom-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium ${bgColor} ${textColor} border ${borderColor}`}
+            role="alert"
+            aria-live="polite"
+        >
+            <div className={`w-5 h-5 rounded-full flex items-center justify-center ${iconBg}`} aria-hidden="true">
                 {isSuccess ? (
                     <Check className="w-3 h-3 text-background" />
                 ) : (

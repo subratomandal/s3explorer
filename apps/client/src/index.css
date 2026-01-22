@@ -4,6 +4,7 @@
 @tailwind utilities;
 
 :root {
+  color-scheme: dark;
   --background: hsl(250, 24%, 9%);
   --background-secondary: hsl(250, 21%, 11%);
   --background-tertiary: hsl(250, 18%, 14%);
@@ -23,6 +24,7 @@
 
 /* Light theme */
 [data-theme="light"] {
+  color-scheme: light;
   --background: hsl(0, 0%, 98%);
   --background-secondary: hsl(0, 0%, 100%);
   --background-tertiary: hsl(250, 20%, 96%);
@@ -309,7 +311,7 @@ select.input option {
 
 .table th {
   text-align: left;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -322,12 +324,28 @@ select.input option {
   z-index: 10;
 }
 
+.table th:first-child {
+  padding-left: 1rem;
+}
+
+.table th:last-child {
+  padding-right: 1rem;
+}
+
 .table td {
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 0.75rem;
   font-size: 0.875rem;
   border-bottom: 1px solid var(--border);
   transition: background 30ms ease;
   vertical-align: middle;
+}
+
+.table td:first-child {
+  padding-left: 1rem;
+}
+
+.table td:last-child {
+  padding-right: 1rem;
 }
 
 /* Tabular numbers for numeric columns */
@@ -453,10 +471,33 @@ select.input option {
 .modal-backdrop {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
+  animation: modalBackdropIn 150ms ease forwards;
+}
+
+@keyframes modalBackdropIn {
+  from {
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px);
+  }
+  to {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+  }
 }
 
 .modal-content {
-  animation: scaleIn 75ms ease;
+  animation: modalContentIn 150ms ease forwards;
+}
+
+@keyframes modalContentIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .context-menu {

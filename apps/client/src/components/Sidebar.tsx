@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Database, Plus, Trash2, Copy, Check, X, Settings, LogOut } from 'lucide-react';
 import type { Bucket } from '../types';
 
@@ -37,16 +37,21 @@ export function Sidebar({
 }: SidebarProps) {
     const [copiedBucket, setCopiedBucket] = useState<string | null>(null);
 
-    const filteredBuckets = buckets.filter(b =>
-        !searchQuery.trim() || b.name.toLowerCase().includes(searchQuery.toLowerCase())
+    // Memoize filtered buckets to avoid recalculation on every render
+    const filteredBuckets = useMemo(() =>
+        buckets.filter(b =>
+            !searchQuery.trim() || b.name.toLowerCase().includes(searchQuery.toLowerCase())
+        ),
+        [buckets, searchQuery]
     );
 
-    const handleCopyBucketName = (e: React.MouseEvent, bucketName: string) => {
+    // Memoize callback to prevent unnecessary re-renders
+    const handleCopyBucketName = useCallback((e: React.MouseEvent, bucketName: string) => {
         e.stopPropagation();
         navigator.clipboard.writeText(bucketName);
         setCopiedBucket(bucketName);
         setTimeout(() => setCopiedBucket(null), 2000);
-    };
+    }, []);
 
     return (
         <>

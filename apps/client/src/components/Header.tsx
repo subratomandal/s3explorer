@@ -50,7 +50,7 @@ export function Header({
         const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
         const limit = isMobile ? Math.min(maxLen, 12) : maxLen;
         if (text.length <= limit) return text;
-        return text.slice(0, limit) + '...';
+        return text.slice(0, limit) + '…';
     };
 
     return (
@@ -89,7 +89,7 @@ export function Header({
                     {showEllipsis && (
                         <span className="flex items-center gap-1 text-foreground-muted flex-shrink-0" aria-hidden="true">
                             <span>/</span>
-                            <span>...</span>
+                            <span>…</span>
                         </span>
                     )}
 

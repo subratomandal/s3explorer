@@ -28,6 +28,8 @@ export function ContextMenu({ x, y, onClose, children }: ContextMenuProps) {
             ref={ref}
             className="fixed z-50 card py-1.5 min-w-[160px] context-menu"
             style={{ left: adjustedX, top: adjustedY }}
+            role="menu"
+            aria-label="Context menu"
         >
             {children}
         </div>
@@ -50,8 +52,9 @@ export function ContextMenuItem({ icon: Icon, label, onClick, danger = false }: 
         <button
             onClick={onClick}
             className={`context-menu-item w-full flex items-center gap-3 px-3.5 py-2 text-sm ${colorClasses}`}
+            role="menuitem"
         >
-            <Icon className="w-4 h-4" />
+            <Icon className="w-4 h-4" aria-hidden="true" />
             {label}
         </button>
     );

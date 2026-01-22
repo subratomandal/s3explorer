@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Folder, Database, Download, Edit3, Trash2 } from 'lucide-react';
 import * as api from './api';
@@ -305,7 +305,7 @@ export default function App() {
     loadBuckets();
   };
 
-  const breadcrumbs = currentPath.split('/').filter(Boolean);
+  const breadcrumbs = useMemo(() => currentPath.split('/').filter(Boolean), [currentPath]);
 
   // Loading state - use same background as app to prevent white flash
   if (checkingAuth) {
@@ -329,6 +329,14 @@ export default function App() {
   // Authenticated - show app
   return (
     <div className="h-screen flex bg-background overflow-hidden">
+      {/* Skip link for accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:bg-background focus:px-4 focus:py-2 focus:rounded-md focus:ring-2 focus:ring-accent-pink focus:text-foreground"
+      >
+        Skip to main content
+      </a>
+
       <Sidebar
         buckets={buckets}
         selectedBucket={selectedBucket}
@@ -346,7 +354,7 @@ export default function App() {
         onLogout={handleLogout}
       />
 
-      <main className="flex-1 flex flex-col min-w-0" {...getRootProps()}>
+      <main id="main-content" className="flex-1 flex flex-col min-w-0" tabIndex={-1} {...getRootProps()}>
         <input {...getInputProps()} />
 
         <Header
@@ -397,6 +405,16 @@ export default function App() {
           )}
         </div>
       </main>
+
+      {/* Live region for screen reader announcements */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {toast?.message}
+      </div>
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
