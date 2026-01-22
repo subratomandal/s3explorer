@@ -37,8 +37,8 @@ export function FileTable({ objects, loading, onNavigate, onDownload, onContextM
             <thead>
                 <tr>
                     <th scope="col">Name</th>
-                    <th scope="col" className="w-16 hidden sm:table-cell text-right">Size</th>
-                    <th scope="col" className="w-20 hidden md:table-cell">Modified</th>
+                    <th scope="col" className="w-[70px] hidden sm:table-cell text-center">Size</th>
+                    <th scope="col" className="w-[85px] hidden md:table-cell text-center">Modified</th>
                     <th scope="col" className="w-12 sm:w-16"><span className="sr-only">Actions</span></th>
                 </tr>
             </thead>
@@ -78,11 +78,11 @@ export function FileTable({ objects, loading, onNavigate, onDownload, onContextM
                                 </div>
                             </td>
 
-                            <td className="text-foreground-muted text-[13px] hidden sm:table-cell text-right whitespace-nowrap">
+                            <td className="text-foreground-muted text-[13px] hidden sm:table-cell text-center whitespace-nowrap tabular-nums">
                                 {obj.isFolder ? '—' : formatBytes(obj.size)}
                             </td>
 
-                            <td className="text-foreground-muted text-[13px] hidden md:table-cell whitespace-nowrap">
+                            <td className="text-foreground-muted text-[13px] hidden md:table-cell text-center whitespace-nowrap">
                                 {obj.isFolder ? '—' : formatDate(obj.lastModified)}
                             </td>
 

@@ -39,6 +39,17 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 html {
   min-height: 100%;
   background: var(--background);
@@ -106,9 +117,10 @@ body {
   border-radius: 0.5rem;
   border: none;
   cursor: pointer;
-  transition: all 50ms ease;
+  transition: background 50ms ease, color 50ms ease, transform 50ms ease, filter 50ms ease;
   outline: none;
   white-space: nowrap;
+  touch-action: manipulation;
 }
 
 .btn:focus-visible {
@@ -261,11 +273,13 @@ select.input option {
   padding: 0.625rem 0.875rem;
   border-radius: 0.5rem;
   cursor: pointer;
-  transition: all 50ms ease;
+  transition: background 50ms ease, color 50ms ease, border-color 50ms ease;
   color: var(--foreground-secondary);
   font-size: 0.875rem;
   border: 1px solid transparent;
   background: transparent;
+  touch-action: manipulation;
+  text-decoration: none;
 }
 
 .sidebar-item:hover {
@@ -313,6 +327,12 @@ select.input option {
   font-size: 0.875rem;
   border-bottom: 1px solid var(--border);
   transition: background 30ms ease;
+  vertical-align: middle;
+}
+
+/* Tabular numbers for numeric columns */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
 .table tbody tr {
