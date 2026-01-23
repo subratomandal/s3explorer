@@ -30,7 +30,7 @@ export function CreateFolderModal({ isOpen, value, onChange, onClose, onCreate }
                     <input
                         id={inputId}
                         type="text"
-                        placeholder="folder-name…"
+                        placeholder="New folder name…"
                         value={value}
                         onChange={e => onChange(e.target.value)}
                         className="input"

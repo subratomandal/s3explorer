@@ -30,6 +30,7 @@ export function RenameModal({ isOpen, value, onChange, onClose, onRename }: Rena
                     <input
                         id={inputId}
                         type="text"
+                        placeholder="Enter new name…"
                         value={value}
                         onChange={e => onChange(e.target.value)}
                         className="input"

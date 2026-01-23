@@ -276,9 +276,35 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
   }
 
   return (
-    <>
     <Modal isOpen={isOpen} onClose={onClose} title="Connection Manager" size="lg">
-      <div className="flex flex-col">
+      <div className="relative flex flex-col">
+        {/* Delete Confirmation Overlay */}
+        {deleteConfirm && (
+          <div className="absolute inset-0 z-10 bg-background-secondary/95 backdrop-blur-sm flex items-center justify-center p-4 rounded-lg animate-fadeIn">
+            <div className="bg-background border border-border rounded-lg p-4 max-w-sm w-full shadow-lg">
+              <h3 className="text-sm font-semibold text-foreground mb-2">Delete Connection</h3>
+              <p className="text-sm text-foreground-secondary mb-4">
+                Are you sure you want to delete this connection? This action cannot be undone.
+              </p>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setDeleteConfirm(null)}
+                  className="btn btn-secondary"
+                  autoFocus
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="btn btn-danger"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {error && (
           <div className="mb-4 p-3 bg-accent-red/10 border border-accent-red/20 rounded-lg text-accent-red text-sm flex items-center gap-2 animate-fadeIn">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -541,31 +567,5 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
         )}
       </div>
     </Modal>
-
-      {/* Delete Confirmation Modal */}
-      {deleteConfirm && (
-        <Modal title="Delete Connection" onClose={() => setDeleteConfirm(null)} size="sm">
-          <div className="space-y-4">
-            <p className="text-sm text-foreground-secondary">
-              Are you sure you want to delete this connection? This action cannot be undone.
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="btn btn-secondary"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="btn btn-danger"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
-    </>
   );
 }
