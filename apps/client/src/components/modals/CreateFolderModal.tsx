@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useState, useId } from 'react';
 import { Modal } from '../Modal';
 
 interface CreateFolderModalProps {
@@ -6,13 +6,24 @@ interface CreateFolderModalProps {
     value: string;
     onChange: (value: string) => void;
     onClose: () => void;
-    onCreate: () => void;
+    onCreate: () => Promise<void> | void;
 }
 
 export function CreateFolderModal({ isOpen, value, onChange, onClose, onCreate }: CreateFolderModalProps) {
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const inputId = useId();
 
     if (!isOpen) return null;
+
+    const handleSubmit = async () => {
+        if (isSubmitting || !value.trim()) return;
+        setIsSubmitting(true);
+        try {
+            await onCreate();
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
         <Modal title="Create Folder" onClose={onClose}>
@@ -20,7 +31,7 @@ export function CreateFolderModal({ isOpen, value, onChange, onClose, onCreate }
                 className="space-y-4"
                 onSubmit={e => {
                     e.preventDefault();
-                    if (value.trim()) onCreate();
+                    handleSubmit();
                 }}
             >
                 <div className="space-y-1.5">
@@ -37,14 +48,15 @@ export function CreateFolderModal({ isOpen, value, onChange, onClose, onCreate }
                         autoFocus
                         autoComplete="off"
                         spellCheck="false"
+                        disabled={isSubmitting}
                     />
                 </div>
                 <div className="flex justify-end gap-3">
-                    <button type="button" onClick={onClose} className="btn btn-secondary">
+                    <button type="button" onClick={onClose} className="btn btn-secondary" disabled={isSubmitting}>
                         Cancel
                     </button>
-                    <button type="submit" className="btn btn-primary" disabled={!value.trim()}>
-                        Create
+                    <button type="submit" className="btn btn-primary" disabled={!value.trim() || isSubmitting}>
+                        {isSubmitting ? 'Creating…' : 'Create'}
                     </button>
                 </div>
             </form>

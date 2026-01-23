@@ -461,7 +461,7 @@ export default function App() {
         isOpen={!!showRename}
         value={newName}
         onChange={setNewName}
-        onClose={() => setShowRename(null)}
+        onClose={() => { setNewName(''); setShowRename(null); }}
         onRename={handleRename}
       />
 

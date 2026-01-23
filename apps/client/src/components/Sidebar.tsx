@@ -130,11 +130,11 @@ export function Sidebar({
                     role="list"
                     aria-labelledby="buckets-heading"
                 >
-                    <div className="space-y-1">
+                    <div className="space-y-0.5 sm:space-y-1">
                         {filteredBuckets.map((bucket, i) => (
                             <div
                                 key={bucket.name}
-                                className={`sidebar-item group stagger-item min-h-[32px] sm:min-h-[36px] py-1.5 sm:py-2 ${selectedBucket === bucket.name ? 'active' : ''}`}
+                                className={`sidebar-item group stagger-item min-h-[28px] sm:min-h-[36px] py-1 sm:py-2 ${selectedBucket === bucket.name ? 'active' : ''}`}
                                 style={{ animationDelay: `${i * 30}ms` }}
                                 onClick={() => onBucketSelect(bucket.name)}
                                 onKeyDown={(e) => e.key === 'Enter' && onBucketSelect(bucket.name)}
@@ -143,8 +143,8 @@ export function Sidebar({
                                 aria-selected={selectedBucket === bucket.name}
                                 aria-label={`Bucket: ${bucket.name}`}
                             >
-                                <Database className="sidebar-icon w-4 h-4 flex-shrink-0" aria-hidden="true" />
-                                <span className="flex-1 truncate text-sm">{bucket.name}</span>
+                                <Database className="sidebar-icon w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" aria-hidden="true" />
+                                <span className="flex-1 truncate text-xs sm:text-sm">{bucket.name}</span>
                                 <div className="flex items-center md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={e => handleCopyBucketName(e, bucket.name)}

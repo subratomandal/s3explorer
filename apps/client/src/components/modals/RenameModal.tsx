@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useState, useId } from 'react';
 import { Modal } from '../Modal';
 
 interface RenameModalProps {
@@ -6,13 +6,24 @@ interface RenameModalProps {
     value: string;
     onChange: (value: string) => void;
     onClose: () => void;
-    onRename: () => void;
+    onRename: () => Promise<void> | void;
 }
 
 export function RenameModal({ isOpen, value, onChange, onClose, onRename }: RenameModalProps) {
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const inputId = useId();
 
     if (!isOpen) return null;
+
+    const handleSubmit = async () => {
+        if (isSubmitting || !value.trim()) return;
+        setIsSubmitting(true);
+        try {
+            await onRename();
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
         <Modal title="Rename" onClose={onClose}>
@@ -20,7 +31,7 @@ export function RenameModal({ isOpen, value, onChange, onClose, onRename }: Rena
                 className="space-y-4"
                 onSubmit={e => {
                     e.preventDefault();
-                    if (value.trim()) onRename();
+                    handleSubmit();
                 }}
             >
                 <div className="space-y-1.5">
@@ -38,17 +49,18 @@ export function RenameModal({ isOpen, value, onChange, onClose, onRename }: Rena
                         autoComplete="off"
                         spellCheck="false"
                         maxLength={255}
+                        disabled={isSubmitting}
                     />
                     {value.length > 50 && (
                         <p className="text-xs text-foreground-muted">{value.length}/255</p>
                     )}
                 </div>
                 <div className="flex justify-end gap-3">
-                    <button type="button" onClick={onClose} className="btn btn-secondary">
+                    <button type="button" onClick={onClose} className="btn btn-secondary" disabled={isSubmitting}>
                         Cancel
                     </button>
-                    <button type="submit" className="btn btn-primary" disabled={!value.trim()}>
-                        Rename
+                    <button type="submit" className="btn btn-primary" disabled={!value.trim() || isSubmitting}>
+                        {isSubmitting ? 'Renaming…' : 'Rename'}
                     </button>
                 </div>
             </form>
