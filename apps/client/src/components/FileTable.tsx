@@ -73,11 +73,11 @@ export function FileTable({ objects, loading, onNavigate, onDownload, onContextM
                                 </div>
                             </td>
 
-                            <td className="text-foreground-muted text-[13px] hidden sm:table-cell !text-center !px-2 whitespace-nowrap" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                            <td className="text-foreground-muted text-[11px] hidden sm:table-cell !text-center !px-2 whitespace-nowrap" style={{ fontVariantNumeric: 'tabular-nums' }}>
                                 {obj.isFolder ? '—' : formatBytes(obj.size)}
                             </td>
 
-                            <td className="text-foreground-muted text-[13px] hidden md:table-cell !text-center !px-2 whitespace-nowrap" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                            <td className="text-foreground-muted text-[11px] hidden md:table-cell !text-center !px-2 whitespace-nowrap" style={{ fontVariantNumeric: 'tabular-nums' }}>
                                 {obj.isFolder ? '—' : formatDate(obj.lastModified)}
                             </td>
 
@@ -85,7 +85,7 @@ export function FileTable({ objects, loading, onNavigate, onDownload, onContextM
                                 <div className="row-actions flex items-center justify-end gap-0.5">
                                     {/* Size on mobile - left of download */}
                                     {!obj.isFolder && (
-                                        <span className="text-[13px] text-foreground-muted sm:hidden mr-1" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                                        <span className="text-[11px] text-foreground-muted sm:hidden mr-1" style={{ fontVariantNumeric: 'tabular-nums' }}>
                                             {formatBytes(obj.size)}
                                         </span>
                                     )}
