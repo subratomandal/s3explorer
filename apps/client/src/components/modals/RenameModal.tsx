@@ -37,7 +37,11 @@ export function RenameModal({ isOpen, value, onChange, onClose, onRename }: Rena
                         autoFocus
                         autoComplete="off"
                         spellCheck="false"
+                        maxLength={255}
                     />
+                    {value.length > 50 && (
+                        <p className="text-xs text-foreground-muted">{value.length}/255</p>
+                    )}
                 </div>
                 <div className="flex justify-end gap-3">
                     <button type="button" onClick={onClose} className="btn btn-secondary">

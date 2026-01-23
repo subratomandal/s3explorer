@@ -9,7 +9,6 @@ import {
   ArrowLeft,
   Home,
   ChevronRight,
-  Command,
 } from 'lucide-react';
 import type { Bucket, CommandAction } from '../types';
 
@@ -46,8 +45,15 @@ export function CommandPalette({
 }: CommandPaletteProps) {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isMac, setIsMac] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+
+  // Detect OS for keyboard shortcut display
+  useEffect(() => {
+    setIsMac(navigator.platform?.toLowerCase().includes('mac') ||
+             navigator.userAgent?.toLowerCase().includes('mac'));
+  }, []);
 
   const actions = useMemo<CommandAction[]>(() => {
     const items: CommandAction[] = [];
@@ -286,7 +292,7 @@ export function CommandPalette({
             </span>
           </div>
           <div className="flex items-center gap-1">
-            <Command className="w-3 h-3" />
+            <kbd className="px-1 py-0.5 bg-background-tertiary border border-border rounded text-[10px]">{isMac ? '⌘' : 'Ctrl'}</kbd>
             <span>K to open</span>
           </div>
         </div>

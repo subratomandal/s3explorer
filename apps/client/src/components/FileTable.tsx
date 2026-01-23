@@ -64,13 +64,11 @@ export function FileTable({ objects, loading, onNavigate, onDownload, onContextM
                                         {getFileIcon(obj.key, obj.isFolder)}
                                     </span>
                                     <div className="min-w-0 flex-1">
-                                        <span className="file-name truncate block text-[13px]">{fileName}</span>
-                                        {/* Show size on mobile below filename */}
-                                        {!obj.isFolder && (
-                                            <span className="text-[11px] text-foreground-muted sm:hidden">
-                                                {formatBytes(obj.size)}
-                                            </span>
-                                        )}
+                                        <span className="file-name truncate block text-[13px] max-w-[120px] sm:max-w-none" title={fileName}>
+                                            {fileName.length > 20 && window.innerWidth < 640
+                                                ? fileName.slice(0, 18) + '…'
+                                                : fileName}
+                                        </span>
                                     </div>
                                     {obj.isFolder && (
                                         <ChevronRight className="file-chevron w-3.5 h-3.5 text-foreground-muted flex-shrink-0" aria-hidden="true" />
@@ -88,6 +86,12 @@ export function FileTable({ objects, loading, onNavigate, onDownload, onContextM
 
                             <td className="py-1.5 sm:py-2">
                                 <div className="row-actions flex items-center justify-end gap-0.5">
+                                    {/* Size on mobile - left of download */}
+                                    {!obj.isFolder && (
+                                        <span className="text-[10px] text-foreground-muted sm:hidden mr-1" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                                            {formatBytes(obj.size)}
+                                        </span>
+                                    )}
                                     {!obj.isFolder && (
                                         <button
                                             onClick={e => { e.stopPropagation(); onDownload(obj); }}

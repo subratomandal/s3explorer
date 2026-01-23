@@ -135,8 +135,17 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
       loadConnections();
       setView('list');
       setError(null);
+      setTestResult(null); // Reset test result when modal opens
     }
   }, [isOpen]);
+
+  // Auto-dismiss test result after 3.5 seconds
+  useEffect(() => {
+    if (testResult) {
+      const timer = setTimeout(() => setTestResult(null), 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [testResult]);
 
   async function loadConnections() {
     setLoading(true);
@@ -162,6 +171,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
     setEditingId(null);
     setSelectedProvider('custom');
     setView('list');
+    setTestResult(null);
     setError(null);
   }
 
@@ -280,23 +290,23 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
       <div className="relative flex flex-col">
         {/* Delete Confirmation Overlay */}
         {deleteConfirm && (
-          <div className="absolute inset-0 z-10 bg-background-secondary/95 backdrop-blur-sm flex items-center justify-center p-4 rounded-lg animate-fadeIn">
-            <div className="bg-background border border-border rounded-lg p-4 max-w-sm w-full shadow-lg">
-              <h3 className="text-sm font-semibold text-foreground mb-2">Delete Connection</h3>
-              <p className="text-sm text-foreground-secondary mb-4">
-                Are you sure you want to delete this connection? This action cannot be undone.
+          <div className="absolute inset-0 z-10 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 rounded-lg animate-fadeIn">
+            <div className="bg-background-secondary border border-border rounded-xl p-5 max-w-xs w-full shadow-2xl animate-fadeIn">
+              <h3 className="text-base font-semibold text-foreground mb-2">Delete Connection</h3>
+              <p className="text-sm text-foreground-secondary mb-5">
+                This action cannot be undone.
               </p>
-              <div className="flex justify-end gap-3">
+              <div className="flex gap-3">
                 <button
                   onClick={() => setDeleteConfirm(null)}
-                  className="btn btn-secondary"
+                  className="btn btn-secondary flex-1"
                   autoFocus
                 >
                   Cancel
                 </button>
                 <button
                   onClick={confirmDelete}
-                  className="btn btn-danger"
+                  className="btn btn-danger flex-1"
                 >
                   Delete
                 </button>
@@ -550,7 +560,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
             {/* Action Buttons */}
             <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-border">
               <button
-                onClick={() => setView('list')}
+                onClick={() => { setView('list'); setTestResult(null); }}
                 className="py-2 px-3 rounded-lg bg-background-tertiary text-foreground-secondary hover:text-foreground hover:bg-background-hover border border-border transition-all text-sm font-medium"
               >
                 Cancel

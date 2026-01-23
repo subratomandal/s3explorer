@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ChevronLeft, RefreshCw, FolderPlus, Upload, Menu, Search, Command } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronLeft, RefreshCw, FolderPlus, Upload, Menu, Search } from 'lucide-react';
 
 interface HeaderProps {
     selectedBucket: string | null;
@@ -29,6 +29,13 @@ export function Header({
     onOpenCommandPalette,
 }: HeaderProps) {
     const [isSpinning, setIsSpinning] = useState(false);
+    const [isMac, setIsMac] = useState(true);
+
+    // Detect OS for keyboard shortcut display
+    useEffect(() => {
+        setIsMac(navigator.platform?.toLowerCase().includes('mac') ||
+                 navigator.userAgent?.toLowerCase().includes('mac'));
+    }, []);
 
     const breadcrumbs = currentPath.split('/').filter(Boolean);
 
@@ -120,12 +127,12 @@ export function Header({
                     <button
                         onClick={onOpenCommandPalette}
                         className="flex items-center gap-1.5 px-2.5 py-1 text-sm text-foreground-muted hover:text-foreground bg-background-tertiary hover:bg-background-hover border border-border hover:border-border-hover rounded-md transition-all w-[170px]"
-                        aria-label="Open command palette (Cmd+K)"
+                        aria-label={`Open command palette (${isMac ? 'Cmd' : 'Ctrl'}+K)`}
                     >
                         <Search className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" />
                         <span className="text-xs">Search...</span>
                         <kbd className="flex items-center gap-0.5 px-1 py-0.5 text-[10px] font-medium bg-background border border-border rounded ml-auto" aria-hidden="true">
-                            <Command className="w-2.5 h-2.5" />
+                            <span>{isMac ? '⌘' : 'Ctrl'}</span>
                             <span>K</span>
                         </kbd>
                     </button>
@@ -151,6 +158,8 @@ export function Header({
                             <input
                                 type="file"
                                 multiple
+                                accept="*/*"
+                                capture={undefined}
                                 className="sr-only"
                                 onChange={e => e.target.files && onUpload(Array.from(e.target.files))}
                                 aria-label="Select files to upload"
