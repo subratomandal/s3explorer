@@ -1,4 +1,4 @@
-import { ChevronRight, Download, MoreHorizontal } from 'lucide-react';
+import { Download, MoreHorizontal } from 'lucide-react';
 import type { S3Object } from '../types';
 import { formatBytes, formatDate } from '../utils/formatters';
 import { getFileName, getFileIcon } from '../utils/fileUtils';
@@ -70,9 +70,6 @@ export function FileTable({ objects, loading, onNavigate, onDownload, onContextM
                                                 : fileName}
                                         </span>
                                     </div>
-                                    {obj.isFolder && (
-                                        <ChevronRight className="file-chevron w-3.5 h-3.5 text-foreground-muted flex-shrink-0" aria-hidden="true" />
-                                    )}
                                 </div>
                             </td>
 
@@ -88,7 +85,7 @@ export function FileTable({ objects, loading, onNavigate, onDownload, onContextM
                                 <div className="row-actions flex items-center justify-end gap-0.5">
                                     {/* Size on mobile - left of download */}
                                     {!obj.isFolder && (
-                                        <span className="text-[11px] text-foreground-muted sm:hidden mr-1" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                                        <span className="text-[13px] text-foreground-muted sm:hidden mr-1" style={{ fontVariantNumeric: 'tabular-nums' }}>
                                             {formatBytes(obj.size)}
                                         </span>
                                     )}

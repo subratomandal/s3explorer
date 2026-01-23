@@ -130,11 +130,11 @@ export function Sidebar({
                     role="list"
                     aria-labelledby="buckets-heading"
                 >
-                    <div className="space-y-0.5 sm:space-y-1">
+                    <div className="space-y-0 sm:space-y-1">
                         {filteredBuckets.map((bucket, i) => (
                             <div
                                 key={bucket.name}
-                                className={`sidebar-item group stagger-item min-h-[28px] sm:min-h-[36px] py-1 sm:py-2 ${selectedBucket === bucket.name ? 'active' : ''}`}
+                                className={`sidebar-item group stagger-item min-h-[24px] sm:min-h-[36px] py-0.5 sm:py-2 ${selectedBucket === bucket.name ? 'active' : ''}`}
                                 style={{ animationDelay: `${i * 30}ms` }}
                                 onClick={() => onBucketSelect(bucket.name)}
                                 onKeyDown={(e) => e.key === 'Enter' && onBucketSelect(bucket.name)}
@@ -143,26 +143,26 @@ export function Sidebar({
                                 aria-selected={selectedBucket === bucket.name}
                                 aria-label={`Bucket: ${bucket.name}`}
                             >
-                                <Database className="sidebar-icon w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" aria-hidden="true" />
-                                <span className="flex-1 truncate text-xs sm:text-sm">{bucket.name}</span>
+                                <Database className="sidebar-icon w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" aria-hidden="true" />
+                                <span className="flex-1 truncate text-[11px] sm:text-sm">{bucket.name}</span>
                                 <div className="flex items-center md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={e => handleCopyBucketName(e, bucket.name)}
-                                        className="btn btn-ghost btn-icon w-6 h-6 sm:w-7 sm:h-7 hover:text-accent-purple"
+                                        className="btn btn-ghost btn-icon w-5 h-5 sm:w-7 sm:h-7 hover:text-accent-purple"
                                         aria-label={`Copy bucket name: ${bucket.name}`}
                                     >
                                         {copiedBucket === bucket.name ? (
-                                            <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-accent-green" aria-hidden="true" />
+                                            <Check className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-accent-green" aria-hidden="true" />
                                         ) : (
-                                            <Copy className="w-3 h-3 sm:w-3.5 sm:h-3.5" aria-hidden="true" />
+                                            <Copy className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" aria-hidden="true" />
                                         )}
                                     </button>
                                     <button
                                         onClick={e => { e.stopPropagation(); onDeleteBucket(bucket.name); }}
-                                        className="btn btn-ghost btn-icon w-6 h-6 sm:w-7 sm:h-7 hover:text-accent-red"
+                                        className="btn btn-ghost btn-icon w-5 h-5 sm:w-7 sm:h-7 hover:text-accent-red"
                                         aria-label={`Delete bucket: ${bucket.name}`}
                                     >
-                                        <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" aria-hidden="true" />
+                                        <Trash2 className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" aria-hidden="true" />
                                     </button>
                                 </div>
                             </div>
