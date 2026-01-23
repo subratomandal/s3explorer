@@ -1,4 +1,4 @@
-import { useEffect, useRef, useId } from 'react';
+import { useEffect, useRef, useId, useCallback } from 'react';
 import { X } from 'lucide-react';
 
 interface ModalProps {
@@ -12,7 +12,17 @@ interface ModalProps {
 export function Modal({ title, children, onClose, isOpen = true, size = 'md' }: ModalProps) {
     const modalRef = useRef<HTMLDivElement>(null);
     const previousActiveElement = useRef<Element | null>(null);
+    const onCloseRef = useRef(onClose);
     const titleId = useId();
+
+    // Keep onClose ref updated without triggering useEffect
+    useEffect(() => {
+        onCloseRef.current = onClose;
+    });
+
+    const handleClose = useCallback(() => {
+        onCloseRef.current();
+    }, []);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -20,7 +30,9 @@ export function Modal({ title, children, onClose, isOpen = true, size = 'md' }: 
         // Store previously focused element
         previousActiveElement.current = document.activeElement;
 
-        const handleEscape = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+        const handleEscape = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') handleClose();
+        };
 
         // Focus trap
         const handleTab = (e: KeyboardEvent) => {
@@ -45,11 +57,13 @@ export function Modal({ title, children, onClose, isOpen = true, size = 'md' }: 
         window.addEventListener('keydown', handleEscape);
         window.addEventListener('keydown', handleTab);
 
-        // Focus first focusable element
-        const firstFocusable = modalRef.current?.querySelector<HTMLElement>(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
-        firstFocusable?.focus();
+        // Focus first focusable element after a short delay to ensure DOM is ready
+        requestAnimationFrame(() => {
+            const firstFocusable = modalRef.current?.querySelector<HTMLElement>(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            );
+            firstFocusable?.focus();
+        });
 
         return () => {
             document.body.style.overflow = '';
@@ -58,7 +72,7 @@ export function Modal({ title, children, onClose, isOpen = true, size = 'md' }: 
             // Restore focus to previously focused element
             (previousActiveElement.current as HTMLElement)?.focus?.();
         };
-    }, [onClose, isOpen]);
+    }, [isOpen, handleClose]);
 
     if (!isOpen) return null;
 
@@ -71,7 +85,7 @@ export function Modal({ title, children, onClose, isOpen = true, size = 'md' }: 
     return (
         <div
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 modal-backdrop"
-            onClick={onClose}
+            onClick={handleClose}
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
@@ -84,7 +98,7 @@ export function Modal({ title, children, onClose, isOpen = true, size = 'md' }: 
                 <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0">
                     <h2 id={titleId} className="text-sm font-semibold text-foreground">{title}</h2>
                     <button
-                        onClick={onClose}
+                        onClick={handleClose}
                         className="btn btn-ghost btn-icon w-8 h-8 text-foreground-muted hover:text-foreground"
                         aria-label="Close modal"
                     >
