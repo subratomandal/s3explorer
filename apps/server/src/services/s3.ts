@@ -157,6 +157,21 @@ export async function getObjectUrl(
   return getSignedUrl(client, command, { expiresIn });
 }
 
+export async function getUploadUrl(
+  bucket: string,
+  key: string,
+  contentType: string,
+  expiresIn: number = 900 // 15 minutes
+): Promise<string> {
+  const client = getS3Client();
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    ContentType: contentType,
+  });
+  return getSignedUrl(client, command, { expiresIn });
+}
+
 export async function uploadObject(
   bucket: string,
   key: string,

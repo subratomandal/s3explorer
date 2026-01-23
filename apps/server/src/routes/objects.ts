@@ -81,13 +81,42 @@ router.get('/:bucket/metadata', async (req: Request, res: Response) => {
   }
 });
 
+// Get presigned URL for direct upload (faster - client uploads directly to S3)
+router.post('/:bucket/upload-url', async (req: Request, res: Response) => {
+  try {
+    const { bucket } = req.params;
+    if (!isValidBucketName(bucket)) {
+      return res.status(400).json({ error: 'Invalid bucket name' });
+    }
+
+    const { fileName, contentType, prefix } = req.body;
+    if (!fileName) {
+      return res.status(400).json({ error: 'fileName is required' });
+    }
+
+    const safeName = sanitizeFilename(fileName);
+    const key = prefix ? `${prefix}${safeName}` : safeName;
+
+    if (!isValidObjectKey(key)) {
+      return res.status(400).json({ error: 'Invalid file name' });
+    }
+
+    const url = await s3.getUploadUrl(bucket, key, contentType || 'application/octet-stream');
+    res.json({ url, key });
+  } catch (error: any) {
+    console.error('Error getting upload URL:', error);
+    res.status(500).json({ error: 'Failed to get upload URL' });
+  }
+});
+
+// Legacy upload endpoint (kept for compatibility, but slower)
 router.post('/:bucket/upload', upload.array('files'), async (req: Request, res: Response) => {
   try {
     const { bucket } = req.params;
     if (!isValidBucketName(bucket)) {
       return res.status(400).json({ error: 'Invalid bucket name' });
     }
-    
+
     const prefix = (req.body.prefix as string) || '';
     const files = req.files as Express.Multer.File[];
 
@@ -99,11 +128,11 @@ router.post('/:bucket/upload', upload.array('files'), async (req: Request, res: 
     for (const file of files) {
       const safeName = sanitizeFilename(file.originalname);
       const key = prefix ? `${prefix}${safeName}` : safeName;
-      
+
       if (!isValidObjectKey(key)) {
         continue; // Skip invalid keys
       }
-      
+
       await s3.uploadObject(bucket, key, file.buffer, file.mimetype);
       results.push({ key, size: file.size });
     }

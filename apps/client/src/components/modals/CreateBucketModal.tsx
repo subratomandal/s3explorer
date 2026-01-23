@@ -42,7 +42,7 @@ export function CreateBucketModal({ isOpen, value, onChange, onClose, onCreate }
                     <input
                         id={inputId}
                         type="text"
-                        placeholder="my-bucket-name…"
+                        placeholder="e.g. photos"
                         value={value}
                         onChange={e => onChange(e.target.value)}
                         className="input"
