@@ -9,6 +9,10 @@ RUN npm run build
 # Build stage for server
 FROM node:20-alpine AS server-builder
 WORKDIR /app/server
+
+# Install native deps for better-sqlite3 compilation
+RUN apk add --no-cache python3 make g++
+
 COPY apps/server/package*.json ./
 RUN npm ci
 COPY apps/server/ ./
