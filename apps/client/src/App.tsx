@@ -178,9 +178,10 @@ export default function App() {
     try {
       setUploading(true);
       setUploadProgress(0);
-      await api.uploadFiles(selectedBucket, currentPath, acceptedFiles, (completed, total) => {
-        setUploadProgress(Math.round((completed / total) * 100));
-      });
+      const interval = setInterval(() => setUploadProgress(p => Math.min(p + 10, 90)), 100);
+      await api.uploadFiles(selectedBucket, currentPath, acceptedFiles);
+      clearInterval(interval);
+      setUploadProgress(100);
       setTimeout(() => {
         setUploading(false);
         setUploadProgress(0);

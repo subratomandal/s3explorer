@@ -195,64 +195,17 @@ export async function getDownloadUrl(bucket: string, key: string): Promise<strin
   return data.url;
 }
 
-// Get presigned upload URL from server
-async function getUploadUrl(
-  bucket: string,
-  fileName: string,
-  contentType: string,
-  prefix: string
-): Promise<{ url: string; key: string }> {
-  const res = await fetchWithTimeout(`${API_BASE}/objects/${encodeURIComponent(bucket)}/upload-url`, {
+export async function uploadFiles(bucket: string, prefix: string, files: File[]): Promise<void> {
+  const formData = new FormData();
+  formData.append('prefix', prefix);
+  files.forEach(file => formData.append('files', file));
+
+  const res = await fetchWithTimeout(`${API_BASE}/objects/${encodeURIComponent(bucket)}/upload`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fileName, contentType, prefix }),
+    body: formData,
+    timeout: 300000, // 5 minutes for uploads
   });
-  return handleResponse(res);
-}
-
-// Upload file directly to S3 using presigned URL (fast - single hop)
-async function uploadToPresignedUrl(url: string, file: File): Promise<void> {
-  const response = await fetch(url, {
-    method: 'PUT',
-    body: file,
-    headers: {
-      'Content-Type': file.type || 'application/octet-stream',
-    },
-  });
-
-  if (!response.ok) {
-    throw new ApiError('Upload failed', response.status);
-  }
-}
-
-export async function uploadFiles(
-  bucket: string,
-  prefix: string,
-  files: File[],
-  onProgress?: (completed: number, total: number) => void
-): Promise<void> {
-  const total = files.length;
-  let completed = 0;
-
-  // Upload files in parallel (up to 3 concurrent)
-  const concurrency = 3;
-  const chunks: File[][] = [];
-  for (let i = 0; i < files.length; i += concurrency) {
-    chunks.push(files.slice(i, i + concurrency));
-  }
-
-  for (const chunk of chunks) {
-    await Promise.all(
-      chunk.map(async (file) => {
-        // Get presigned URL from server
-        const { url } = await getUploadUrl(bucket, file.name, file.type, prefix);
-        // Upload directly to S3
-        await uploadToPresignedUrl(url, file);
-        completed++;
-        onProgress?.(completed, total);
-      })
-    );
-  }
+  await handleResponse(res);
 }
 
 export async function createFolder(bucket: string, path: string): Promise<void> {
