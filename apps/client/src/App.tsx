@@ -169,9 +169,9 @@ export default function App() {
     }
   }, [selectedBucket, currentPath]);
 
-  useEffect(() => { 
-    if (selectedBucket && authenticated) loadObjects(); 
-  }, [selectedBucket, currentPath, authenticated]);
+  useEffect(() => {
+    if (selectedBucket && authenticated) loadObjects();
+  }, [selectedBucket, currentPath, authenticated, loadObjects]);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (!selectedBucket || acceptedFiles.length === 0) return;

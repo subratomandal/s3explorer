@@ -78,7 +78,7 @@ export function FileTable({ objects, loading, onNavigate, onDownload, onContextM
                                 </div>
                             </td>
 
-                            <td className="text-foreground-muted text-[13px] hidden sm:table-cell !text-center !px-2 whitespace-nowrap tabular-nums">
+                            <td className="text-foreground-muted text-[13px] hidden sm:table-cell !text-center !px-2 whitespace-nowrap" style={{ fontVariantNumeric: 'tabular-nums' }}>
                                 {obj.isFolder ? '—' : formatBytes(obj.size)}
                             </td>
 

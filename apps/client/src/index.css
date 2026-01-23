@@ -472,6 +472,8 @@ select.input option {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
   animation: modalBackdropIn 150ms ease forwards;
+  overscroll-behavior: contain;
+  touch-action: manipulation;
 }
 
 @keyframes modalBackdropIn {

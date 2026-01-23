@@ -7,8 +7,12 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon: Icon, title, description, action }: EmptyStateProps) {
     return (
-        <div className="flex flex-col items-center justify-center h-full py-16 text-center empty-state px-4">
-            <div className="w-14 h-14 rounded-xl bg-background-tertiary flex items-center justify-center mb-4 empty-state-icon border border-border">
+        <div
+            className="flex flex-col items-center justify-center h-full py-16 text-center empty-state px-4"
+            role="status"
+            aria-label={title}
+        >
+            <div className="w-14 h-14 rounded-xl bg-background-tertiary flex items-center justify-center mb-4 empty-state-icon border border-border" aria-hidden="true">
                 <Icon className="w-7 h-7 text-foreground-muted" />
             </div>
             <h3 className="text-base font-medium mb-1.5">{title}</h3>

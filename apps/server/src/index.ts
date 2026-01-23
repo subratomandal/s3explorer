@@ -38,7 +38,6 @@ app.use(helmet({
 app.set('trust proxy', 1);
 
 // Body parsing
-// Body parsing
 app.use(express.json());
 
 // Global error logging for debugging
@@ -83,7 +82,6 @@ app.get('/api/health', (req, res) => {
 });
 
 // Protected API routes
-// Protected API routes
 app.use('/api/buckets', requireAuth, bucketsRouter);
 app.use('/api/objects', requireAuth, objectsRouter);
 app.use('/api/connections', requireAuth, connectionsRouter);
@@ -92,11 +90,14 @@ app.use('/api/connections', requireAuth, connectionsRouter);
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Unhandled Server Error:', err);
   if (!res.headersSent) {
-    res.status(500).json({ error: 'Internal Server Error', details: err.message });
+    // Don't expose error details in production
+    const message = process.env.NODE_ENV === 'production'
+      ? 'Internal Server Error'
+      : err.message;
+    res.status(500).json({ error: message });
   }
 });
 
-// Serve static files in production
 // Serve static files if they exist (Production / Docker)
 const publicPath = path.join(__dirname, '..', 'public');
 

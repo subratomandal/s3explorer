@@ -48,8 +48,9 @@ export function WelcomeMessage({ onConfigure }: WelcomeMessageProps) {
         <button
           onClick={(e) => { e.stopPropagation(); handleDismiss(); }}
           className="absolute top-2 right-2 p-1.5 text-foreground-muted hover:text-foreground transition-colors z-10"
+          aria-label="Dismiss welcome message"
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4" aria-hidden="true" />
         </button>
 
         <div className="flex items-center gap-3">

@@ -75,9 +75,10 @@ router.post('/', async (req: Request, res: Response) => {
     try {
       await listBuckets(config);
     } catch (testErr: any) {
-      console.warn(`Connection test failed for '${name}' but saving anyway:`, testErr.message);
-      // res.status(400).json({ error: `Connection test failed: ${testErr.message}` });
-      // return;
+      // Connection test failed but we still save - user may fix credentials later
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`Connection test failed for '${name}':`, testErr.message);
+      }
     }
 
     // Encrypt credentials
@@ -132,9 +133,10 @@ router.put('/:id', async (req: Request, res: Response) => {
     try {
       await listBuckets(config);
     } catch (testErr: any) {
-      console.warn(`Connection test failed for '${name || existing.name}' but updating anyway:`, testErr.message);
-      // res.status(400).json({ error: `Connection test failed: ${testErr.message}` });
-      // return;
+      // Connection test failed but we still update - user may fix credentials later
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`Connection test failed for '${name || existing.name}':`, testErr.message);
+      }
     }
 
     // Encrypt credentials

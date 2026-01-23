@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { Modal } from '../Modal';
 
 interface RenameModalProps {
@@ -9,24 +10,43 @@ interface RenameModalProps {
 }
 
 export function RenameModal({ isOpen, value, onChange, onClose, onRename }: RenameModalProps) {
+    const inputId = useId();
+
     if (!isOpen) return null;
 
     return (
         <Modal title="Rename" onClose={onClose}>
-            <div className="space-y-4">
-                <input
-                    type="text"
-                    value={value}
-                    onChange={e => onChange(e.target.value)}
-                    className="input"
-                    autoFocus
-                    onKeyDown={e => e.key === 'Enter' && onRename()}
-                />
-                <div className="flex justify-end gap-3">
-                    <button onClick={onClose} className="btn btn-secondary">Cancel</button>
-                    <button onClick={onRename} className="btn btn-primary" disabled={!value.trim()}>Rename</button>
+            <form
+                className="space-y-4"
+                onSubmit={e => {
+                    e.preventDefault();
+                    if (value.trim()) onRename();
+                }}
+            >
+                <div className="space-y-1.5">
+                    <label htmlFor={inputId} className="text-sm text-foreground-secondary">
+                        New Name
+                    </label>
+                    <input
+                        id={inputId}
+                        type="text"
+                        value={value}
+                        onChange={e => onChange(e.target.value)}
+                        className="input"
+                        autoFocus
+                        autoComplete="off"
+                        spellCheck="false"
+                    />
                 </div>
-            </div>
+                <div className="flex justify-end gap-3">
+                    <button type="button" onClick={onClose} className="btn btn-secondary">
+                        Cancel
+                    </button>
+                    <button type="submit" className="btn btn-primary" disabled={!value.trim()}>
+                        Rename
+                    </button>
+                </div>
+            </form>
         </Modal>
     );
 }

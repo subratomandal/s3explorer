@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Plus, Trash2, Check, Server, ChevronDown, AlertCircle, RefreshCw, ChevronRight, Link } from 'lucide-react';
 import * as api from '../api';
 import type { Connection, ConnectionConfig } from '../api';
@@ -116,6 +116,8 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
   const [editingId, setEditingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
 
   // Form State
   const [selectedProvider, setSelectedProvider] = useState<string>('custom');
@@ -193,6 +195,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
   async function handleTest() {
     setTesting(true);
     setError(null);
+    setTestResult(null);
     try {
       const result = await api.testConnection({
         endpoint: form.endpoint,
@@ -201,9 +204,9 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
         region: form.region,
         forcePathStyle: form.forcePathStyle,
       });
-      alert(`Connection successful! Found ${result.bucketCount} buckets.`);
+      setTestResult({ success: true, message: `Connection successful! Found ${result.bucketCount} bucket${result.bucketCount !== 1 ? 's' : ''}.` });
     } catch (err: any) {
-      alert(`Connection failed: ${err.message}`);
+      setTestResult({ success: false, message: `Connection failed: ${err.message}` });
     } finally {
       setTesting(false);
     }
@@ -228,16 +231,22 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
     }
   }
 
-  async function handleDelete(e: React.MouseEvent, id: number) {
-    e.stopPropagation();
-    if (!confirm('Are you sure you want to delete this connection?')) return;
+  const confirmDelete = useCallback(async () => {
+    if (!deleteConfirm) return;
     try {
-      await api.deleteConnection(id);
+      await api.deleteConnection(deleteConfirm);
       await loadConnections();
       onConnectionChange();
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setDeleteConfirm(null);
     }
+  }, [deleteConfirm, onConnectionChange]);
+
+  function handleDelete(e: React.MouseEvent, id: number) {
+    e.stopPropagation();
+    setDeleteConfirm(id);
   }
 
   async function handleActivate(id: number) {
@@ -267,6 +276,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
   }
 
   return (
+    <>
     <Modal isOpen={isOpen} onClose={onClose} title="Connection Manager" size="lg">
       <div className="flex flex-col">
         {error && (
@@ -362,9 +372,10 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
             <div className="space-y-3">
               {/* Provider Selector */}
               <div className="space-y-1.5">
-                <label className="text-xs text-foreground-muted leading-none block">Provider</label>
+                <label htmlFor="conn-provider" className="text-xs text-foreground-muted leading-none block">Provider</label>
                 <div className="relative">
                   <select
+                    id="conn-provider"
                     value={selectedProvider}
                     onChange={(e) => handleProviderChange(e.target.value)}
                     className="input appearance-none cursor-pointer pr-10 h-10 text-sm"
@@ -380,19 +391,23 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
               {/* Profile Name & Region Row */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs text-foreground-muted leading-none block">Profile Name</label>
+                  <label htmlFor="conn-name" className="text-xs text-foreground-muted leading-none block">Profile Name</label>
                   <input
+                    id="conn-name"
                     type="text"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="Production"
+                    placeholder="Production…"
                     className="input h-10 text-sm"
+                    autoComplete="off"
+                    spellCheck="false"
                   />
                 </div>
                 <div className="space-y-1.5 min-w-0">
-                  <label className="text-xs text-foreground-muted leading-none block">Region</label>
+                  <label htmlFor="conn-region" className="text-xs text-foreground-muted leading-none block">Region</label>
                   <div className="relative">
                     <select
+                      id="conn-region"
                       value={form.region}
                       onChange={(e) => handleRegionChange(e.target.value)}
                       className="input appearance-none cursor-pointer pr-10 h-10 text-sm truncate"
@@ -408,36 +423,46 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
 
               {/* Endpoint */}
               <div className="space-y-1.5">
-                <label className="text-xs text-foreground-muted leading-none block">S3 Endpoint</label>
+                <label htmlFor="conn-endpoint" className="text-xs text-foreground-muted leading-none block">S3 Endpoint</label>
                 <input
-                  type="text"
+                  id="conn-endpoint"
+                  type="url"
                   value={form.endpoint}
                   onChange={(e) => setForm({ ...form, endpoint: e.target.value })}
-                  placeholder="https://s3.amazonaws.com"
+                  placeholder="https://s3.amazonaws.com…"
                   className="input font-mono h-9 text-sm"
+                  autoComplete="off"
+                  spellCheck="false"
                 />
               </div>
 
               {/* Keys Row */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs text-foreground-muted leading-none block">Access Key</label>
+                  <label htmlFor="conn-access-key" className="text-xs text-foreground-muted leading-none block">Access Key</label>
                   <input
+                    id="conn-access-key"
                     type="text"
                     value={form.accessKey}
                     onChange={(e) => setForm({ ...form, accessKey: e.target.value })}
-                    placeholder="AKIA..."
+                    placeholder="AKIA…"
                     className="input font-mono h-10 text-sm"
+                    autoComplete="off"
+                    spellCheck="false"
+                    autoCorrect="off"
+                    autoCapitalize="off"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs text-foreground-muted leading-none block">Secret Key</label>
+                  <label htmlFor="conn-secret-key" className="text-xs text-foreground-muted leading-none block">Secret Key</label>
                   <input
+                    id="conn-secret-key"
                     type="password"
                     value={form.secretKey}
                     onChange={(e) => setForm({ ...form, secretKey: e.target.value })}
                     placeholder="••••••••"
                     className="input font-mono h-10 text-sm"
+                    autoComplete="off"
                   />
                 </div>
               </div>
@@ -445,18 +470,21 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
               {/* Path Style & Test */}
               <div className="flex items-center justify-between">
                 <label className="flex items-center gap-2 cursor-pointer group">
-                  <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
-                    form.forcePathStyle
-                      ? 'bg-accent-purple border-accent-purple'
-                      : 'border-border bg-transparent group-hover:border-border-hover'
-                  }`}>
-                    {form.forcePathStyle && <Check className="w-3 h-3 text-white" />}
-                  </div>
+                  <span
+                    className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
+                      form.forcePathStyle
+                        ? 'bg-accent-purple border-accent-purple'
+                        : 'border-border bg-transparent group-hover:border-border-hover'
+                    }`}
+                    aria-hidden="true"
+                  >
+                    {form.forcePathStyle && <Check className="w-3 h-3 text-white" aria-hidden="true" />}
+                  </span>
                   <input
                     type="checkbox"
                     checked={form.forcePathStyle}
                     onChange={(e) => setForm({ ...form, forcePathStyle: e.target.checked })}
-                    className="hidden"
+                    className="sr-only"
                   />
                   <span className="text-xs text-foreground-muted leading-none group-hover:text-foreground transition-colors">Path-style URLs</span>
                 </label>
@@ -465,11 +493,32 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                   onClick={handleTest}
                   disabled={testing || !form.endpoint || (!editingId && (!form.accessKey || !form.secretKey))}
                   className="group text-xs text-foreground-muted hover:text-accent-purple transition-colors flex items-center gap-1.5 disabled:opacity-50 px-2 py-1 rounded hover:bg-accent-purple/10"
+                  aria-label="Test connection"
                 >
-                  <RefreshCw className={`w-3 h-3 ${testing ? 'animate-spin' : 'group-hover:rotate-45'} transition-transform`} />
-                  Test
+                  <RefreshCw className={`w-3 h-3 ${testing ? 'animate-spin' : 'group-hover:rotate-45'} transition-transform`} aria-hidden="true" />
+                  {testing ? 'Testing…' : 'Test'}
                 </button>
               </div>
+
+              {/* Test Result */}
+              {testResult && (
+                <div
+                  className={`p-3 rounded-lg text-sm flex items-center gap-2 ${
+                    testResult.success
+                      ? 'bg-accent-green/10 border border-accent-green/20 text-accent-green'
+                      : 'bg-accent-red/10 border border-accent-red/20 text-accent-red'
+                  }`}
+                  role="status"
+                  aria-live="polite"
+                >
+                  {testResult.success ? (
+                    <Check className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+                  )}
+                  {testResult.message}
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}
@@ -492,5 +541,31 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
         )}
       </div>
     </Modal>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <Modal title="Delete Connection" onClose={() => setDeleteConfirm(null)} size="sm">
+          <div className="space-y-4">
+            <p className="text-sm text-foreground-secondary">
+              Are you sure you want to delete this connection? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="btn btn-secondary"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="btn btn-danger"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+    </>
   );
 }

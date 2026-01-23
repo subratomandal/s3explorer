@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import { Modal } from '../Modal';
 
 interface CreateBucketModalProps {
@@ -11,6 +11,8 @@ interface CreateBucketModalProps {
 
 export function CreateBucketModal({ isOpen, value, onChange, onClose, onCreate }: CreateBucketModalProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const inputId = useId();
+    const hintId = useId();
 
     if (!isOpen) return null;
 
@@ -26,33 +28,47 @@ export function CreateBucketModal({ isOpen, value, onChange, onClose, onCreate }
 
     return (
         <Modal title="Create Bucket" onClose={onClose}>
-            <div className="space-y-4">
-                <input
-                    type="text"
-                    placeholder="bucket name"
-                    value={value}
-                    onChange={e => onChange(e.target.value)}
-                    className="input"
-                    autoFocus
-                    onKeyDown={e => {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleSubmit();
-                        }
-                    }}
-                    disabled={isSubmitting}
-                />
+            <form
+                className="space-y-4"
+                onSubmit={e => {
+                    e.preventDefault();
+                    handleSubmit();
+                }}
+            >
+                <div className="space-y-1.5">
+                    <label htmlFor={inputId} className="text-sm text-foreground-secondary">
+                        Bucket Name
+                    </label>
+                    <input
+                        id={inputId}
+                        type="text"
+                        placeholder="my-bucket-name…"
+                        value={value}
+                        onChange={e => onChange(e.target.value)}
+                        className="input"
+                        autoFocus
+                        disabled={isSubmitting}
+                        autoComplete="off"
+                        spellCheck="false"
+                        aria-describedby={hintId}
+                    />
+                    <p id={hintId} className="text-xs text-foreground-muted">
+                        Use lowercase letters, numbers, and hyphens only
+                    </p>
+                </div>
                 <div className="flex justify-end gap-3">
-                    <button onClick={onClose} className="btn btn-secondary" disabled={isSubmitting}>Cancel</button>
+                    <button type="button" onClick={onClose} className="btn btn-secondary" disabled={isSubmitting}>
+                        Cancel
+                    </button>
                     <button
-                        onClick={handleSubmit}
+                        type="submit"
                         className="btn btn-primary"
                         disabled={!value.trim() || isSubmitting}
                     >
-                        {isSubmitting ? 'Creating...' : 'Create'}
+                        {isSubmitting ? 'Creating…' : 'Create'}
                     </button>
                 </div>
-            </div>
+            </form>
         </Modal>
     );
 }

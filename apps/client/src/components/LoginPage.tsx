@@ -75,18 +75,22 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             </div>
 
             <label className="flex items-center gap-3 cursor-pointer group py-1">
-              <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
-                rememberMe
-                  ? 'bg-accent-purple border-accent-purple'
-                  : 'border-border bg-transparent group-hover:border-border-hover'
-              }`}>
-                {rememberMe && <Check className="w-3 h-3 text-white" />}
-              </div>
+              <span
+                className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
+                  rememberMe
+                    ? 'bg-accent-purple border-accent-purple'
+                    : 'border-border bg-transparent group-hover:border-border-hover'
+                }`}
+                aria-hidden="true"
+              >
+                {rememberMe && <Check className="w-3 h-3 text-white" aria-hidden="true" />}
+              </span>
               <input
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="hidden"
+                className="sr-only"
+                aria-label="Remember me for 7 days"
               />
               <span className="text-sm text-foreground-secondary group-hover:text-foreground transition-colors">Remember me</span>
             </label>
