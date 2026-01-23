@@ -346,7 +346,7 @@ export default function App() {
         activeConnectionName={activeConnection?.name}
         onSearchChange={setSearchQuery}
         onBucketSelect={(name) => { setSelectedBucket(name); setCurrentPath(''); setSidebarOpen(false); }}
-        onNewBucket={() => setShowNewBucket(true)}
+        onNewBucket={() => { setNewName(''); setShowNewBucket(true); }}
         onDeleteBucket={(name) => setShowDeleteBucket(name)}
         onCloseSidebar={() => setSidebarOpen(false)}
         onNavigateHome={() => { setSelectedBucket(null); setCurrentPath(''); setSidebarOpen(false); }}
@@ -366,7 +366,7 @@ export default function App() {
           onNavigateToRoot={() => setCurrentPath('')}
           onNavigateToBreadcrumb={(i) => setCurrentPath(breadcrumbs.slice(0, i + 1).join('/') + '/')}
           onRefresh={() => loadObjects()}
-          onNewFolder={() => setShowNewFolder(true)}
+          onNewFolder={() => { setNewName(''); setShowNewFolder(true); }}
           onUpload={onDrop}
           onOpenCommandPalette={() => setShowCommandPalette(true)}
         />
@@ -445,7 +445,7 @@ export default function App() {
         isOpen={showNewBucket}
         value={newName}
         onChange={setNewName}
-        onClose={() => setShowNewBucket(false)}
+        onClose={() => { setNewName(''); setShowNewBucket(false); }}
         onCreate={handleCreateBucket}
       />
 
@@ -453,7 +453,7 @@ export default function App() {
         isOpen={showNewFolder}
         value={newName}
         onChange={setNewName}
-        onClose={() => setShowNewFolder(false)}
+        onClose={() => { setNewName(''); setShowNewFolder(false); }}
         onCreate={handleCreateFolder}
       />
 
@@ -493,10 +493,10 @@ export default function App() {
         onNavigateToRoot={() => setCurrentPath('')}
         onGoBack={handleGoBack}
         onRefresh={() => loadObjects()}
-        onNewFolder={() => setShowNewFolder(true)}
+        onNewFolder={() => { setNewName(''); setShowNewFolder(true); }}
         onUpload={() => fileInputRef.current?.click()}
         onOpenConnections={() => setShowConnectionManager(true)}
-        onNewBucket={() => setShowNewBucket(true)}
+        onNewBucket={() => { setNewName(''); setShowNewBucket(true); }}
       />
 
       <input
