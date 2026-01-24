@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { Database, Plus, Trash2, Copy, Check, X, Settings, LogOut, Sun, Moon } from 'lucide-react';
+import { Database, Plus, Trash2, Copy, Check, Settings, LogOut, Sun, Moon } from 'lucide-react';
 import type { Bucket } from '../types';
 
 interface SidebarProps {
@@ -71,16 +71,6 @@ export function Sidebar({
                 role="navigation"
                 aria-label="Sidebar navigation"
             >
-
-                {/* Close button - absolute positioned at top right on mobile */}
-                <button
-                    onClick={onCloseSidebar}
-                    className="absolute top-2 right-2 btn btn-ghost btn-icon w-10 h-10 md:hidden z-10"
-                    aria-label="Close sidebar"
-                >
-                    <X className="w-5 h-5" aria-hidden="true" />
-                </button>
-
                 {/* Header - fixed height */}
                 <div
                     className="h-14 flex items-center justify-between px-4 border-b border-border flex-shrink-0"
@@ -97,7 +87,7 @@ export function Sidebar({
                     </div>
                     <button
                         onClick={onToggleTheme}
-                        className="p-2 text-foreground-muted hover:text-foreground transition-colors"
+                        className="p-2 mr-1 text-foreground-muted hover:text-foreground transition-colors"
                         aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
                     >
                         {theme === 'dark' ? (
@@ -132,7 +122,7 @@ export function Sidebar({
                     </span>
                     <button
                         onClick={onNewBucket}
-                        className="create-bucket-btn p-2 mr-1 text-foreground-secondary hover:text-foreground transition-all"
+                        className="create-bucket-btn p-2 mr-2 text-foreground-secondary hover:text-foreground transition-all"
                         aria-label="Create new bucket"
                     >
                         <Plus className="w-4 h-4" aria-hidden="true" />
