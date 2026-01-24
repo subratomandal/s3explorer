@@ -61,7 +61,7 @@ export function Header({
     };
 
     return (
-        <header className="h-14 flex items-center justify-between px-2 sm:px-4 border-b border-border bg-background-secondary/50 flex-shrink-0 relative" role="banner">
+        <header className="h-14 flex items-center justify-between px-2 sm:pl-4 sm:pr-2 border-b border-border bg-background-secondary/50 flex-shrink-0 relative" role="banner">
             {/* Left Section - Navigation */}
             <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-shrink-0 max-w-[45%] sm:max-w-[280px] z-10">
                 <button

@@ -73,7 +73,7 @@ export function Sidebar({
             >
                 {/* Header - fixed height */}
                 <div
-                    className="h-14 flex items-center justify-between px-4 border-b border-border flex-shrink-0"
+                    className="h-14 flex items-center justify-between pl-4 pr-2 border-b border-border flex-shrink-0"
                 >
                     <div className="flex items-center gap-2.5 cursor-pointer group transition-all duration-300 hover:opacity-80" onClick={onNavigateHome} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && onNavigateHome()}>
                         <img
@@ -116,7 +116,7 @@ export function Sidebar({
                 </div>
 
                 {/* Buckets section header - fixed */}
-                <div className="flex items-center justify-between px-3 pl-5 py-2 flex-shrink-0">
+                <div className="flex items-center justify-between pl-5 pr-2 py-2 flex-shrink-0">
                     <span className="text-xs font-semibold text-foreground-muted uppercase tracking-wider" id="buckets-heading">
                         Buckets
                     </span>
