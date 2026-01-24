@@ -134,7 +134,7 @@ export function Sidebar({
                         {filteredBuckets.map((bucket, i) => (
                             <div
                                 key={bucket.name}
-                                className={`sidebar-item group stagger-item min-h-0 sm:min-h-[36px] py-1 sm:py-2 ${selectedBucket === bucket.name ? 'active' : ''}`}
+                                className={`sidebar-item group stagger-item min-h-[18px] sm:min-h-[36px] py-px sm:py-2 ${selectedBucket === bucket.name ? 'active' : ''}`}
                                 style={{ animationDelay: `${i * 30}ms` }}
                                 onClick={() => onBucketSelect(bucket.name)}
                                 onKeyDown={(e) => e.key === 'Enter' && onBucketSelect(bucket.name)}
