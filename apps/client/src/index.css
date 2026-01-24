@@ -684,10 +684,10 @@ textarea:focus-visible {
     font-size: 0.7rem;
   }
 
-  /* Sidebar items need larger touch targets */
+  /* Sidebar items - compact on mobile */
   .sidebar-item {
-    min-height: 44px;
-    padding: 0.75rem;
+    min-height: 22px;
+    padding: 0.25rem 0.75rem;
   }
 
   /* Context menu items */
