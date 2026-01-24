@@ -1,31 +1,31 @@
-// v 1.0
+// v 2.0 - Theme-aware colors using CSS variables
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
         background: {
-          DEFAULT: 'hsl(250, 24%, 9%)',
-          secondary: 'hsl(250, 21%, 11%)',
-          tertiary: 'hsl(250, 18%, 14%)',
-          hover: 'hsl(250, 18%, 16%)',
+          DEFAULT: 'var(--background)',
+          secondary: 'var(--background-secondary)',
+          tertiary: 'var(--background-tertiary)',
+          hover: 'var(--background-hover)',
         },
         border: {
-          DEFAULT: 'hsl(250, 15%, 20%)',
-          hover: 'hsl(250, 15%, 28%)',
+          DEFAULT: 'var(--border)',
+          hover: 'var(--border-hover)',
         },
         foreground: {
-          DEFAULT: 'hsl(0, 0%, 100%)',
-          secondary: 'hsl(250, 10%, 70%)',
-          muted: 'hsl(250, 10%, 50%)',
+          DEFAULT: 'var(--foreground)',
+          secondary: 'var(--foreground-secondary)',
+          muted: 'var(--foreground-muted)',
         },
         accent: {
-          pink: '#C049FF',
-          purple: '#9333EA',
-          green: '#4ADE80',
-          blue: '#3B82F6',
-          yellow: '#FACC15',
-          red: '#EF4444',
+          pink: 'var(--accent-pink)',
+          purple: 'var(--accent-purple)',
+          green: 'var(--accent-green)',
+          blue: 'var(--accent-blue)',
+          yellow: 'var(--accent-yellow)',
+          red: 'var(--accent-red)',
         },
       },
       fontFamily: {

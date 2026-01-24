@@ -25,38 +25,27 @@
 /* Light theme */
 [data-theme="light"] {
   color-scheme: light;
-  --background: hsl(0, 0%, 98%);
+  --background: hsl(220, 20%, 97%);
   --background-secondary: hsl(0, 0%, 100%);
-  --background-tertiary: hsl(250, 20%, 96%);
-  --background-hover: hsl(250, 20%, 92%);
-  --border: hsl(250, 15%, 88%);
-  --border-hover: hsl(250, 15%, 78%);
-  --foreground: hsl(250, 24%, 12%);
-  --foreground-secondary: hsl(250, 10%, 35%);
-  --foreground-muted: hsl(250, 10%, 50%);
-  --accent-pink: #A020F0;
+  --background-tertiary: hsl(220, 20%, 94%);
+  --background-hover: hsl(220, 20%, 90%);
+  --border: hsl(220, 15%, 85%);
+  --border-hover: hsl(220, 15%, 75%);
+  --foreground: hsl(220, 30%, 15%);
+  --foreground-secondary: hsl(220, 15%, 40%);
+  --foreground-muted: hsl(220, 10%, 55%);
+  --accent-pink: #9333EA;
   --accent-purple: #7C3AED;
+  --accent-green: #16A34A;
+  --accent-blue: #2563EB;
+  --accent-yellow: #CA8A04;
+  --accent-red: #DC2626;
 }
 
 /* Light theme specific adjustments */
 [data-theme="light"] .glass {
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-[data-theme="light"] .modal-backdrop {
-  background: rgba(0, 0, 0, 0.4);
-}
-
-[data-theme="light"] .command-palette-backdrop {
-  background: rgba(0, 0, 0, 0.5);
-}
-
-[data-theme="light"] .command-palette-content {
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.05),
-    0 25px 50px -12px rgba(0, 0, 0, 0.25),
-    0 0 100px rgba(124, 58, 237, 0.1);
 }
 
 * {
@@ -517,20 +506,32 @@ select.input option {
 }
 
 .modal-backdrop {
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--modal-backdrop-bg, rgba(0, 0, 0, 0.6));
   backdrop-filter: blur(4px);
   animation: modalBackdropIn 150ms ease forwards;
   overscroll-behavior: contain;
   touch-action: manipulation;
 }
 
+:root {
+  --modal-backdrop-bg: rgba(0, 0, 0, 0.6);
+  --command-palette-backdrop: rgba(0, 0, 0, 0.7);
+  --command-palette-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 100px rgba(192, 73, 255, 0.1);
+}
+
+[data-theme="light"] {
+  --modal-backdrop-bg: rgba(0, 0, 0, 0.4);
+  --command-palette-backdrop: rgba(0, 0, 0, 0.5);
+  --command-palette-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 25px 50px -12px rgba(0, 0, 0, 0.2), 0 0 60px rgba(124, 58, 237, 0.08);
+}
+
 @keyframes modalBackdropIn {
   from {
-    background: rgba(0, 0, 0, 0);
+    opacity: 0;
     backdrop-filter: blur(0px);
   }
   to {
-    background: rgba(0, 0, 0, 0.6);
+    opacity: 1;
     backdrop-filter: blur(4px);
   }
 }
@@ -609,16 +610,16 @@ header {
 
 /* Command Palette Styles */
 .command-palette-backdrop {
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--command-palette-backdrop, rgba(0, 0, 0, 0.7));
   backdrop-filter: blur(8px);
 }
 
 .command-palette-content {
   animation: commandPaletteIn 75ms ease;
-  box-shadow:
+  box-shadow: var(--command-palette-shadow,
     0 0 0 1px rgba(255, 255, 255, 0.05),
     0 25px 50px -12px rgba(0, 0, 0, 0.5),
-    0 0 100px rgba(192, 73, 255, 0.1);
+    0 0 100px rgba(192, 73, 255, 0.1));
 }
 
 @keyframes commandPaletteIn {
