@@ -286,34 +286,36 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Connection Manager" size="lg">
-      <div className="relative flex flex-col">
-        {/* Delete Confirmation Overlay */}
-        {deleteConfirm && (
-          <div className="absolute inset-0 z-10 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 rounded-lg animate-fadeIn">
-            <div className="bg-background-secondary border border-border rounded-xl p-5 max-w-xs w-full shadow-2xl animate-fadeIn">
-              <h3 className="text-base font-semibold text-foreground mb-2">Delete Connection</h3>
-              <p className="text-sm text-foreground-secondary mb-5">
-                This action cannot be undone.
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setDeleteConfirm(null)}
-                  className="btn btn-secondary flex-1"
-                  autoFocus
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmDelete}
-                  className="btn btn-danger flex-1"
-                >
-                  Delete
-                </button>
-              </div>
+    <>
+      {/* Delete Confirmation Overlay - Full screen */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-background-secondary border border-border rounded-xl p-6 max-w-sm w-full shadow-2xl animate-scaleIn">
+            <h3 className="text-lg font-semibold text-foreground mb-3">Delete Connection</h3>
+            <p className="text-sm text-foreground-secondary mb-6">
+              This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="btn btn-secondary flex-1"
+                autoFocus
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="btn btn-danger flex-1"
+              >
+                Delete
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
+
+    <Modal isOpen={isOpen} onClose={onClose} title="Connection Manager" size="lg">
+      <div className="relative flex flex-col">
 
         {error && (
           <div className="mb-4 p-3 bg-accent-red/10 border border-accent-red/20 rounded-lg text-accent-red text-sm flex items-center gap-2 animate-fadeIn">
@@ -341,8 +343,8 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                   <div
                     key={conn.id}
                     onClick={() => handleActivate(conn.id)}
-                    className={`group relative flex items-center justify-between p-3 rounded-lg bg-background-tertiary transition-all cursor-pointer overflow-hidden ${
-                      conn.isActive ? 'ring-1 ring-accent-purple/50' : 'hover:bg-accent-purple/5'
+                    className={`group relative flex items-center justify-between p-3 rounded-lg bg-background-tertiary border border-accent-purple/30 transition-all cursor-pointer overflow-hidden ${
+                      conn.isActive ? 'border-accent-purple' : 'hover:border-accent-purple/60 hover:bg-accent-purple/5'
                     }`}
                   >
                     {/* Left accent border */}
@@ -577,5 +579,6 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
         )}
       </div>
     </Modal>
+    </>
   );
 }

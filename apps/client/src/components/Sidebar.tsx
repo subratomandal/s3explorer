@@ -87,7 +87,7 @@ export function Sidebar({
                     </div>
                     <button
                         onClick={onToggleTheme}
-                        className="p-2 mr-3 text-foreground-muted hover:text-foreground transition-colors"
+                        className="p-2 text-foreground-muted hover:text-foreground transition-colors"
                         aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
                     >
                         {theme === 'dark' ? (
@@ -122,7 +122,7 @@ export function Sidebar({
                     </span>
                     <button
                         onClick={onNewBucket}
-                        className="create-bucket-btn p-2 mr-4 text-foreground-secondary hover:text-foreground transition-all"
+                        className="create-bucket-btn p-2 text-foreground-secondary hover:text-foreground transition-all"
                         aria-label="Create new bucket"
                     >
                         <Plus className="w-4 h-4" aria-hidden="true" />

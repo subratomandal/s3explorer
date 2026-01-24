@@ -171,7 +171,7 @@ export function Header({
                 <button
                     onClick={handleRefresh}
                     disabled={!selectedBucket || loading}
-                    className="btn btn-ghost btn-icon w-9 h-9 mr-2"
+                    className="btn btn-ghost btn-icon w-9 h-9"
                     aria-label={loading ? 'Refreshing...' : 'Refresh file list'}
                 >
                     <RefreshCw className={`w-5 h-5 ${isSpinning ? 'animate-spin-once' : ''}`} aria-hidden="true" />
