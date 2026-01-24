@@ -79,7 +79,7 @@ export function Sidebar({
                         <img
                             src="/logo.svg"
                             alt="S3 Explorer logo"
-                            className="w-7 h-7 logo-spin logo-themed transition-all duration-300 group-hover:drop-shadow-[0_0_4px_rgba(255,255,255,0.25)]"
+                            className="w-7 h-7 logo-spin logo-themed"
                         />
                         <span className="font-semibold text-base transition-all duration-300 group-hover:text-foreground group-hover:drop-shadow-[0_0_4px_rgba(255,255,255,0.15)]">
                             S3 Explorer
@@ -87,7 +87,7 @@ export function Sidebar({
                     </div>
                     <button
                         onClick={onToggleTheme}
-                        className="p-2 mr-1 text-foreground-muted hover:text-foreground transition-colors"
+                        className="p-2 mr-3 text-foreground-muted hover:text-foreground transition-colors"
                         aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
                     >
                         {theme === 'dark' ? (
@@ -122,7 +122,7 @@ export function Sidebar({
                     </span>
                     <button
                         onClick={onNewBucket}
-                        className="create-bucket-btn p-2 mr-2 text-foreground-secondary hover:text-foreground transition-all"
+                        className="create-bucket-btn p-2 mr-4 text-foreground-secondary hover:text-foreground transition-all"
                         aria-label="Create new bucket"
                     >
                         <Plus className="w-4 h-4" aria-hidden="true" />
