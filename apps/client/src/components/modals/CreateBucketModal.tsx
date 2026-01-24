@@ -1,5 +1,6 @@
-import { useState, useId } from 'react';
+import { useState, useId, useMemo } from 'react';
 import { Modal } from '../Modal';
+import { validateBucketName } from '../../utils/validation';
 
 interface CreateBucketModalProps {
     isOpen: boolean;
@@ -11,13 +12,20 @@ interface CreateBucketModalProps {
 
 export function CreateBucketModal({ isOpen, value, onChange, onClose, onCreate }: CreateBucketModalProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [touched, setTouched] = useState(false);
     const inputId = useId();
     const hintId = useId();
+    const errorId = useId();
+
+    // Validate on every change
+    const validation = useMemo(() => validateBucketName(value), [value]);
+    const showError = touched && !validation.valid && value.trim();
 
     if (!isOpen) return null;
 
     const handleSubmit = async () => {
-        if (isSubmitting || !value.trim()) return;
+        setTouched(true);
+        if (isSubmitting || !validation.valid) return;
         setIsSubmitting(true);
         try {
             await onCreate();
@@ -26,8 +34,13 @@ export function CreateBucketModal({ isOpen, value, onChange, onClose, onCreate }
         }
     };
 
+    const handleClose = () => {
+        setTouched(false);
+        onClose();
+    };
+
     return (
-        <Modal title="Create Bucket" onClose={onClose}>
+        <Modal title="Create Bucket" onClose={handleClose}>
             <form
                 className="space-y-4"
                 onSubmit={e => {
@@ -44,26 +57,35 @@ export function CreateBucketModal({ isOpen, value, onChange, onClose, onCreate }
                         type="text"
                         placeholder="e.g. photos"
                         value={value}
-                        onChange={e => onChange(e.target.value)}
-                        className="input"
+                        onChange={e => onChange(e.target.value.toLowerCase())}
+                        onBlur={() => setTouched(true)}
+                        className={`input ${showError ? 'border-accent-red focus:border-accent-red focus:ring-accent-red/20' : ''}`}
                         autoFocus
                         disabled={isSubmitting}
                         autoComplete="off"
                         spellCheck="false"
-                        aria-describedby={hintId}
+                        aria-describedby={showError ? errorId : hintId}
+                        aria-invalid={showError ? true : undefined}
+                        maxLength={63}
                     />
-                    <p id={hintId} className="text-xs text-foreground-muted">
-                        Use lowercase letters, numbers, and hyphens only
-                    </p>
+                    {showError ? (
+                        <p id={errorId} className="text-xs text-accent-red" role="alert">
+                            {validation.error}
+                        </p>
+                    ) : (
+                        <p id={hintId} className="text-xs text-foreground-muted">
+                            3-63 characters: lowercase letters, numbers, and hyphens
+                        </p>
+                    )}
                 </div>
                 <div className="flex justify-end gap-3">
-                    <button type="button" onClick={onClose} className="btn btn-secondary" disabled={isSubmitting}>
+                    <button type="button" onClick={handleClose} className="btn btn-secondary" disabled={isSubmitting}>
                         Cancel
                     </button>
                     <button
                         type="submit"
                         className="btn btn-primary"
-                        disabled={!value.trim() || isSubmitting}
+                        disabled={!validation.valid || isSubmitting}
                     >
                         {isSubmitting ? 'Creating…' : 'Create'}
                     </button>

@@ -41,6 +41,7 @@ export default {
         'fade-in': 'fadeIn 200ms ease',
         'slide-up': 'slideUp 200ms ease',
         'slide-in': 'slideIn 200ms ease',
+        'slide-up-fade': 'slideUpFade 300ms ease',
       },
       keyframes: {
         fadeIn: {
@@ -54,6 +55,10 @@ export default {
         slideIn: {
           from: { opacity: '0', transform: 'translateX(-10px)' },
           to: { opacity: '1', transform: 'translateX(0)' },
+        },
+        slideUpFade: {
+          from: { opacity: '0', transform: 'translateY(16px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
         },
       },
     },

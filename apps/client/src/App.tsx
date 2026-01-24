@@ -4,6 +4,7 @@ import { Folder, Database, Download, Edit3, Trash2 } from 'lucide-react';
 import * as api from './api';
 import type { Bucket, S3Object, ToastState, ContextMenuState } from './types';
 import { getFileName } from './utils/fileUtils';
+import { useNetworkStatus } from './hooks/useNetworkStatus';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { FileTable } from './components/FileTable';
@@ -13,6 +14,7 @@ import { ContextMenu, ContextMenuItem } from './components/ContextMenu';
 import { UploadProgress } from './components/UploadProgress';
 import { DropOverlay } from './components/DropOverlay';
 import { ErrorBanner } from './components/ErrorBanner';
+import { OfflineIndicator } from './components/OfflineIndicator';
 import { CreateBucketModal } from './components/modals/CreateBucketModal';
 import { CreateFolderModal } from './components/modals/CreateFolderModal';
 import { RenameModal } from './components/modals/RenameModal';
@@ -36,6 +38,9 @@ export default function App() {
   // Connection state
   const [activeConnection, setActiveConnection] = useState<Connection | null>(null);
   const [showConnectionManager, setShowConnectionManager] = useState(false);
+
+  // Network status
+  const networkStatus = useNetworkStatus();
 
   // Bucket/Object state
   const [buckets, setBuckets] = useState<Bucket[]>([]);
@@ -173,15 +178,73 @@ export default function App() {
     if (selectedBucket && authenticated) loadObjects();
   }, [selectedBucket, currentPath, authenticated, loadObjects]);
 
+  // Browser history integration for folder navigation
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      const state = event.state;
+      if (state) {
+        setSelectedBucket(state.bucket || null);
+        setCurrentPath(state.path || '');
+      } else {
+        // No state means we're at the initial page
+        setSelectedBucket(null);
+        setCurrentPath('');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Push state when bucket or path changes (but not on initial load or popstate)
+  const isInitialMount = useRef(true);
+  const isPopState = useRef(false);
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      // Replace initial state
+      window.history.replaceState(
+        { bucket: selectedBucket, path: currentPath },
+        '',
+        window.location.pathname
+      );
+      return;
+    }
+
+    if (isPopState.current) {
+      isPopState.current = false;
+      return;
+    }
+
+    // Push new state for user-initiated navigation
+    window.history.pushState(
+      { bucket: selectedBucket, path: currentPath },
+      '',
+      window.location.pathname
+    );
+  }, [selectedBucket, currentPath]);
+
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (!selectedBucket || acceptedFiles.length === 0) return;
+
+    // Check network status before upload
+    if (!networkStatus.isOnline || !networkStatus.isBackendReachable) {
+      showToastMsg('Cannot upload - check your connection', 'error');
+      return;
+    }
+
     try {
       setUploading(true);
       setUploadProgress(0);
-      const interval = setInterval(() => setUploadProgress(p => Math.min(p + 10, 90)), 100);
+
+      // Simulate progress while uploading (real progress would need XHR)
+      const interval = setInterval(() => setUploadProgress(p => Math.min(p + 5, 85)), 200);
+
       await api.uploadFiles(selectedBucket, currentPath, acceptedFiles);
+
       clearInterval(interval);
       setUploadProgress(100);
+
       setTimeout(() => {
         setUploading(false);
         setUploadProgress(0);
@@ -189,11 +252,18 @@ export default function App() {
         showToastMsg(`${acceptedFiles.length} file${acceptedFiles.length > 1 ? 's' : ''} uploaded`);
       }, 400);
     } catch (err: any) {
-      setError(err.message);
+      setUploadProgress(0);
       setUploading(false);
-      showToastMsg('Upload failed', 'error');
+
+      // More specific error messages
+      const errorMsg = err.code === 'NETWORK_ERROR'
+        ? 'Upload failed - connection lost'
+        : err.code === 'TIMEOUT'
+          ? 'Upload timed out - file may be too large'
+          : 'Upload failed';
+      showToastMsg(errorMsg, 'error');
     }
-  }, [selectedBucket, currentPath, loadObjects]);
+  }, [selectedBucket, currentPath, loadObjects, networkStatus.isOnline, networkStatus.isBackendReachable]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, noClick: true });
 
@@ -517,6 +587,11 @@ export default function App() {
         <WelcomeMessage onConfigure={() => setShowConnectionManager(true)} />
       )}
 
+      {/* Network status indicator */}
+      <OfflineIndicator
+        isOnline={networkStatus.isOnline}
+        isBackendReachable={networkStatus.isBackendReachable}
+      />
     </div>
   );
 }

@@ -2,6 +2,8 @@ import type { Bucket, S3Object } from './types';
 
 const API_BASE = '/api';
 const DEFAULT_TIMEOUT = 30000; // 30 seconds
+const DEFAULT_RETRIES = 3;
+const RETRY_DELAY_BASE = 1000; // 1 second base delay for exponential backoff
 
 export type { Bucket, S3Object };
 
@@ -10,38 +12,80 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
-    public code?: string
+    public code?: string,
+    public isRetryable: boolean = false
   ) {
     super(message);
     this.name = 'ApiError';
   }
 }
 
-// Wrapper for fetch with timeout and better error handling
+// Determine if an error is retryable
+function isRetryableError(status: number): boolean {
+  // Retry on network errors (0), timeouts (408), and server errors (5xx)
+  return status === 0 || status === 408 || status === 429 || (status >= 500 && status < 600);
+}
+
+// Sleep helper for retry delays
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Wrapper for fetch with timeout, retry logic, and better error handling
 async function fetchWithTimeout(
   url: string,
-  options: RequestInit & { timeout?: number } = {}
+  options: RequestInit & { timeout?: number; retries?: number; skipRetry?: boolean } = {}
 ): Promise<Response> {
-  const { timeout = DEFAULT_TIMEOUT, ...fetchOptions } = options;
+  const {
+    timeout = DEFAULT_TIMEOUT,
+    retries = DEFAULT_RETRIES,
+    skipRetry = false,
+    ...fetchOptions
+  } = options;
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  let lastError: ApiError | null = null;
+  const maxAttempts = skipRetry ? 1 : retries;
 
-  try {
-    const response = await fetch(url, {
-      ...fetchOptions,
-      signal: controller.signal,
-      credentials: 'include',
-    });
-    return response;
-  } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw new ApiError('Request timed out', 408, 'TIMEOUT');
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    try {
+      const response = await fetch(url, {
+        ...fetchOptions,
+        signal: controller.signal,
+        credentials: 'include',
+      });
+
+      clearTimeout(timeoutId);
+
+      // Don't retry on client errors (4xx) except 429 (rate limit)
+      if (!response.ok && isRetryableError(response.status) && attempt < maxAttempts - 1) {
+        const delay = RETRY_DELAY_BASE * Math.pow(2, attempt); // Exponential backoff
+        await sleep(delay);
+        continue;
+      }
+
+      return response;
+    } catch (error) {
+      clearTimeout(timeoutId);
+
+      if (error instanceof Error && error.name === 'AbortError') {
+        lastError = new ApiError('Request timed out', 408, 'TIMEOUT', true);
+      } else {
+        lastError = new ApiError('Network error - check your connection', 0, 'NETWORK_ERROR', true);
+      }
+
+      // Retry on network errors
+      if (attempt < maxAttempts - 1) {
+        const delay = RETRY_DELAY_BASE * Math.pow(2, attempt);
+        await sleep(delay);
+        continue;
+      }
     }
-    throw new ApiError('Network error', 0, 'NETWORK_ERROR');
-  } finally {
-    clearTimeout(timeoutId);
   }
+
+  throw lastError || new ApiError('Request failed after retries', 0, 'RETRY_EXHAUSTED', false);
 }
 
 // Helper to handle response
