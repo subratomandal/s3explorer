@@ -195,10 +195,26 @@ export async function getDownloadUrl(bucket: string, key: string): Promise<strin
   return data.url;
 }
 
-export async function uploadFiles(bucket: string, prefix: string, files: File[]): Promise<void> {
+export async function uploadFiles(
+  bucket: string,
+  prefix: string,
+  files: File[],
+  renamedNames?: Map<File, string>
+): Promise<void> {
   const formData = new FormData();
   formData.append('prefix', prefix);
-  files.forEach(file => formData.append('files', file));
+
+  // If we have renamed names, send them as a JSON array
+  if (renamedNames && renamedNames.size > 0) {
+    const names: string[] = [];
+    files.forEach(file => {
+      formData.append('files', file);
+      names.push(renamedNames.get(file) || file.name);
+    });
+    formData.append('names', JSON.stringify(names));
+  } else {
+    files.forEach(file => formData.append('files', file));
+  }
 
   const res = await fetchWithTimeout(`${API_BASE}/objects/${encodeURIComponent(bucket)}/upload`, {
     method: 'POST',

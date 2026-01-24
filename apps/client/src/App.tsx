@@ -4,6 +4,7 @@ import { Folder, Database, Download, Edit3, Trash2 } from 'lucide-react';
 import * as api from './api';
 import type { Bucket, S3Object, ToastState, ContextMenuState } from './types';
 import { getFileName } from './utils/fileUtils';
+import { resolveUploadConflicts, generateUniqueName, hasNameConflict } from './utils/uniqueName';
 import { useNetworkStatus } from './hooks/useNetworkStatus';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
@@ -237,10 +238,24 @@ export default function App() {
       setUploading(true);
       setUploadProgress(0);
 
+      // Get existing file names in current folder to check for duplicates
+      const existingNames = new Set(
+        objects
+          .filter(obj => !obj.isFolder)
+          .map(obj => getFileName(obj.key))
+      );
+
+      // Resolve conflicts by generating unique names
+      const renamedFiles = resolveUploadConflicts(acceptedFiles, existingNames);
+
+      // Check if any files were renamed
+      const renamedCount = Array.from(renamedFiles.entries())
+        .filter(([file, newName]) => file.name !== newName).length;
+
       // Simulate progress while uploading (real progress would need XHR)
       const interval = setInterval(() => setUploadProgress(p => Math.min(p + 5, 85)), 200);
 
-      await api.uploadFiles(selectedBucket, currentPath, acceptedFiles);
+      await api.uploadFiles(selectedBucket, currentPath, acceptedFiles, renamedFiles);
 
       clearInterval(interval);
       setUploadProgress(100);
@@ -249,7 +264,10 @@ export default function App() {
         setUploading(false);
         setUploadProgress(0);
         loadObjects();
-        showToastMsg(`${acceptedFiles.length} file${acceptedFiles.length > 1 ? 's' : ''} uploaded`);
+        const msg = renamedCount > 0
+          ? `${acceptedFiles.length} file${acceptedFiles.length > 1 ? 's' : ''} uploaded (${renamedCount} renamed)`
+          : `${acceptedFiles.length} file${acceptedFiles.length > 1 ? 's' : ''} uploaded`;
+        showToastMsg(msg);
       }, 400);
     } catch (err: any) {
       setUploadProgress(0);
@@ -263,13 +281,21 @@ export default function App() {
           : 'Upload failed';
       showToastMsg(errorMsg, 'error');
     }
-  }, [selectedBucket, currentPath, loadObjects, networkStatus.isOnline, networkStatus.isBackendReachable]);
+  }, [selectedBucket, currentPath, loadObjects, objects, networkStatus.isOnline, networkStatus.isBackendReachable]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, noClick: true });
 
   const handleCreateBucket = async () => {
     if (!newName.trim()) return;
     const name = newName.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+
+    // Check if bucket already exists
+    const existingBucketNames = new Set(buckets.map(b => b.name.toLowerCase()));
+    if (existingBucketNames.has(name)) {
+      showToastMsg(`Bucket "${name}" already exists`, 'error');
+      return;
+    }
+
     try {
       await api.createBucket(name);
       setShowNewBucket(false);
@@ -278,7 +304,11 @@ export default function App() {
       setSelectedBucket(name);
       showToastMsg(`Bucket "${name}" created`);
     } catch (err: any) {
-      showToastMsg('Failed to create bucket', 'error');
+      // Check for common S3 errors
+      const errorMsg = err.message?.toLowerCase().includes('already')
+        ? `Bucket "${name}" already exists`
+        : 'Failed to create bucket';
+      showToastMsg(errorMsg, 'error');
     }
   };
 
@@ -319,11 +349,24 @@ export default function App() {
   const handleCreateFolder = async () => {
     if (!newName.trim() || !selectedBucket) return;
     try {
-      await api.createFolder(selectedBucket, currentPath + newName.trim());
+      // Get existing names to check for duplicates
+      const existingNames = new Set(objects.map(obj => getFileName(obj.key)));
+
+      // Generate unique folder name if needed
+      let folderName = newName.trim();
+      if (hasNameConflict(folderName, existingNames)) {
+        folderName = generateUniqueName(folderName, existingNames, true);
+      }
+
+      await api.createFolder(selectedBucket, currentPath + folderName);
       setShowNewFolder(false);
       setNewName('');
       loadObjects();
-      showToastMsg(`Folder created`);
+
+      const msg = folderName !== newName.trim()
+        ? `Folder created as "${folderName}"`
+        : `Folder created`;
+      showToastMsg(msg);
     } catch (err: any) {
       showToastMsg('Failed to create folder', 'error');
     }
@@ -332,22 +375,40 @@ export default function App() {
   const handleRename = async () => {
     if (!showRename || !newName.trim() || !selectedBucket) return;
     try {
+      // Get existing names (excluding the item being renamed)
+      const existingNames = new Set(
+        objects
+          .filter(obj => obj.key !== showRename.key)
+          .map(obj => getFileName(obj.key))
+      );
+
+      // Generate unique name if there's a conflict
+      let finalName = newName.trim();
+      const originalName = finalName;
+      if (hasNameConflict(finalName, existingNames)) {
+        finalName = generateUniqueName(finalName, existingNames, showRename.isFolder);
+      }
+
       let newKey: string;
       if (showRename.isFolder) {
         const pathParts = showRename.key.split('/').filter(Boolean);
         pathParts.pop();
         const parentPath = pathParts.length > 0 ? pathParts.join('/') + '/' : '';
-        newKey = parentPath + newName.trim() + '/';
+        newKey = parentPath + finalName + '/';
       } else {
         const lastSlash = showRename.key.lastIndexOf('/');
         const dirPath = lastSlash >= 0 ? showRename.key.substring(0, lastSlash + 1) : '';
-        newKey = dirPath + newName.trim();
+        newKey = dirPath + finalName;
       }
       await api.renameObject(selectedBucket, showRename.key, newKey);
       setShowRename(null);
       setNewName('');
       loadObjects();
-      showToastMsg(`Renamed`);
+
+      const msg = finalName !== originalName
+        ? `Renamed to "${finalName}"`
+        : `Renamed`;
+      showToastMsg(msg);
     } catch (err: any) {
       showToastMsg('Rename failed', 'error');
     }

@@ -95,9 +95,22 @@ router.post('/:bucket/upload', upload.array('files'), async (req: Request, res: 
       return res.status(400).json({ error: 'No files provided' });
     }
 
+    // Parse renamed names if provided (for handling duplicate names)
+    let renamedNames: string[] | null = null;
+    if (req.body.names) {
+      try {
+        renamedNames = JSON.parse(req.body.names);
+      } catch {
+        // Ignore parse errors, use original names
+      }
+    }
+
     const results = [];
-    for (const file of files) {
-      const safeName = sanitizeFilename(file.originalname);
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      // Use renamed name if provided, otherwise use original
+      const originalName = renamedNames && renamedNames[i] ? renamedNames[i] : file.originalname;
+      const safeName = sanitizeFilename(originalName);
       const key = prefix ? `${prefix}${safeName}` : safeName;
 
       if (!isValidObjectKey(key)) {
