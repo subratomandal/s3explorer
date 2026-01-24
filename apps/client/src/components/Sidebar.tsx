@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Database, Plus, Trash2, Copy, Check, X, Settings, LogOut, Sun, Moon } from 'lucide-react';
 import type { Bucket } from '../types';
 
@@ -9,6 +9,8 @@ interface SidebarProps {
     loading: boolean;
     sidebarOpen: boolean;
     activeConnectionName?: string;
+    theme: 'dark' | 'light';
+    onToggleTheme: () => void;
     onSearchChange: (value: string) => void;
     onBucketSelect: (name: string) => void;
     onNewBucket: () => void;
@@ -26,6 +28,8 @@ export function Sidebar({
     loading,
     sidebarOpen,
     activeConnectionName,
+    theme,
+    onToggleTheme,
     onSearchChange,
     onBucketSelect,
     onNewBucket,
@@ -36,20 +40,6 @@ export function Sidebar({
     onLogout,
 }: SidebarProps) {
     const [copiedBucket, setCopiedBucket] = useState<string | null>(null);
-    const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-        const saved = localStorage.getItem('theme');
-        return (saved === 'light' || saved === 'dark') ? saved : 'dark';
-    });
-
-    // Apply theme to document
-    useEffect(() => {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-    }, [theme]);
-
-    const toggleTheme = useCallback(() => {
-        setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-    }, []);
 
     // Memoize filtered buckets to avoid recalculation on every render
     const filteredBuckets = useMemo(() =>
@@ -99,14 +89,14 @@ export function Sidebar({
                         <img
                             src="/logo.svg"
                             alt="S3 Explorer logo"
-                            className={`w-7 h-7 logo-spin transition-all duration-300 group-hover:drop-shadow-[0_0_4px_rgba(255,255,255,0.25)] ${theme === 'dark' ? 'invert' : ''}`}
+                            className="w-7 h-7 logo-spin logo-themed transition-all duration-300 group-hover:drop-shadow-[0_0_4px_rgba(255,255,255,0.25)]"
                         />
                         <span className="font-semibold text-base transition-all duration-300 group-hover:text-foreground group-hover:drop-shadow-[0_0_4px_rgba(255,255,255,0.15)]">
                             S3 Explorer
                         </span>
                     </div>
                     <button
-                        onClick={toggleTheme}
+                        onClick={onToggleTheme}
                         className="p-2 text-foreground-muted hover:text-foreground transition-colors"
                         aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
                     >

@@ -58,7 +58,7 @@ export function WelcomeMessage({ onConfigure }: WelcomeMessageProps) {
             <img
               src="/logo.svg"
               alt=""
-              className="w-6 h-6 invert opacity-80 group-hover:opacity-100 transition-opacity"
+              className="w-6 h-6 logo-themed opacity-80 group-hover:opacity-100 transition-opacity"
             />
           </div>
           <div className="flex-1 min-w-0">

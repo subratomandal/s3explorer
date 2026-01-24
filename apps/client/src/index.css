@@ -478,6 +478,15 @@ select.input option {
   animation: spin 1s linear infinite;
 }
 
+/* Theme-aware logo - inverts in dark mode, normal in light mode */
+.logo-themed {
+  filter: invert(1);
+}
+
+[data-theme="light"] .logo-themed {
+  filter: invert(0);
+}
+
 .animate-fadeIn { animation: fadeIn 75ms ease; }
 .animate-fadeInUp { animation: fadeInUp 100ms ease; }
 .animate-fadeInDown { animation: fadeInDown 100ms ease; }

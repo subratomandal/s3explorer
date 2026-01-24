@@ -37,7 +37,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             <img
               src="/logo.svg"
               alt="S3 Explorer"
-              className="w-14 h-14 sm:w-16 sm:h-16 invert"
+              className="w-14 h-14 sm:w-16 sm:h-16 logo-themed"
             />
           </div>
           <h1 className="text-lg sm:text-xl font-semibold text-foreground">Welcome back</h1>

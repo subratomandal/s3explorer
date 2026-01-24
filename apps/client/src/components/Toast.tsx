@@ -27,9 +27,9 @@ export function Toast({ message, type = 'success', onClose }: ToastProps) {
         >
             <div className={`w-5 h-5 rounded-full flex items-center justify-center ${iconBg}`} aria-hidden="true">
                 {isSuccess ? (
-                    <Check className="w-3 h-3 text-background" />
+                    <Check className="w-3 h-3 text-white" />
                 ) : (
-                    <X className="w-3 h-3 text-background" />
+                    <X className="w-3 h-3 text-white" />
                 )}
             </div>
             {message}

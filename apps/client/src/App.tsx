@@ -66,10 +66,14 @@ export default function App() {
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
 
-  const [theme] = useState<'dark' | 'light'>(() => {
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.THEME);
     return (saved === 'light' || saved === 'dark') ? saved : 'dark';
   });
+
+  const toggleTheme = useCallback(() => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  }, []);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -475,6 +479,8 @@ export default function App() {
         loading={loading}
         sidebarOpen={sidebarOpen}
         activeConnectionName={activeConnection?.name}
+        theme={theme}
+        onToggleTheme={toggleTheme}
         onSearchChange={setSearchQuery}
         onBucketSelect={(name) => { setSelectedBucket(name); setCurrentPath(''); setSidebarOpen(false); }}
         onNewBucket={() => { setNewName(''); setShowNewBucket(true); }}
