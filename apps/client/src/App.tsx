@@ -436,6 +436,10 @@ export default function App() {
   };
 
   const handleConnectionChange = () => {
+    // Reset state when switching connections
+    setSelectedBucket(null);
+    setCurrentPath('');
+    setObjects([]);
     loadActiveConnection();
     loadBuckets();
   };

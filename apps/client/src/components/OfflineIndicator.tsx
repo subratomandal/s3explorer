@@ -23,12 +23,12 @@ export function OfflineIndicator({ isOnline, isBackendReachable }: OfflineIndica
             role="alert"
             aria-live="assertive"
         >
-            <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-accent-red/10 border border-accent-red/20 shadow-lg backdrop-blur-sm">
+            <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg bg-accent-red/15 border border-accent-purple/40 shadow-lg backdrop-blur-sm">
                 <WifiOff className="w-4 h-4 text-accent-red flex-shrink-0" />
-                <span className="text-sm text-foreground font-medium">{message}</span>
+                <span className="text-xs sm:text-sm text-foreground font-medium">{message}</span>
                 <button
                     onClick={handleRetry}
-                    className="flex items-center gap-1.5 text-xs text-accent-red hover:text-accent-red/80 transition-colors ml-2"
+                    className="flex items-center gap-1 sm:gap-1.5 text-xs text-accent-red hover:text-accent-red/80 transition-colors ml-1 sm:ml-2"
                     aria-label="Retry connection"
                 >
                     <RefreshCw className="w-3 h-3" />

@@ -426,33 +426,48 @@ select.input option {
 }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-4px); }
+  from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.98); }
+  from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-4px); }
+  from { opacity: 0; transform: translateX(-8px); }
   to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes slideInRight {
-  from { opacity: 0; transform: translateX(4px); }
+  from { opacity: 0; transform: translateX(8px); }
   to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.animate-slide-up-fade {
+  animation: slideUpFade 300ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes spin {
@@ -495,17 +510,17 @@ select.input option {
   filter: invert(0) drop-shadow(0 0 4px rgba(0,0,0,0.15)) !important;
 }
 
-.animate-fadeIn { animation: fadeIn 75ms ease; }
-.animate-fadeInUp { animation: fadeInUp 100ms ease; }
-.animate-fadeInDown { animation: fadeInDown 100ms ease; }
-.animate-scaleIn { animation: scaleIn 75ms ease; }
-.animate-slideInLeft { animation: slideInLeft 100ms ease; }
-.animate-slideInRight { animation: slideInRight 100ms ease; }
+.animate-fadeIn { animation: fadeIn 200ms cubic-bezier(0.16, 1, 0.3, 1); }
+.animate-fadeInUp { animation: fadeInUp 250ms cubic-bezier(0.16, 1, 0.3, 1); }
+.animate-fadeInDown { animation: fadeInDown 250ms cubic-bezier(0.16, 1, 0.3, 1); }
+.animate-scaleIn { animation: scaleIn 200ms cubic-bezier(0.16, 1, 0.3, 1); }
+.animate-slideInLeft { animation: slideInLeft 250ms cubic-bezier(0.16, 1, 0.3, 1); }
+.animate-slideInRight { animation: slideInRight 250ms cubic-bezier(0.16, 1, 0.3, 1); }
 .animate-spin { animation: spin 1s linear infinite; }
 
 .stagger-item {
   opacity: 0;
-  animation: fadeInUp 80ms ease forwards;
+  animation: fadeInUp 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Create bucket button - subtle glow on hover */
@@ -526,8 +541,8 @@ select.input option {
 
 .modal-backdrop {
   background: var(--modal-backdrop-bg, rgba(0, 0, 0, 0.6));
-  backdrop-filter: blur(4px);
-  animation: modalBackdropIn 150ms ease forwards;
+  backdrop-filter: blur(8px);
+  animation: modalBackdropIn 250ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   overscroll-behavior: contain;
   touch-action: manipulation;
 }
@@ -551,18 +566,18 @@ select.input option {
   }
   to {
     opacity: 1;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(8px);
   }
 }
 
 .modal-content {
-  animation: modalContentIn 150ms ease forwards;
+  animation: modalContentIn 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes modalContentIn {
   from {
     opacity: 0;
-    transform: scale(0.96) translateY(8px);
+    transform: scale(0.94) translateY(10px);
   }
   to {
     opacity: 1;
@@ -571,7 +586,7 @@ select.input option {
 }
 
 .context-menu {
-  animation: scaleIn 50ms ease;
+  animation: scaleIn 180ms cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: top left;
 }
 
@@ -601,7 +616,7 @@ select.input option {
 }
 
 .empty-state {
-  animation: fadeInUp 150ms ease;
+  animation: fadeInUp 300ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .empty-state-icon {
@@ -634,7 +649,7 @@ header {
 }
 
 .command-palette-content {
-  animation: commandPaletteIn 75ms ease;
+  animation: commandPaletteIn 250ms cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: var(--command-palette-shadow,
     0 0 0 1px rgba(255, 255, 255, 0.05),
     0 25px 50px -12px rgba(0, 0, 0, 0.5),
@@ -644,7 +659,7 @@ header {
 @keyframes commandPaletteIn {
   from {
     opacity: 0;
-    transform: scale(0.98) translateY(-6px);
+    transform: scale(0.95) translateY(-12px);
   }
   to {
     opacity: 1;

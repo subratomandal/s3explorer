@@ -318,7 +318,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
       <div className="relative flex flex-col">
 
         {error && (
-          <div className="mb-4 p-3 bg-accent-red/10 border border-accent-red/20 rounded-lg text-accent-red text-sm flex items-center gap-2 animate-fadeIn">
+          <div className="mb-4 p-3 bg-accent-red/15 rounded-lg text-accent-red text-sm flex items-center gap-2 animate-fadeIn">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             {error}
           </div>
@@ -343,8 +343,8 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                   <div
                     key={conn.id}
                     onClick={() => handleActivate(conn.id)}
-                    className={`group relative flex items-center justify-between p-3 rounded-lg bg-background-tertiary border border-accent-purple/30 transition-all cursor-pointer overflow-hidden ${
-                      conn.isActive ? 'border-accent-purple' : 'hover:border-accent-purple/60 hover:bg-accent-purple/5'
+                    className={`group relative flex items-center justify-between p-3 rounded-lg bg-background-tertiary transition-all cursor-pointer overflow-hidden ${
+                      conn.isActive ? 'ring-1 ring-accent-purple' : 'hover:bg-accent-purple/5'
                     }`}
                   >
                     {/* Left accent border */}
@@ -543,8 +543,8 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                 <div
                   className={`p-3 rounded-lg text-sm flex items-center gap-2 ${
                     testResult.success
-                      ? 'bg-accent-green/10 border border-accent-green/20 text-accent-green'
-                      : 'bg-accent-red/10 border border-accent-red/20 text-accent-red'
+                      ? 'bg-accent-green/15 text-accent-green'
+                      : 'bg-accent-red/15 text-accent-red'
                   }`}
                   role="status"
                   aria-live="polite"
