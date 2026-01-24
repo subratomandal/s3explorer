@@ -544,7 +544,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                   className={`p-3 rounded-lg text-sm flex items-center gap-2 ${
                     testResult.success
                       ? 'bg-accent-green/15 text-accent-green'
-                      : 'bg-accent-red/15 text-accent-red'
+                      : 'bg-accent-red/15 text-accent-red border border-accent-purple/40'
                   }`}
                   role="status"
                   aria-live="polite"

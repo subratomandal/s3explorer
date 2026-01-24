@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2, AlertTriangle, Folder, FileText } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { getFileName } from '../../utils/fileUtils';
 import type { S3Object } from '../../types';
 
@@ -33,53 +33,32 @@ export function DeleteModal({ object, onClose, onDelete }: DeleteModalProps) {
             onClick={onClose}
         >
             <div
-                className="bg-background-secondary border border-border rounded-xl p-6 max-w-md w-full shadow-2xl animate-scaleIn"
+                className="bg-background-secondary border border-border rounded-xl p-6 max-w-sm w-full shadow-2xl animate-scaleIn"
                 onClick={e => e.stopPropagation()}
             >
-                {/* Header with icon */}
-                <div className="flex items-center gap-4 mb-5">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                        isFolder ? 'bg-accent-red/15' : 'bg-accent-red/10'
-                    }`}>
-                        <Trash2 className="w-6 h-6 text-accent-red" />
-                    </div>
-                    <div>
-                        <h3 className="text-lg font-semibold text-foreground">
-                            Delete {isFolder ? 'Folder' : 'File'}
-                        </h3>
-                        <p className="text-sm text-foreground-muted mt-0.5">
-                            This action cannot be undone
-                        </p>
-                    </div>
-                </div>
+                {/* Header */}
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                    Delete {isFolder ? 'Folder' : 'File'}
+                </h3>
 
-                {/* File/Folder info */}
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-background-tertiary mb-4">
-                    {isFolder ? (
-                        <Folder className="w-5 h-5 text-accent-purple flex-shrink-0" />
-                    ) : (
-                        <FileText className="w-5 h-5 text-foreground-muted flex-shrink-0" />
-                    )}
-                    <span className="text-sm font-medium text-foreground truncate" title={fileName}>
-                        {fileName}
-                    </span>
-                </div>
+                {/* Description */}
+                <p className="text-sm text-foreground-muted mb-4">
+                    Are you sure you want to delete{' '}
+                    <span className="text-foreground font-medium">"{fileName}"</span>?
+                </p>
 
                 {/* Warning for folders */}
                 {isFolder && (
-                    <div className="flex items-start gap-3 p-3 rounded-lg bg-accent-yellow/10 mb-5">
-                        <AlertTriangle className="w-5 h-5 text-accent-yellow flex-shrink-0 mt-0.5" />
-                        <div className="text-sm">
-                            <p className="text-foreground font-medium">All contents will be deleted</p>
-                            <p className="text-foreground-muted mt-1">
-                                This includes all files and subfolders inside this folder.
-                            </p>
-                        </div>
+                    <div className="flex items-start gap-2.5 p-3 rounded-lg bg-accent-yellow/10 mb-5 text-sm">
+                        <AlertTriangle className="w-4 h-4 text-accent-yellow flex-shrink-0 mt-0.5" />
+                        <p className="text-foreground-secondary">
+                            All files and subfolders will be permanently deleted.
+                        </p>
                     </div>
                 )}
 
                 {/* Actions */}
-                <div className="flex gap-3">
+                <div className="flex gap-3 mt-5">
                     <button
                         onClick={onClose}
                         className="btn btn-secondary flex-1"
