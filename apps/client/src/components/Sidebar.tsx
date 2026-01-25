@@ -79,7 +79,7 @@ export function Sidebar({
                         <img
                             src="/logo.svg"
                             alt="S3 Explorer logo"
-                            className="w-7 h-7 logo-spin logo-themed"
+                            className="w-7 h-7 2xl:w-8 2xl:h-8 logo-spin logo-themed"
                         />
                         <span className="font-semibold text-base transition-all duration-300 group-hover:text-foreground group-hover:drop-shadow-[0_0_4px_rgba(255,255,255,0.15)]">
                             S3 Explorer

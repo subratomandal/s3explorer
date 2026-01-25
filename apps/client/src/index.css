@@ -3,6 +3,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/* High-quality text rendering for all screens */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Crisp rendering on high-DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  html {
+    text-rendering: geometricPrecision;
+  }
+}
+
 :root {
   color-scheme: dark;
   --background: hsl(250, 24%, 9%);
@@ -53,16 +73,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Smooth theme transition */
-html {
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-html *,
-html *::before,
-html *::after {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease, fill 0.2s ease, box-shadow 0.3s ease;
-}
+/* Instant theme transition */
 
 /* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
@@ -486,16 +497,21 @@ select.input option {
 
 /* Logo spin on hover */
 .logo-spin {
-  transition: transform 0.3s ease;
+  transition: transform 0.4s ease;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 .logo-spin:hover {
-  animation: spin 1s linear infinite;
+  animation: spin 2.5s linear infinite;
 }
 
 /* Theme-aware logo - inverts in dark mode, normal in light mode */
 .logo-themed {
   filter: invert(1) !important;
+  image-rendering: -webkit-optimize-contrast;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .logo-themed:hover {
@@ -510,10 +526,10 @@ select.input option {
   filter: invert(0) drop-shadow(0 0 4px rgba(0,0,0,0.15)) !important;
 }
 
-.animate-fadeIn { animation: fadeIn 320ms cubic-bezier(0.22, 1, 0.36, 1); }
+.animate-fadeIn { animation: fadeIn 100ms ease-out; }
 .animate-fadeInUp { animation: fadeInUp 300ms cubic-bezier(0.22, 1, 0.36, 1); }
 .animate-fadeInDown { animation: fadeInDown 300ms cubic-bezier(0.22, 1, 0.36, 1); }
-.animate-scaleIn { animation: scaleIn 340ms cubic-bezier(0.22, 1, 0.36, 1) 40ms both; }
+.animate-scaleIn { animation: scaleIn 320ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both; }
 .animate-slideInLeft { animation: slideInLeft 300ms cubic-bezier(0.22, 1, 0.36, 1); }
 .animate-slideInRight { animation: slideInRight 300ms cubic-bezier(0.22, 1, 0.36, 1); }
 .animate-spin { animation: spin 1s linear infinite; }
@@ -542,7 +558,7 @@ select.input option {
 .modal-backdrop {
   background: var(--modal-backdrop-bg, rgba(0, 0, 0, 0.6));
   backdrop-filter: blur(8px);
-  animation: modalBackdropIn 380ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: modalBackdropIn 100ms ease-out forwards;
   overscroll-behavior: contain;
   touch-action: manipulation;
 }
@@ -560,22 +576,18 @@ select.input option {
 }
 
 @keyframes modalBackdropIn {
-  0% {
+  from {
     opacity: 0;
-    backdrop-filter: blur(0px);
+    backdrop-filter: blur(8px);
   }
-  50% {
-    opacity: 0.8;
-    backdrop-filter: blur(4px);
-  }
-  100% {
+  to {
     opacity: 1;
     backdrop-filter: blur(8px);
   }
 }
 
 .modal-content {
-  animation: modalContentIn 360ms cubic-bezier(0.22, 1, 0.36, 1) 60ms both;
+  animation: modalContentIn 320ms cubic-bezier(0.22, 1, 0.36, 1) 100ms both;
 }
 
 @keyframes modalContentIn {
@@ -653,7 +665,7 @@ header {
 }
 
 .command-palette-content {
-  animation: commandPaletteIn 340ms cubic-bezier(0.22, 1, 0.36, 1) 50ms both;
+  animation: commandPaletteIn 300ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
   box-shadow: var(--command-palette-shadow,
     0 0 0 1px rgba(255, 255, 255, 0.05),
     0 25px 50px -12px rgba(0, 0, 0, 0.5),
