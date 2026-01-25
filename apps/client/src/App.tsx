@@ -21,7 +21,7 @@ import { CreateFolderModal } from './components/modals/CreateFolderModal';
 import { RenameModal } from './components/modals/RenameModal';
 import { DeleteModal } from './components/modals/DeleteModal';
 import { DeleteBucketModal } from './components/modals/DeleteBucketModal';
-import { PreviewModal, isPreviewable } from './components/modals/PreviewModal';
+import { PreviewModal } from './components/modals/PreviewModal';
 import { CommandPalette } from './components/CommandPalette';
 import { LoginPage } from './components/LoginPage';
 import { ConnectionManager } from './components/ConnectionManager';
