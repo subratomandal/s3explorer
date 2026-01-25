@@ -35,11 +35,10 @@ function SelectCheckbox({ checked, onChange, ariaLabel }: { checked: boolean; on
     return (
         <button
             onClick={(e) => { e.stopPropagation(); onChange(); }}
-            className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
-                checked
+            className={`w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${checked
                     ? 'bg-accent-purple border-accent-purple text-white'
                     : 'border-border hover:border-foreground-muted'
-            }`}
+                }`}
             aria-label={ariaLabel}
             aria-checked={checked}
             role="checkbox"
@@ -61,21 +60,27 @@ const FileRow = memo(({ index, style, data }: RowProps) => {
             style={style}
             className={`file-row flex items-center ${obj.isFolder ? 'is-folder cursor-pointer' : ''} ${isSelected ? 'bg-accent-purple/10' : ''}`}
             onContextMenu={e => onContextMenu(e, obj)}
-            onClick={() => obj.isFolder && onNavigate(obj)}
-            onKeyDown={(e) => obj.isFolder && e.key === 'Enter' && onNavigate(obj)}
+            onClick={() => {
+                if (obj.isFolder) {
+                    onNavigate(obj);
+                } else {
+                    onSelect(obj.key, !isSelected);
+                }
+            }}
+            onKeyDown={(e) => {
+                if (obj.isFolder && e.key === 'Enter') {
+                    onNavigate(obj);
+                } else if (!obj.isFolder && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    onSelect(obj.key, !isSelected);
+                }
+            }}
             tabIndex={obj.isFolder ? 0 : -1}
             role="row"
             aria-label={obj.isFolder ? `Folder: ${fileName}` : `File: ${fileName}`}
             aria-selected={isSelected}
         >
-            {/* Checkbox column */}
-            <div className="w-10 flex items-center justify-center pl-2">
-                <SelectCheckbox
-                    checked={isSelected}
-                    onChange={() => onSelect(obj.key, !isSelected)}
-                    ariaLabel={`Select ${fileName}`}
-                />
-            </div>
+            {/* Checkbox column removed from row, selection happens via row click */}
 
             {/* Name column */}
             <div className="flex-1 min-w-0 flex items-center gap-2 px-2 sm:px-3">
@@ -146,21 +151,28 @@ function StandardRow({ obj, onNavigate, onDownload, onContextMenu, onSelect, isS
             className={`file-row stagger-item ${obj.isFolder ? 'is-folder' : ''} ${isSelected ? 'bg-accent-purple/10' : ''}`}
             style={{ animationDelay: `${index * 25}ms` }}
             onContextMenu={e => onContextMenu(e, obj)}
-            onClick={() => obj.isFolder && onNavigate(obj)}
-            onKeyDown={(e) => obj.isFolder && e.key === 'Enter' && onNavigate(obj)}
+            onClick={() => {
+                if (obj.isFolder) {
+                    onNavigate(obj);
+                } else {
+                    onSelect(obj.key, !isSelected);
+                }
+            }}
+            onKeyDown={(e) => {
+                if (obj.isFolder && e.key === 'Enter') {
+                    onNavigate(obj);
+                } else if (!obj.isFolder && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    onSelect(obj.key, !isSelected);
+                }
+            }}
             tabIndex={obj.isFolder ? 0 : -1}
             role="row"
             aria-label={obj.isFolder ? `Folder: ${fileName}` : `File: ${fileName}`}
             aria-selected={isSelected}
         >
-            <td className="py-1.5 sm:py-2 w-10">
-                <div className="flex items-center justify-center">
-                    <SelectCheckbox
-                        checked={isSelected}
-                        onChange={() => onSelect(obj.key, !isSelected)}
-                        ariaLabel={`Select ${fileName}`}
-                    />
-                </div>
+            <td className="py-1.5 sm:py-2 w-10 text-center">
+                {/* Checkbox removed, row click toggles selection */}
             </td>
             <td className="py-1.5 sm:py-2">
                 <div className="flex items-center gap-2">

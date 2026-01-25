@@ -319,10 +319,11 @@ export default function App() {
     setBuckets(prev => [...prev, newBucket].sort((a, b) => a.name.localeCompare(b.name)));
     setShowNewBucket(false);
     setNewName('');
-    setSelectedBucket(name);
 
     try {
       await api.createBucket(name);
+      // Select the bucket only after it's successfully created
+      setSelectedBucket(name);
       showToastMsg(`Bucket "${name}" created`);
     } catch (err: any) {
       // Rollback on error
@@ -449,21 +450,7 @@ export default function App() {
     }
   };
 
-  // Batch download handler
-  const handleBatchDownload = async () => {
-    const filesToDownload = objects.filter(obj => selectedKeys.has(obj.key) && !obj.isFolder);
 
-    for (const obj of filesToDownload) {
-      try {
-        const url = await api.getDownloadUrl(selectedBucket!, obj.key);
-        window.open(url, '_blank');
-      } catch (err) {
-        console.error(`Failed to download ${obj.key}:`, err);
-      }
-    }
-
-    clearSelection();
-  };
 
   const handleCreateFolder = async () => {
     if (!newName.trim() || !selectedBucket) return;
@@ -829,8 +816,6 @@ export default function App() {
         selectedCount={selectedKeys.size}
         onClearSelection={clearSelection}
         onDeleteSelected={handleBatchDelete}
-        onDownloadSelected={handleBatchDownload}
-        hasFiles={objects.some(obj => selectedKeys.has(obj.key) && !obj.isFolder)}
       />
     </div>
   );

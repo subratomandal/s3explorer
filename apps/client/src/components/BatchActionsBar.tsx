@@ -1,19 +1,15 @@
-import { X, Trash2, Download } from 'lucide-react';
+import { X, Trash2 } from 'lucide-react';
 
 interface BatchActionsBarProps {
     selectedCount: number;
     onClearSelection: () => void;
     onDeleteSelected: () => void;
-    onDownloadSelected: () => void;
-    hasFiles: boolean; // Whether any files (not folders) are selected
 }
 
 export function BatchActionsBar({
     selectedCount,
     onClearSelection,
     onDeleteSelected,
-    onDownloadSelected,
-    hasFiles,
 }: BatchActionsBarProps) {
     if (selectedCount === 0) return null;
 
@@ -24,16 +20,7 @@ export function BatchActionsBar({
                     {selectedCount} selected
                 </span>
 
-                {hasFiles && (
-                    <button
-                        onClick={onDownloadSelected}
-                        className="btn btn-ghost btn-sm gap-1.5"
-                        aria-label="Download selected"
-                    >
-                        <Download className="w-4 h-4" />
-                        <span className="hidden sm:inline">Download</span>
-                    </button>
-                )}
+
 
                 <button
                     onClick={onDeleteSelected}
