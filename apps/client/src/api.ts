@@ -1,19 +1,50 @@
 import type { Bucket, S3Object } from './types';
+import { API_TIMEOUTS } from './constants';
 
 const API_BASE = '/api';
-const DEFAULT_TIMEOUT = 30000; // 30 seconds
 
 export type { Bucket, S3Object };
+
+// S3 Error code to user-friendly message mapping
+const S3_ERROR_MESSAGES: Record<string, string> = {
+  'NoSuchBucket': 'Bucket does not exist',
+  'NoSuchKey': 'File or folder does not exist',
+  'BucketAlreadyExists': 'A bucket with this name already exists',
+  'BucketAlreadyOwnedByYou': 'You already own a bucket with this name',
+  'BucketNotEmpty': 'Bucket is not empty',
+  'AccessDenied': 'Access denied - check your credentials',
+  'InvalidAccessKeyId': 'Invalid access key',
+  'SignatureDoesNotMatch': 'Invalid secret key',
+  'InvalidBucketName': 'Invalid bucket name',
+  'InvalidObjectState': 'Object is in an invalid state for this operation',
+  'KeyTooLongError': 'File name is too long',
+  'EntityTooLarge': 'File is too large to upload',
+  'SlowDown': 'Too many requests - please wait and try again',
+  'ServiceUnavailable': 'S3 service is temporarily unavailable',
+  'InternalError': 'S3 internal error - please try again',
+  'RequestTimeout': 'Request timed out',
+  'ExpiredToken': 'Session expired - please reconnect',
+  'InvalidToken': 'Invalid session token',
+};
 
 // Custom error class for API errors
 export class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
-    public code?: string
+    public code?: string,
+    public s3Code?: string
   ) {
     super(message);
     this.name = 'ApiError';
+  }
+
+  // Get user-friendly message
+  getUserMessage(): string {
+    if (this.s3Code && S3_ERROR_MESSAGES[this.s3Code]) {
+      return S3_ERROR_MESSAGES[this.s3Code];
+    }
+    return this.message;
   }
 }
 
@@ -22,7 +53,7 @@ async function fetchWithTimeout(
   url: string,
   options: RequestInit & { timeout?: number } = {}
 ): Promise<Response> {
-  const { timeout = DEFAULT_TIMEOUT, ...fetchOptions } = options;
+  const { timeout = API_TIMEOUTS.DEFAULT, ...fetchOptions } = options;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -38,17 +69,32 @@ async function fetchWithTimeout(
     if (error instanceof Error && error.name === 'AbortError') {
       throw new ApiError('Request timed out', 408, 'TIMEOUT');
     }
-    throw new ApiError('Network error', 0, 'NETWORK_ERROR');
+    throw new ApiError('Network error - check your connection', 0, 'NETWORK_ERROR');
   } finally {
     clearTimeout(timeoutId);
   }
 }
 
-// Helper to handle response
+// Helper to handle response with improved error parsing
 async function handleResponse<T>(response: Response): Promise<T> {
-  const data = await response.json();
+  let data: any;
+  try {
+    data = await response.json();
+  } catch {
+    throw new ApiError('Invalid response from server', response.status, 'PARSE_ERROR');
+  }
+
   if (!response.ok) {
-    throw new ApiError(data.error || 'Request failed', response.status);
+    // Extract S3 error code if present
+    const s3Code = data.s3Code || data.code || data.Code;
+    const message = data.error || data.message || data.Message || 'Request failed';
+
+    // Create detailed error
+    const error = new ApiError(message, response.status, undefined, s3Code);
+
+    // Use user-friendly message
+    error.message = error.getUserMessage();
+    throw error;
   }
   return data;
 }
@@ -151,7 +197,7 @@ export async function testConnection(config: Omit<ConnectionConfig, 'name'>): Pr
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(config),
-    timeout: 60000, // Longer timeout for connection tests
+    timeout: API_TIMEOUTS.CONNECTION_TEST,
   });
   return handleResponse(res);
 }
@@ -175,7 +221,7 @@ export async function createBucket(name: string): Promise<void> {
 export async function deleteBucket(name: string): Promise<void> {
   const res = await fetchWithTimeout(`${API_BASE}/buckets/${encodeURIComponent(name)}`, {
     method: 'DELETE',
-    timeout: 120000, // Longer timeout for bucket deletion (empties first)
+    timeout: API_TIMEOUTS.DELETE_BUCKET,
   });
   await handleResponse(res);
 }
@@ -219,7 +265,7 @@ export async function uploadFiles(
   const res = await fetchWithTimeout(`${API_BASE}/objects/${encodeURIComponent(bucket)}/upload`, {
     method: 'POST',
     body: formData,
-    timeout: 300000, // 5 minutes for uploads
+    timeout: API_TIMEOUTS.UPLOAD,
   });
   await handleResponse(res);
 }
@@ -238,7 +284,7 @@ export async function renameObject(bucket: string, oldKey: string, newKey: strin
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ oldKey, newKey }),
-    timeout: 60000, // Longer for rename (copy + delete)
+    timeout: API_TIMEOUTS.RENAME,
   });
   await handleResponse(res);
 }
@@ -261,7 +307,20 @@ export async function deleteObject(bucket: string, key: string, isFolder: boolea
   const params = new URLSearchParams({ key, isFolder: String(isFolder) });
   const res = await fetchWithTimeout(`${API_BASE}/objects/${encodeURIComponent(bucket)}?${params}`, {
     method: 'DELETE',
-    timeout: 120000, // Longer for folder deletion (recursive)
+    timeout: API_TIMEOUTS.DELETE_FOLDER,
   });
   await handleResponse(res);
+}
+
+export async function deleteObjects(
+  bucket: string,
+  objects: Array<{ key: string; isFolder: boolean }>
+): Promise<{ deleted: string[]; failed: string[] }> {
+  const res = await fetchWithTimeout(`${API_BASE}/objects/${encodeURIComponent(bucket)}/batch-delete`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ objects }),
+    timeout: API_TIMEOUTS.DELETE_FOLDER * 2, // Longer for batch operations
+  });
+  return handleResponse(res);
 }

@@ -1,6 +1,8 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Database, Plus, Trash2, Copy, Check, Settings, LogOut, Sun, Moon } from 'lucide-react';
 import type { Bucket } from '../types';
+import { useDebounce } from '../hooks/useDebounce';
+import { UI_DELAYS } from '../constants';
 
 interface SidebarProps {
     buckets: Bucket[];
@@ -40,13 +42,31 @@ export function Sidebar({
     onLogout,
 }: SidebarProps) {
     const [copiedBucket, setCopiedBucket] = useState<string | null>(null);
+    const [localSearch, setLocalSearch] = useState(searchQuery);
+
+    // Debounce the search input for performance
+    const debouncedSearch = useDebounce(localSearch, UI_DELAYS.SEARCH_DEBOUNCE);
+
+    // Sync debounced value back to parent
+    useEffect(() => {
+        if (debouncedSearch !== searchQuery) {
+            onSearchChange(debouncedSearch);
+        }
+    }, [debouncedSearch, searchQuery, onSearchChange]);
+
+    // Sync external changes to local state
+    useEffect(() => {
+        if (searchQuery !== localSearch && searchQuery !== debouncedSearch) {
+            setLocalSearch(searchQuery);
+        }
+    }, [searchQuery]);
 
     // Memoize filtered buckets to avoid recalculation on every render
     const filteredBuckets = useMemo(() =>
         buckets.filter(b =>
-            !searchQuery.trim() || b.name.toLowerCase().includes(searchQuery.toLowerCase())
+            !debouncedSearch.trim() || b.name.toLowerCase().includes(debouncedSearch.toLowerCase())
         ),
-        [buckets, searchQuery]
+        [buckets, debouncedSearch]
     );
 
     // Memoize callback to prevent unnecessary re-renders
@@ -106,8 +126,8 @@ export function Sidebar({
                         type="search"
                         name="bucket-search"
                         placeholder="Search buckets…"
-                        value={searchQuery}
-                        onChange={e => onSearchChange(e.target.value)}
+                        value={localSearch}
+                        onChange={e => setLocalSearch(e.target.value)}
                         className="input h-10 text-base sm:text-sm sm:h-auto"
                         aria-label="Search buckets"
                         autoComplete="off"
@@ -177,7 +197,7 @@ export function Sidebar({
                     {filteredBuckets.length === 0 && !loading && (
                         <div className="py-8 text-center" role="status">
                             <p className="text-sm text-foreground-muted">
-                                {searchQuery ? 'No matches' : 'No buckets'}
+                                {debouncedSearch ? 'No matches' : 'No buckets'}
                             </p>
                         </div>
                     )}

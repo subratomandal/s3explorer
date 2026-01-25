@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Folder, Database, Download, Edit3, Trash2 } from 'lucide-react';
+import { Folder, Database, Download, Edit3, Trash2, Eye } from 'lucide-react';
 import * as api from './api';
 import type { Bucket, S3Object, ToastState, ContextMenuState } from './types';
 import { getFileName } from './utils/fileUtils';
@@ -21,10 +21,12 @@ import { CreateFolderModal } from './components/modals/CreateFolderModal';
 import { RenameModal } from './components/modals/RenameModal';
 import { DeleteModal } from './components/modals/DeleteModal';
 import { DeleteBucketModal } from './components/modals/DeleteBucketModal';
+import { PreviewModal, isPreviewable } from './components/modals/PreviewModal';
 import { CommandPalette } from './components/CommandPalette';
 import { LoginPage } from './components/LoginPage';
 import { ConnectionManager } from './components/ConnectionManager';
 import { WelcomeMessage } from './components/WelcomeMessage';
+import { BatchActionsBar } from './components/BatchActionsBar';
 import type { Connection } from './api';
 
 const STORAGE_KEYS = {
@@ -62,9 +64,14 @@ export default function App() {
   const [showRename, setShowRename] = useState<S3Object | null>(null);
   const [showDelete, setShowDelete] = useState<S3Object | null>(null);
   const [showDeleteBucket, setShowDeleteBucket] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState<S3Object | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
+
+  // Selection state for batch operations
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.THEME);
@@ -141,10 +148,17 @@ export default function App() {
         e.preventDefault();
         setShowConnectionManager(true);
       }
+      // Cmd/Ctrl + U for upload
+      if ((e.metaKey || e.ctrlKey) && e.key === 'u') {
+        e.preventDefault();
+        if (selectedBucket && fileInputRef.current) {
+          fileInputRef.current.click();
+        }
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [selectedBucket]);
 
   const showToastMsg = (message: string, type: 'success' | 'error' = 'success') => setToast({ message, type });
 
@@ -300,34 +314,42 @@ export default function App() {
       return;
     }
 
+    // Optimistic update - add bucket immediately
+    const newBucket: Bucket = { name, creationDate: new Date().toISOString() };
+    setBuckets(prev => [...prev, newBucket].sort((a, b) => a.name.localeCompare(b.name)));
+    setShowNewBucket(false);
+    setNewName('');
+    setSelectedBucket(name);
+
     try {
       await api.createBucket(name);
-      setShowNewBucket(false);
-      setNewName('');
-      loadBuckets();
-      setSelectedBucket(name);
       showToastMsg(`Bucket "${name}" created`);
     } catch (err: any) {
-      // Check for common S3 errors
-      const errorMsg = err.message?.toLowerCase().includes('already')
-        ? `Bucket "${name}" already exists`
-        : 'Failed to create bucket';
-      showToastMsg(errorMsg, 'error');
+      // Rollback on error
+      setBuckets(prev => prev.filter(b => b.name !== name));
+      setSelectedBucket(null);
+      showToastMsg(err.message || 'Failed to create bucket', 'error');
     }
   };
 
   const handleDeleteBucket = async (name: string) => {
+    // Optimistic update - remove bucket immediately
+    const previousBuckets = buckets;
+    setBuckets(prev => prev.filter(b => b.name !== name));
+
+    if (selectedBucket === name) {
+      setSelectedBucket(null);
+      setObjects([]);
+      setCurrentPath('');
+    }
+
     try {
       await api.deleteBucket(name);
-      if (selectedBucket === name) {
-        setSelectedBucket(null);
-        setObjects([]);
-        setCurrentPath('');
-      }
-      loadBuckets();
       showToastMsg(`Bucket deleted`);
     } catch (err: any) {
-      showToastMsg('Failed to delete bucket', 'error');
+      // Rollback on error
+      setBuckets(previousBuckets);
+      showToastMsg(err.message || 'Failed to delete bucket', 'error');
     }
   };
 
@@ -346,33 +368,142 @@ export default function App() {
       const url = await api.getDownloadUrl(selectedBucket!, obj.key);
       window.open(url, '_blank');
     } catch (err: any) {
-      showToastMsg('Download failed', 'error');
+      showToastMsg(err.message || 'Download failed', 'error');
     }
+  };
+
+  const handlePreview = async (obj: S3Object) => {
+    if (obj.isFolder) return;
+
+    try {
+      const url = await api.getDownloadUrl(selectedBucket!, obj.key);
+      setPreviewUrl(url);
+      setShowPreview(obj);
+    } catch (err: any) {
+      showToastMsg(err.message || 'Failed to load preview', 'error');
+    }
+  };
+
+  const closePreview = () => {
+    setShowPreview(null);
+    setPreviewUrl(null);
+  };
+
+  // Selection handlers for batch operations
+  const handleSelect = useCallback((key: string, selected: boolean) => {
+    setSelectedKeys(prev => {
+      const next = new Set(prev);
+      if (selected) {
+        next.add(key);
+      } else {
+        next.delete(key);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleSelectAll = useCallback((selected: boolean) => {
+    if (selected) {
+      setSelectedKeys(new Set(objects.map(obj => obj.key)));
+    } else {
+      setSelectedKeys(new Set());
+    }
+  }, [objects]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedKeys(new Set());
+  }, []);
+
+  // Clear selection when path or bucket changes
+  useEffect(() => {
+    clearSelection();
+  }, [selectedBucket, currentPath, clearSelection]);
+
+  // Batch delete handler
+  const handleBatchDelete = async () => {
+    if (selectedKeys.size === 0 || !selectedBucket) return;
+
+    const objectsToDelete = objects.filter(obj => selectedKeys.has(obj.key));
+    const keysToDelete = new Set(selectedKeys);
+
+    // Optimistic update
+    setObjects(prev => prev.filter(obj => !keysToDelete.has(obj.key)));
+    clearSelection();
+
+    try {
+      const result = await api.deleteObjects(
+        selectedBucket,
+        objectsToDelete.map(obj => ({ key: obj.key, isFolder: obj.isFolder }))
+      );
+
+      if (result.failed.length > 0) {
+        showToastMsg(`Deleted ${result.deleted.length}, ${result.failed.length} failed`, 'error');
+        // Reload to get accurate state
+        loadObjects();
+      } else {
+        showToastMsg(`Deleted ${result.deleted.length} items`);
+      }
+    } catch (err: any) {
+      showToastMsg(err.message || 'Batch delete failed', 'error');
+      loadObjects(); // Reload to restore state
+    }
+  };
+
+  // Batch download handler
+  const handleBatchDownload = async () => {
+    const filesToDownload = objects.filter(obj => selectedKeys.has(obj.key) && !obj.isFolder);
+
+    for (const obj of filesToDownload) {
+      try {
+        const url = await api.getDownloadUrl(selectedBucket!, obj.key);
+        window.open(url, '_blank');
+      } catch (err) {
+        console.error(`Failed to download ${obj.key}:`, err);
+      }
+    }
+
+    clearSelection();
   };
 
   const handleCreateFolder = async () => {
     if (!newName.trim() || !selectedBucket) return;
+
+    // Get existing names to check for duplicates
+    const existingNames = new Set(objects.map(obj => getFileName(obj.key)));
+
+    // Generate unique folder name if needed
+    let folderName = newName.trim();
+    if (hasNameConflict(folderName, existingNames)) {
+      folderName = generateUniqueName(folderName, existingNames, true);
+    }
+
+    const folderKey = currentPath + folderName + '/';
+
+    // Optimistic update - add folder immediately
+    const newFolder: S3Object = {
+      key: folderKey,
+      size: 0,
+      isFolder: true,
+    };
+    setObjects(prev => [...prev, newFolder].sort((a, b) => {
+      // Folders first, then alphabetical
+      if (a.isFolder && !b.isFolder) return -1;
+      if (!a.isFolder && b.isFolder) return 1;
+      return a.key.localeCompare(b.key);
+    }));
+    setShowNewFolder(false);
+    setNewName('');
+
     try {
-      // Get existing names to check for duplicates
-      const existingNames = new Set(objects.map(obj => getFileName(obj.key)));
-
-      // Generate unique folder name if needed
-      let folderName = newName.trim();
-      if (hasNameConflict(folderName, existingNames)) {
-        folderName = generateUniqueName(folderName, existingNames, true);
-      }
-
       await api.createFolder(selectedBucket, currentPath + folderName);
-      setShowNewFolder(false);
-      setNewName('');
-      loadObjects();
-
       const msg = folderName !== newName.trim()
         ? `Folder created as "${folderName}"`
         : `Folder created`;
       showToastMsg(msg);
     } catch (err: any) {
-      showToastMsg('Failed to create folder', 'error');
+      // Rollback on error
+      setObjects(prev => prev.filter(obj => obj.key !== folderKey));
+      showToastMsg(err.message || 'Failed to create folder', 'error');
     }
   };
 
@@ -414,19 +545,26 @@ export default function App() {
         : `Renamed`;
       showToastMsg(msg);
     } catch (err: any) {
-      showToastMsg('Rename failed', 'error');
+      showToastMsg(err.message || 'Rename failed', 'error');
     }
   };
 
   const handleDelete = async () => {
     if (!showDelete || !selectedBucket) return;
+
+    // Optimistic update - remove object immediately
+    const deletedObject = showDelete;
+    const previousObjects = objects;
+    setObjects(prev => prev.filter(obj => obj.key !== deletedObject.key));
+    setShowDelete(null);
+
     try {
-      await api.deleteObject(selectedBucket, showDelete.key, showDelete.isFolder);
-      setShowDelete(null);
-      loadObjects();
+      await api.deleteObject(selectedBucket, deletedObject.key, deletedObject.isFolder);
       showToastMsg(`Deleted`);
     } catch (err: any) {
-      showToastMsg('Delete failed', 'error');
+      // Rollback on error
+      setObjects(previousObjects);
+      showToastMsg(err.message || 'Delete failed', 'error');
     }
   };
 
@@ -539,9 +677,12 @@ export default function App() {
             <FileTable
               objects={objects}
               loading={loading}
+              selectedKeys={selectedKeys}
               onNavigate={handleNavigate}
               onDownload={handleDownload}
               onContextMenu={handleContextMenu}
+              onSelect={handleSelect}
+              onSelectAll={handleSelectAll}
             />
           )}
         </div>
@@ -561,6 +702,13 @@ export default function App() {
 
       {contextMenu && (
         <ContextMenu x={contextMenu.x} y={contextMenu.y} onClose={() => setContextMenu(null)}>
+          {!contextMenu.object.isFolder && isPreviewable(getFileName(contextMenu.object.key), contextMenu.object.size) && (
+            <ContextMenuItem
+              icon={Eye}
+              label="Preview"
+              onClick={() => { handlePreview(contextMenu.object); setContextMenu(null); }}
+            />
+          )}
           {!contextMenu.object.isFolder && (
             <ContextMenuItem
               icon={Download}
@@ -618,6 +766,18 @@ export default function App() {
         onDelete={() => { handleDeleteBucket(showDeleteBucket!); setShowDeleteBucket(null); }}
       />
 
+      <PreviewModal
+        object={showPreview}
+        previewUrl={previewUrl}
+        onClose={closePreview}
+        onDownload={() => {
+          if (showPreview) {
+            handleDownload(showPreview);
+            closePreview();
+          }
+        }}
+      />
+
       <ConnectionManager
         isOpen={showConnectionManager}
         onClose={() => setShowConnectionManager(false)}
@@ -662,6 +822,15 @@ export default function App() {
       <OfflineIndicator
         isOnline={networkStatus.isOnline}
         isBackendReachable={networkStatus.isBackendReachable}
+      />
+
+      {/* Batch actions bar */}
+      <BatchActionsBar
+        selectedCount={selectedKeys.size}
+        onClearSelection={clearSelection}
+        onDeleteSelected={handleBatchDelete}
+        onDownloadSelected={handleBatchDownload}
+        hasFiles={objects.some(obj => selectedKeys.has(obj.key) && !obj.isFolder)}
       />
     </div>
   );

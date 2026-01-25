@@ -4,9 +4,13 @@ import path from 'path';
 import * as s3 from '../services/s3.js';
 
 const router = Router();
-const upload = multer({ 
+
+// File size limits
+const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB limit (multipart handles larger files)
+
+const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 100 * 1024 * 1024 } // 100MB limit
+  limits: { fileSize: MAX_FILE_SIZE }
 });
 
 // Sanitize filename - prevent path traversal
@@ -25,19 +29,28 @@ function isValidObjectKey(key: string): boolean {
   return key.length > 0 && key.length <= 1024 && !key.includes('../');
 }
 
+// Helper to extract S3 error details
+function getS3ErrorDetails(error: any): { message: string; s3Code?: string; status: number } {
+  const s3Code = error.name || error.Code || error.$metadata?.httpStatusCode;
+  const message = error.message || 'Operation failed';
+  const status = error.$metadata?.httpStatusCode || 500;
+  return { message, s3Code, status };
+}
+
 router.get('/:bucket', async (req: Request, res: Response) => {
   try {
     const { bucket } = req.params;
     if (!isValidBucketName(bucket)) {
       return res.status(400).json({ error: 'Invalid bucket name' });
     }
-    
+
     const prefix = (req.query.prefix as string) || '';
     const { objects, prefixes } = await s3.listObjects(bucket, prefix);
     res.json({ objects, prefixes, bucket, prefix });
   } catch (error: any) {
     console.error('Error listing objects:', error);
-    res.status(500).json({ error: 'Failed to list objects' });
+    const { message, s3Code, status } = getS3ErrorDetails(error);
+    res.status(status).json({ error: message, s3Code });
   }
 });
 
@@ -45,19 +58,20 @@ router.get('/:bucket/download', async (req: Request, res: Response) => {
   try {
     const { bucket } = req.params;
     const key = req.query.key as string;
-    
+
     if (!isValidBucketName(bucket)) {
       return res.status(400).json({ error: 'Invalid bucket name' });
     }
     if (!key || !isValidObjectKey(key)) {
       return res.status(400).json({ error: 'Invalid key' });
     }
-    
+
     const url = await s3.getObjectUrl(bucket, key);
     res.json({ url });
   } catch (error: any) {
     console.error('Error getting download URL:', error);
-    res.status(500).json({ error: 'Failed to get download URL' });
+    const { message, s3Code, status } = getS3ErrorDetails(error);
+    res.status(status).json({ error: message, s3Code });
   }
 });
 
@@ -65,19 +79,20 @@ router.get('/:bucket/metadata', async (req: Request, res: Response) => {
   try {
     const { bucket } = req.params;
     const key = req.query.key as string;
-    
+
     if (!isValidBucketName(bucket)) {
       return res.status(400).json({ error: 'Invalid bucket name' });
     }
     if (!key || !isValidObjectKey(key)) {
       return res.status(400).json({ error: 'Invalid key' });
     }
-    
+
     const metadata = await s3.getObjectMetadata(bucket, key);
     res.json(metadata);
   } catch (error: any) {
     console.error('Error getting metadata:', error);
-    res.status(500).json({ error: 'Failed to get metadata' });
+    const { message, s3Code, status } = getS3ErrorDetails(error);
+    res.status(status).json({ error: message, s3Code });
   }
 });
 
@@ -124,7 +139,8 @@ router.post('/:bucket/upload', upload.array('files'), async (req: Request, res: 
     res.json({ success: true, uploaded: results });
   } catch (error: any) {
     console.error('Error uploading files:', error);
-    res.status(500).json({ error: 'Failed to upload files' });
+    const { message, s3Code, status } = getS3ErrorDetails(error);
+    res.status(status).json({ error: message, s3Code });
   }
 });
 
@@ -144,7 +160,8 @@ router.post('/:bucket/folder', async (req: Request, res: Response) => {
     res.json({ success: true, message: `Folder created` });
   } catch (error: any) {
     console.error('Error creating folder:', error);
-    res.status(500).json({ error: 'Failed to create folder' });
+    const { message, s3Code, status } = getS3ErrorDetails(error);
+    res.status(status).json({ error: message, s3Code });
   }
 });
 
@@ -164,7 +181,8 @@ router.put('/:bucket/rename', async (req: Request, res: Response) => {
     res.json({ success: true, message: 'Renamed successfully' });
   } catch (error: any) {
     console.error('Error renaming object:', error);
-    res.status(500).json({ error: 'Failed to rename' });
+    const { message, s3Code, status } = getS3ErrorDetails(error);
+    res.status(status).json({ error: message, s3Code });
   }
 });
 
@@ -187,7 +205,8 @@ router.post('/:bucket/copy', async (req: Request, res: Response) => {
     res.json({ success: true, message: 'Copied successfully' });
   } catch (error: any) {
     console.error('Error copying object:', error);
-    res.status(500).json({ error: 'Failed to copy' });
+    const { message, s3Code, status } = getS3ErrorDetails(error);
+    res.status(status).json({ error: message, s3Code });
   }
 });
 
@@ -213,7 +232,52 @@ router.delete('/:bucket', async (req: Request, res: Response) => {
     res.json({ success: true, message: 'Deleted successfully' });
   } catch (error: any) {
     console.error('Error deleting object:', error);
-    res.status(500).json({ error: 'Failed to delete' });
+    const { message, s3Code, status } = getS3ErrorDetails(error);
+    res.status(status).json({ error: message, s3Code });
+  }
+});
+
+// Batch delete objects
+router.post('/:bucket/batch-delete', async (req: Request, res: Response) => {
+  try {
+    const { bucket } = req.params;
+    const { objects } = req.body;
+
+    if (!isValidBucketName(bucket)) {
+      return res.status(400).json({ error: 'Invalid bucket name' });
+    }
+
+    if (!Array.isArray(objects) || objects.length === 0) {
+      return res.status(400).json({ error: 'No objects specified' });
+    }
+
+    const deleted: string[] = [];
+    const failed: string[] = [];
+
+    for (const obj of objects) {
+      try {
+        if (!obj.key || !isValidObjectKey(obj.key)) {
+          failed.push(obj.key || 'unknown');
+          continue;
+        }
+
+        if (obj.isFolder) {
+          await s3.deleteFolder(bucket, obj.key);
+        } else {
+          await s3.deleteObject(bucket, obj.key);
+        }
+        deleted.push(obj.key);
+      } catch (err) {
+        console.error(`Failed to delete ${obj.key}:`, err);
+        failed.push(obj.key);
+      }
+    }
+
+    res.json({ deleted, failed });
+  } catch (error: any) {
+    console.error('Error in batch delete:', error);
+    const { message, s3Code, status } = getS3ErrorDetails(error);
+    res.status(status).json({ error: message, s3Code });
   }
 });
 
