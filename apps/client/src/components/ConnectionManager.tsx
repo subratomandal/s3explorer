@@ -508,8 +508,8 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                   <label className="flex items-center gap-2 cursor-pointer group">
                     <span
                       className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${form.forcePathStyle
-                          ? 'bg-accent-purple border-accent-purple'
-                          : 'border-border bg-transparent group-hover:border-border-hover'
+                        ? 'bg-accent-purple border-accent-purple'
+                        : 'border-border bg-transparent group-hover:border-border-hover'
                         }`}
                       aria-hidden="true"
                     >
@@ -539,8 +539,8 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                 {testResult && (
                   <div
                     className={`p-3 rounded-lg text-sm flex items-center gap-2 ${testResult.success
-                        ? 'bg-accent-green/15 text-accent-green'
-                        : 'bg-accent-red/15 text-accent-red border border-accent-red/30 dark:border-purple-800'
+                      ? 'bg-accent-green/15 text-accent-green'
+                      : 'bg-accent-red/15 text-accent-red border border-accent-red/30 dark:border-zinc-700'
                       }`}
                     role="status"
                     aria-live="polite"
