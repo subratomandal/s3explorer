@@ -526,7 +526,7 @@ select.input option {
   filter: invert(0) drop-shadow(0 0 4px rgba(0,0,0,0.15)) !important;
 }
 
-.animate-fadeIn { animation: fadeIn 100ms ease-out; }
+.animate-fadeIn { animation: none; opacity: 1; }
 .animate-fadeInUp { animation: fadeInUp 300ms cubic-bezier(0.22, 1, 0.36, 1); }
 .animate-fadeInDown { animation: fadeInDown 300ms cubic-bezier(0.22, 1, 0.36, 1); }
 .animate-scaleIn { animation: scaleIn 320ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both; }
@@ -558,7 +558,8 @@ select.input option {
 .modal-backdrop {
   background: var(--modal-backdrop-bg, rgba(0, 0, 0, 0.6));
   backdrop-filter: blur(8px);
-  animation: modalBackdropIn 100ms ease-out forwards;
+  animation: none;
+  opacity: 1;
   overscroll-behavior: contain;
   touch-action: manipulation;
 }
@@ -662,6 +663,8 @@ header {
 .command-palette-backdrop {
   background: var(--command-palette-backdrop, rgba(0, 0, 0, 0.7));
   backdrop-filter: blur(8px);
+  animation: none;
+  opacity: 1;
 }
 
 .command-palette-content {

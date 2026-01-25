@@ -398,7 +398,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
             {connections.length > 0 && (
               <button
                 onClick={() => { resetForm(); setView('form'); }}
-                className="group w-full mt-3 py-2.5 px-4 rounded-lg border border-dashed border-border text-foreground-secondary hover:text-accent-purple hover:border-accent-purple/30 hover:bg-accent-purple/5 transition-all flex items-center justify-center gap-2 text-sm font-medium"
+                className="group w-full mt-3 py-2.5 px-4 rounded-lg border border-dashed border-border text-foreground-secondary hover:text-accent-purple hover:border-accent-purple hover:bg-accent-purple/5 transition-all flex items-center justify-center gap-2 text-sm font-medium"
               >
                 <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
                 Add Connection
