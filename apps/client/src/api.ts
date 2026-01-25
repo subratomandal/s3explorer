@@ -241,6 +241,11 @@ export async function getDownloadUrl(bucket: string, key: string): Promise<strin
   return data.url;
 }
 
+export function getPreviewUrl(bucket: string, key: string): string {
+  const params = new URLSearchParams({ key });
+  return `${API_BASE}/objects/${encodeURIComponent(bucket)}/proxy?${params}`;
+}
+
 export async function uploadFiles(
   bucket: string,
   prefix: string,

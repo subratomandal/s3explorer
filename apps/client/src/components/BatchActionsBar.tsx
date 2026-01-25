@@ -15,7 +15,7 @@ export function BatchActionsBar({
 
     return (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 animate-slideUp">
-            <div className="flex items-center gap-2 px-4 py-2.5 bg-background-secondary border border-border rounded-xl shadow-lg">
+            <div className="flex items-center gap-2 px-3 py-2 bg-background-secondary border border-border rounded-md shadow-lg">
                 <span className="text-sm text-foreground-secondary mr-2">
                     {selectedCount} selected
                 </span>

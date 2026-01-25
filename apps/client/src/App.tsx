@@ -377,7 +377,7 @@ export default function App() {
     if (obj.isFolder) return;
 
     try {
-      const url = await api.getDownloadUrl(selectedBucket!, obj.key);
+      const url = api.getPreviewUrl(selectedBucket!, obj.key);
       setPreviewUrl(url);
       setShowPreview(obj);
     } catch (err: any) {

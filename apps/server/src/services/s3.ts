@@ -46,7 +46,7 @@ function getS3Client(configOverride?: S3ConnectionConfig): S3Client {
 
   // Get active connection from DB
   const active = connections.getActive();
-  
+
   if (!active) {
     throw new Error('No active S3 connection. Please add and activate a connection.');
   }
@@ -159,6 +159,13 @@ export async function getObjectUrl(
   const client = getS3Client();
   const command = new GetObjectCommand({ Bucket: bucket, Key: key });
   return getSignedUrl(client, command, { expiresIn });
+}
+
+export async function getObjectStream(bucket: string, key: string) {
+  const client = getS3Client();
+  const command = new GetObjectCommand({ Bucket: bucket, Key: key });
+  const response = await client.send(command);
+  return response.Body;
 }
 
 // Size threshold for multipart upload (100MB)

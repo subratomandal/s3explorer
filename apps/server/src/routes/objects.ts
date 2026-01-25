@@ -75,6 +75,44 @@ router.get('/:bucket/download', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/:bucket/proxy', async (req: Request, res: Response) => {
+  try {
+    const { bucket } = req.params;
+    const key = req.query.key as string;
+
+    if (!isValidBucketName(bucket)) {
+      return res.status(400).json({ error: 'Invalid bucket name' });
+    }
+    if (!key || !isValidObjectKey(key)) {
+      return res.status(400).json({ error: 'Invalid key' });
+    }
+
+    // Get metadata for content type
+    try {
+      const metadata = await s3.getObjectMetadata(bucket, key);
+      if (metadata.contentType) {
+        res.setHeader('Content-Type', metadata.contentType);
+      }
+      if (metadata.contentLength) {
+        res.setHeader('Content-Length', metadata.contentLength);
+      }
+    } catch (e) {
+      // Ignore metadata errors, proceed with stream
+      console.warn('Failed to get metadata for proxy:', e);
+    }
+
+    const stream = await s3.getObjectStream(bucket, key);
+    // @ts-ignore - AWS SDK stream types are compatible with express response
+    stream.pipe(res);
+  } catch (error: any) {
+    console.error('Error proxying object:', error);
+    const { message, s3Code, status } = getS3ErrorDetails(error);
+    if (!res.headersSent) {
+      res.status(status).json({ error: message, s3Code });
+    }
+  }
+});
+
 router.get('/:bucket/metadata', async (req: Request, res: Response) => {
   try {
     const { bucket } = req.params;
@@ -148,14 +186,14 @@ router.post('/:bucket/folder', async (req: Request, res: Response) => {
   try {
     const { bucket } = req.params;
     const { path: folderPath } = req.body;
-    
+
     if (!isValidBucketName(bucket)) {
       return res.status(400).json({ error: 'Invalid bucket name' });
     }
     if (!folderPath || !isValidObjectKey(folderPath)) {
       return res.status(400).json({ error: 'Invalid path' });
     }
-    
+
     await s3.createFolder(bucket, folderPath);
     res.json({ success: true, message: `Folder created` });
   } catch (error: any) {
@@ -169,14 +207,14 @@ router.put('/:bucket/rename', async (req: Request, res: Response) => {
   try {
     const { bucket } = req.params;
     const { oldKey, newKey } = req.body;
-    
+
     if (!isValidBucketName(bucket)) {
       return res.status(400).json({ error: 'Invalid bucket name' });
     }
     if (!oldKey || !newKey || !isValidObjectKey(oldKey) || !isValidObjectKey(newKey)) {
       return res.status(400).json({ error: 'Invalid keys' });
     }
-    
+
     await s3.renameObject(bucket, oldKey, newKey);
     res.json({ success: true, message: 'Renamed successfully' });
   } catch (error: any) {
@@ -190,7 +228,7 @@ router.post('/:bucket/copy', async (req: Request, res: Response) => {
   try {
     const { bucket } = req.params;
     const { sourceKey, destBucket, destKey } = req.body;
-    
+
     if (!isValidBucketName(bucket)) {
       return res.status(400).json({ error: 'Invalid bucket name' });
     }
@@ -200,7 +238,7 @@ router.post('/:bucket/copy', async (req: Request, res: Response) => {
     if (!sourceKey || !destKey || !isValidObjectKey(sourceKey) || !isValidObjectKey(destKey)) {
       return res.status(400).json({ error: 'Invalid keys' });
     }
-    
+
     await s3.copyObject(bucket, sourceKey, destBucket || bucket, destKey);
     res.json({ success: true, message: 'Copied successfully' });
   } catch (error: any) {
