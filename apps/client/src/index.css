@@ -510,12 +510,12 @@ select.input option {
   filter: invert(0) drop-shadow(0 0 4px rgba(0,0,0,0.15)) !important;
 }
 
-.animate-fadeIn { animation: fadeIn 200ms cubic-bezier(0.16, 1, 0.3, 1); }
-.animate-fadeInUp { animation: fadeInUp 250ms cubic-bezier(0.16, 1, 0.3, 1); }
-.animate-fadeInDown { animation: fadeInDown 250ms cubic-bezier(0.16, 1, 0.3, 1); }
-.animate-scaleIn { animation: scaleIn 200ms cubic-bezier(0.16, 1, 0.3, 1); }
-.animate-slideInLeft { animation: slideInLeft 250ms cubic-bezier(0.16, 1, 0.3, 1); }
-.animate-slideInRight { animation: slideInRight 250ms cubic-bezier(0.16, 1, 0.3, 1); }
+.animate-fadeIn { animation: fadeIn 320ms cubic-bezier(0.22, 1, 0.36, 1); }
+.animate-fadeInUp { animation: fadeInUp 300ms cubic-bezier(0.22, 1, 0.36, 1); }
+.animate-fadeInDown { animation: fadeInDown 300ms cubic-bezier(0.22, 1, 0.36, 1); }
+.animate-scaleIn { animation: scaleIn 340ms cubic-bezier(0.22, 1, 0.36, 1) 40ms both; }
+.animate-slideInLeft { animation: slideInLeft 300ms cubic-bezier(0.22, 1, 0.36, 1); }
+.animate-slideInRight { animation: slideInRight 300ms cubic-bezier(0.22, 1, 0.36, 1); }
 .animate-spin { animation: spin 1s linear infinite; }
 
 .stagger-item {
@@ -542,7 +542,7 @@ select.input option {
 .modal-backdrop {
   background: var(--modal-backdrop-bg, rgba(0, 0, 0, 0.6));
   backdrop-filter: blur(8px);
-  animation: modalBackdropIn 250ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: modalBackdropIn 380ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
   overscroll-behavior: contain;
   touch-action: manipulation;
 }
@@ -560,24 +560,28 @@ select.input option {
 }
 
 @keyframes modalBackdropIn {
-  from {
+  0% {
     opacity: 0;
     backdrop-filter: blur(0px);
   }
-  to {
+  50% {
+    opacity: 0.8;
+    backdrop-filter: blur(4px);
+  }
+  100% {
     opacity: 1;
     backdrop-filter: blur(8px);
   }
 }
 
 .modal-content {
-  animation: modalContentIn 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: modalContentIn 360ms cubic-bezier(0.22, 1, 0.36, 1) 60ms both;
 }
 
 @keyframes modalContentIn {
   from {
     opacity: 0;
-    transform: scale(0.94) translateY(10px);
+    transform: scale(0.96) translateY(8px);
   }
   to {
     opacity: 1;
@@ -649,7 +653,7 @@ header {
 }
 
 .command-palette-content {
-  animation: commandPaletteIn 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  animation: commandPaletteIn 340ms cubic-bezier(0.22, 1, 0.36, 1) 50ms both;
   box-shadow: var(--command-palette-shadow,
     0 0 0 1px rgba(255, 255, 255, 0.05),
     0 25px 50px -12px rgba(0, 0, 0, 0.5),
@@ -659,7 +663,7 @@ header {
 @keyframes commandPaletteIn {
   from {
     opacity: 0;
-    transform: scale(0.95) translateY(-12px);
+    transform: scale(0.97) translateY(-10px);
   }
   to {
     opacity: 1;
