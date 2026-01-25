@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Folder, Database, Download, Edit3, Trash2, Eye } from 'lucide-react';
+import { Folder, Database, Download, Edit3, Trash2 } from 'lucide-react';
 import * as api from './api';
 import type { Bucket, S3Object, ToastState, ContextMenuState } from './types';
 import { getFileName } from './utils/fileUtils';
@@ -283,7 +283,7 @@ export default function App() {
         setUploadProgress(0);
         loadObjects();
         const msg = renamedCount > 0
-          ? `${acceptedFiles.length} file${acceptedFiles.length > 1 ? 's' : ''} uploaded (${renamedCount} renamed)`
+          ? `${acceptedFiles.length} file${acceptedFiles.length > 1 ? 's' : ''} uploaded(${renamedCount} renamed)`
           : `${acceptedFiles.length} file${acceptedFiles.length > 1 ? 's' : ''} uploaded`;
         showToastMsg(msg);
       }, 400);
@@ -373,17 +373,7 @@ export default function App() {
     }
   };
 
-  const handlePreview = async (obj: S3Object) => {
-    if (obj.isFolder) return;
 
-    try {
-      const url = api.getPreviewUrl(selectedBucket!, obj.key);
-      setPreviewUrl(url);
-      setShowPreview(obj);
-    } catch (err: any) {
-      showToastMsg(err.message || 'Failed to load preview', 'error');
-    }
-  };
 
   const closePreview = () => {
     setShowPreview(null);
@@ -689,13 +679,7 @@ export default function App() {
 
       {contextMenu && (
         <ContextMenu x={contextMenu.x} y={contextMenu.y} onClose={() => setContextMenu(null)}>
-          {!contextMenu.object.isFolder && isPreviewable(getFileName(contextMenu.object.key), contextMenu.object.size) && (
-            <ContextMenuItem
-              icon={Eye}
-              label="Preview"
-              onClick={() => { handlePreview(contextMenu.object); setContextMenu(null); }}
-            />
-          )}
+
           {!contextMenu.object.isFolder && (
             <ContextMenuItem
               icon={Download}
