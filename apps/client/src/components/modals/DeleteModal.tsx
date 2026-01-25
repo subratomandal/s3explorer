@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AlertTriangle } from 'lucide-react';
+
 import { getFileName } from '../../utils/fileUtils';
 import type { S3Object } from '../../types';
 
@@ -48,14 +48,7 @@ export function DeleteModal({ object, onClose, onDelete }: DeleteModalProps) {
                 </p>
 
                 {/* Warning for folders */}
-                {isFolder && (
-                    <div className="flex items-start gap-2.5 p-3 rounded-lg bg-accent-yellow/10 mb-5 text-sm">
-                        <AlertTriangle className="w-4 h-4 text-accent-yellow flex-shrink-0 mt-0.5" />
-                        <p className="text-foreground-secondary">
-                            All files and subfolders will be permanently deleted.
-                        </p>
-                    </div>
-                )}
+
 
                 {/* Actions */}
                 <div className="flex gap-3 mt-5">
