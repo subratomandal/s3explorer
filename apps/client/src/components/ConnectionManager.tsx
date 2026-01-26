@@ -343,7 +343,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                     <div
                       key={conn.id}
                       onClick={() => handleActivate(conn.id)}
-                      className={`group relative flex items-center justify-between p-3 rounded-lg bg-background-tertiary transition-all cursor-pointer overflow-hidden ${conn.isActive ? 'ring-1 ring-accent-purple' : 'hover:bg-accent-purple/5'
+                      className={`group relative flex items-center justify-between p-3 !rounded-md bg-background-tertiary transition-all cursor-pointer overflow-hidden ${conn.isActive ? 'ring-1 ring-accent-purple' : 'hover:bg-accent-purple/5'
                         }`}
                     >
                       {/* Left accent border */}
