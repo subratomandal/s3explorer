@@ -356,7 +356,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className={`font-medium text-sm truncate transition-colors ${conn.isActive ? 'text-foreground' : 'text-foreground group-hover:text-accent-purple'}`}>
+                            <span className={`font-medium text-base sm:text-sm truncate transition-colors ${conn.isActive ? 'text-foreground' : 'text-foreground group-hover:text-accent-purple'}`}>
                               {conn.name}
                             </span>
                             {conn.isActive && (
@@ -539,7 +539,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                 {testResult && (
                   <div
                     className={`p-3 rounded-lg text-sm flex items-center gap-2 ${testResult.success
-                      ? 'bg-accent-green/15 text-accent-green'
+                      ? 'bg-accent-green/15 text-accent-green border border-accent-green/30 dark:border-zinc-700'
                       : 'bg-accent-red/15 text-accent-red border border-accent-red/30 dark:border-zinc-700'
                       }`}
                     role="status"

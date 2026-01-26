@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, RefreshCw, FolderPlus, Upload, Menu, Search } from 'lucide-react';
+import { ChevronLeft, RefreshCw, Menu, Search, FolderPlus } from 'lucide-react';
 
 interface HeaderProps {
     selectedBucket: string | null;
@@ -34,7 +34,7 @@ export function Header({
     // Detect OS for keyboard shortcut display
     useEffect(() => {
         setIsMac(navigator.platform?.toLowerCase().includes('mac') ||
-                 navigator.userAgent?.toLowerCase().includes('mac'));
+            navigator.userAgent?.toLowerCase().includes('mac'));
     }, []);
 
     const breadcrumbs = currentPath.split('/').filter(Boolean);
@@ -145,16 +145,16 @@ export function Header({
                     <>
                         <button
                             onClick={onNewFolder}
-                            className="btn btn-secondary h-9 sm:h-9 px-2 sm:px-3"
+                            className="btn btn-secondary h-8 sm:h-8 px-2 sm:px-2 rounded-full border border-border hover:border-border-hover dark:border-white/20 transition-all flex items-center gap-2"
                             aria-label="Create new folder"
                         >
                             <FolderPlus className="w-5 h-5 sm:w-4 sm:h-4" aria-hidden="true" />
-                            <span className="hidden md:inline text-sm">Folder</span>
+                            <span className="hidden md:inline text-sm font-medium">Folder</span>
                         </button>
 
-                        <label className="btn btn-primary cursor-pointer h-9 sm:h-9 px-2 sm:px-3 select-none" role="button" aria-label="Upload files">
-                            <Upload className="w-5 h-5 sm:w-4 sm:h-4 pointer-events-none" aria-hidden="true" />
-                            <span className="hidden sm:inline text-sm pointer-events-none">Upload</span>
+                        <label className="btn btn-primary cursor-pointer h-8 sm:h-8 px-2 sm:px-2 rounded-full border border-transparent hover:border-white/20 transition-all flex items-center gap-2 select-none" role="button" aria-label="Upload files">
+                            <img src="/icons/upload.png" alt="" className="w-5 h-5 sm:w-4 sm:h-4 brightness-0 invert" aria-hidden="true" />
+                            <span className="hidden sm:inline text-sm font-medium pointer-events-none">Upload</span>
                             <input
                                 type="file"
                                 multiple

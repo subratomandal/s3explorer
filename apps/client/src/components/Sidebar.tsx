@@ -159,7 +159,7 @@ export function Sidebar({
                         {filteredBuckets.map((bucket, i) => (
                             <div
                                 key={bucket.name}
-                                className={`sidebar-item group stagger-item min-h-[18px] sm:min-h-[36px] py-px sm:py-2 !rounded-md ${selectedBucket === bucket.name ? 'active' : ''}`}
+                                className={`sidebar-item group stagger-item h-10 !rounded-md ${selectedBucket === bucket.name ? 'active' : ''}`}
                                 style={{ animationDelay: `${i * 30}ms` }}
                                 onClick={() => onBucketSelect(bucket.name)}
                                 onKeyDown={(e) => e.key === 'Enter' && onBucketSelect(bucket.name)}
@@ -169,7 +169,7 @@ export function Sidebar({
                                 aria-label={`Bucket: ${bucket.name}`}
                             >
                                 <Database className="sidebar-icon w-4 h-4 flex-shrink-0" aria-hidden="true" />
-                                <span className="flex-1 truncate text-sm">{bucket.name}</span>
+                                <span className="flex-1 truncate text-base sm:text-sm">{bucket.name}</span>
                                 <div className="flex items-center md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={e => handleCopyBucketName(e, bucket.name)}
@@ -213,7 +213,7 @@ export function Sidebar({
                             aria-label={activeConnectionName ? `Connection settings - Connected to: ${activeConnectionName}` : 'Connection settings'}
                         >
                             <Settings className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
-                            <span className="flex-1 truncate text-sm text-left">
+                            <span className="flex-1 truncate text-base sm:text-sm text-left">
                                 {activeConnectionName ? `${activeConnectionName}` : 'Connections'}
                             </span>
                         </button>
@@ -227,7 +227,7 @@ export function Sidebar({
                             aria-label="Logout"
                         >
                             <LogOut className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
-                            <span className="text-sm">Logout</span>
+                            <span className="text-base sm:text-sm">Logout</span>
                         </button>
                     )}
 
