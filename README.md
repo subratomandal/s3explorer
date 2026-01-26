@@ -7,6 +7,20 @@ A secure, self-hosted web-based file manager for S3-compatible storage buckets.
 
 ---
 
+## Guide
+
+###### • Set PASSWORD: to be atleast 12 characters, one symbol [!,@], one capital letter, two numbers atleast.   
+###### • Example → !Staritongithub20
+###### • Set SESSION SECRET: Random 32+ character string.
+###### • Example → 9f3c7e2a1b6d4e8f0c5a9d2e7b1a4f6c8d0e3a9b5c7f2e4d6a1c8b9f0e2d
+
+
+---
+
+  <img src="https://raw.githubusercontent.com/subratomandal/s3explorer/main/apps/client/public/images/showpage.gif">
+
+---
+
 ## Overview
 
 Managing S3 buckets often requires command-line tools or provider-specific dashboards that vary significantly in usability. S3 Explorer unifies this experience by offering a single, consistent web interface to upload, download, and organize files across any S3-compatible provider.
