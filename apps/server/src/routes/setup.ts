@@ -35,10 +35,6 @@ router.post('/', async (req, res) => {
         await setAdminPassword(password);
 
         if (sessionSecret) {
-            // We need to import preferences to save this, or add a helper in auth.ts
-            // For now, let's update auth.ts to export a helper or do it here if we import preferences
-            // Ideally setAdminPassword could accept it, but cleaner to separate.
-            // Let's import preferences at top of file.
             preferences.set('session_secret', sessionSecret);
             console.log('Setup: Session secret configured');
         }
