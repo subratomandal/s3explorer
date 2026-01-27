@@ -126,11 +126,11 @@ export async function getAuthStatus(): Promise<{ authenticated: boolean; loginTi
   }
 }
 
-export async function setup(password: string): Promise<void> {
+export async function setup(password: string, sessionSecret?: string): Promise<void> {
   const res = await fetchWithTimeout(`${API_BASE}/setup`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password }),
+    body: JSON.stringify({ password, sessionSecret }),
   });
   await handleResponse(res);
 }

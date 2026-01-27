@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Shield, ArrowRight, Check, AlertCircle } from 'lucide-react';
+import { ArrowRight, Check, AlertCircle, Eye, EyeOff, RefreshCcw } from 'lucide-react';
 import * as api from '../api';
 
 interface SetupPageProps {
@@ -9,8 +9,22 @@ interface SetupPageProps {
 export function SetupPage({ onSetupComplete }: SetupPageProps) {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [sessionSecret, setSessionSecret] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [showSecret, setShowSecret] = useState(false);
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const generateSecret = () => {
+        // Generate a random 32-byte hex string (64 chars) client-side
+        const array = new Uint8Array(32);
+        window.crypto.getRandomValues(array);
+        const hex = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
+        setSessionSecret(hex);
+        setShowSecret(true);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,7 +42,8 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
 
         try {
             setLoading(true);
-            await api.setup(password);
+            // Send both password and optional session secret
+            await api.setup(password, sessionSecret || undefined);
             onSetupComplete();
         } catch (err: any) {
             setError(err.message || 'Setup failed');
@@ -46,62 +61,118 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
     ];
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4 animate-in fade-in duration-500">
-            <div className="w-full max-w-md space-y-8">
+        <div className="min-h-[100dvh] flex flex-col items-center bg-background px-4 py-8 sm:px-6 lg:px-8 animate-in fade-in duration-500 overflow-y-auto">
 
+            <div className="flex-1 w-full flex flex-col items-center justify-center max-w-md space-y-8">
                 {/* Header */}
                 <div className="text-center">
-                    <div className="mx-auto w-16 h-16 bg-accent-purple/10 rounded-2xl flex items-center justify-center mb-6">
-                        <Shield className="w-8 h-8 text-accent-purple" />
+                    <div className="mx-auto w-16 h-16 flex items-center justify-center mb-6">
+                        <img src="/logo.svg" alt="S3 Explorer" className="w-16 h-16" />
                     </div>
                     <h1 className="text-2xl font-bold tracking-tight mb-2">Welcome to S3 Explorer</h1>
                     <p className="text-foreground-secondary">
-                        Create an admin password to secure your instance.
+                        Configure your instance security settings.
                     </p>
                 </div>
 
                 {/* Card */}
-                <div className="bg-background-secondary p-8 rounded-xl border border-border shadow-soft">
+                <div className="w-full bg-background-secondary p-6 sm:p-8 rounded-xl border border-border shadow-soft">
                     <form onSubmit={handleSubmit} className="space-y-6">
 
-                        {/* Password Input */}
+                        {/* Session Secret Section */}
+                        <div className="space-y-3 pb-6 border-b border-border/50">
+                            <label className="block text-sm font-medium" htmlFor="session-secret">
+                                Session Secret <span className="text-foreground-muted font-normal">(Optional)</span>
+                            </label>
+                            <p className="text-xs text-foreground-muted mb-2">
+                                Set a persistent secret to keep users logged in across server restarts. Leave blank to auto-generate (transient).
+                            </p>
+                            <div className="relative">
+                                <input
+                                    id="session-secret"
+                                    type={showSecret ? "text" : "password"}
+                                    value={sessionSecret}
+                                    onChange={(e) => setSessionSecret(e.target.value)}
+                                    className="input w-full h-10 text-sm pr-20 font-mono"
+                                    placeholder="Click generate for explicit secret..."
+                                />
+                                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowSecret(!showSecret)}
+                                        className="p-1.5 text-foreground-muted hover:text-foreground hover:bg-background-tertiary rounded-md transition-colors"
+                                        title={showSecret ? "Hide secret" : "Show secret"}
+                                    >
+                                        {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={generateSecret}
+                                        className="p-1.5 text-accent-purple hover:bg-accent-purple/10 rounded-md transition-colors"
+                                        title="Generate random 32-byte hex secret"
+                                    >
+                                        <RefreshCcw className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Password Inputs */}
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium mb-1.5" htmlFor="password">
                                     Admin Password
                                 </label>
-                                <input
-                                    id="password"
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="input w-full h-11 sm:h-10 text-base sm:text-sm"
-                                    placeholder="Create a strong password..."
-                                    required
-                                    autoFocus
-                                />
+                                <div className="relative">
+                                    <input
+                                        id="password"
+                                        type={showPassword ? "text" : "password"}
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="input w-full h-11 sm:h-10 text-base sm:text-sm pr-10"
+                                        placeholder="Create a strong password..."
+                                        required
+                                        autoFocus
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium mb-1.5" htmlFor="confirm-password">
                                     Confirm Password
                                 </label>
-                                <input
-                                    id="confirm-password"
-                                    type="password"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className="input w-full h-11 sm:h-10 text-base sm:text-sm"
-                                    placeholder="Repeat password..."
-                                    required
-                                />
+                                <div className="relative">
+                                    <input
+                                        id="confirm-password"
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        className="input w-full h-11 sm:h-10 text-base sm:text-sm pr-10"
+                                        placeholder="Repeat password..."
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground transition-colors"
+                                    >
+                                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
                         {/* Requirements */}
                         <div className="space-y-2 bg-background/50 p-4 rounded-lg border border-border/50">
                             <span className="text-xs font-semibold text-foreground-muted uppercase tracking-wider block mb-2">
-                                Requirements
+                                Password Requirements
                             </span>
                             <div className="grid grid-cols-1 gap-1.5">
                                 {requirements.map((req, i) => (
@@ -136,7 +207,7 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                     </svg>
-                                    Setting up...
+                                    Configuring...
                                 </span>
                             ) : (
                                 <span className="flex items-center gap-2">
@@ -149,22 +220,24 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                 </div>
 
                 <p className="text-center text-sm text-foreground-muted">
-                    This password will be stored securely using Argon2 encryption.
+                    Secrets are encrypted and stored securely using SQLite + Argon2.
                 </p>
             </div>
 
-            {/* GitHub link */}
-            <a
-                href="https://github.com/subratomandal"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="fixed bottom-4 left-1/2 -translate-x-1/2 w-4 h-4 flex items-center justify-center opacity-50 hover:opacity-100 transition-opacity duration-200"
-                aria-label="Visit GitHub (opens in new tab)"
-            >
-                <svg className="w-4 h-4" viewBox="0 0 98 96" fill="currentColor" aria-hidden="true">
-                    <path fillRule="evenodd" clipRule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z" />
-                </svg>
-            </a>
+            {/* Footer - Pushed to bottom via flex layout but not fixed overlapping */}
+            <div className="mt-8 py-4 opacity-50 hover:opacity-100 transition-opacity duration-200">
+                <a
+                    href="https://github.com/subratomandal"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-foreground-muted hover:text-foreground transition-colors"
+                >
+                    <svg className="w-5 h-5" viewBox="0 0 98 96" fill="currentColor">
+                        <path fillRule="evenodd" clipRule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z" />
+                    </svg>
+                    <span>subratomandal</span>
+                </a>
+            </div>
         </div>
     );
 }

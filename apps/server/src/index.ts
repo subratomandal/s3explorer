@@ -7,7 +7,7 @@ import fs from 'fs';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 
-import { SQLiteStore } from './services/db.js';
+import { SQLiteStore, preferences } from './services/db.js';
 import { requireAuth } from './middleware/auth.js';
 import authRouter from './routes/auth.js';
 import bucketsRouter from './routes/buckets.js';
@@ -56,9 +56,14 @@ app.use((req, res, next) => {
 });
 
 // Session configuration
-const sessionSecret = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
-if (!process.env.SESSION_SECRET) {
-  console.warn('WARNING: SESSION_SECRET not set, using random secret. Sessions will invalidate on restart.');
+// Priority: 1. DB (Saved via Setup) 2. Env Var 3. Random Fallback
+let sessionSecret = preferences.get('session_secret') || process.env.SESSION_SECRET;
+
+if (!sessionSecret) {
+  console.warn('WARNING: SESSION_SECRET not set, generating random secret. Sessions will invalidate on restart.');
+  sessionSecret = crypto.randomBytes(32).toString('hex');
+} else {
+  console.log('Using configured session secret');
 }
 
 app.use(session({

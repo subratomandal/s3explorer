@@ -170,10 +170,10 @@ export function Sidebar({
                             >
                                 <Database className="sidebar-icon w-4 h-4 flex-shrink-0" aria-hidden="true" />
                                 <span className="flex-1 truncate text-base sm:text-sm">{bucket.name}</span>
-                                <div className="flex items-center md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                <div className="flex items-center gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={e => handleCopyBucketName(e, bucket.name)}
-                                        className="btn btn-ghost btn-icon w-7 h-7 hover:text-accent-purple"
+                                        className="flex items-center justify-center w-8 h-8 rounded-md text-foreground-secondary hover:text-accent-purple hover:bg-transparent active:bg-transparent active:scale-95 transition-all focus-visible:ring-0 focus-visible:outline-none"
                                         aria-label={`Copy bucket name: ${bucket.name}`}
                                     >
                                         {copiedBucket === bucket.name ? (
@@ -184,7 +184,7 @@ export function Sidebar({
                                     </button>
                                     <button
                                         onClick={e => { e.stopPropagation(); onDeleteBucket(bucket.name); }}
-                                        className="btn btn-ghost btn-icon w-7 h-7 hover:text-accent-red"
+                                        className="flex items-center justify-center w-8 h-8 rounded-md text-foreground-secondary hover:text-accent-red hover:bg-transparent active:bg-transparent active:scale-95 transition-all focus-visible:ring-0 focus-visible:outline-none"
                                         aria-label={`Delete bucket: ${bucket.name}`}
                                     >
                                         <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
