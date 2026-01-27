@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, Check, AlertCircle, Eye, EyeOff, RefreshCcw } from 'lucide-react';
+import { ArrowRight, Check, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import * as api from '../api';
 
 interface SetupPageProps {
@@ -17,14 +17,7 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const generateSecret = () => {
-        // Generate a random 32-byte hex string (64 chars) client-side
-        const array = new Uint8Array(32);
-        window.crypto.getRandomValues(array);
-        const hex = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
-        setSessionSecret(hex);
-        setShowSecret(true);
-    };
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -67,7 +60,7 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                 {/* Header */}
                 <div className="text-center">
                     <div className="mx-auto w-16 h-16 flex items-center justify-center mb-6">
-                        <img src="/logo.svg" alt="S3 Explorer" className="w-16 h-16" />
+                        <img src="/logo.svg" alt="S3 Explorer" className="w-16 h-16 logo-themed" />
                     </div>
                     <h1 className="text-2xl font-bold tracking-tight mb-2">Welcome to S3 Explorer</h1>
                     <p className="text-foreground-secondary">
@@ -80,12 +73,12 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                     <form onSubmit={handleSubmit} className="space-y-6">
 
                         {/* Session Secret Section */}
-                        <div className="space-y-3 pb-6 border-b border-border/50">
+                        <div className="space-y-3">
                             <label className="block text-sm font-medium" htmlFor="session-secret">
-                                Session Secret <span className="text-foreground-muted font-normal">(Optional)</span>
+                                Session Secret
                             </label>
                             <p className="text-xs text-foreground-muted mb-2">
-                                Set a persistent secret to keep users logged in across server restarts. Leave blank to auto-generate (transient).
+                                Set a persistent secret to keep users logged in. Must match complexity requirements.
                             </p>
                             <div className="relative">
                                 <input
@@ -93,8 +86,9 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                                     type={showSecret ? "text" : "password"}
                                     value={sessionSecret}
                                     onChange={(e) => setSessionSecret(e.target.value)}
-                                    className="input w-full h-10 text-sm pr-20 font-mono"
-                                    placeholder="Click generate for explicit secret..."
+                                    className="input w-full h-11 sm:h-10 text-base sm:text-sm pr-12 font-mono"
+                                    placeholder="Enter a strong session secret..."
+                                    required
                                 />
                                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                                     <button
@@ -105,15 +99,33 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                                     >
                                         {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                     </button>
-                                    <button
-                                        type="button"
-                                        onClick={generateSecret}
-                                        className="p-1.5 text-accent-purple hover:bg-accent-purple/10 rounded-md transition-colors"
-                                        title="Generate random 32-byte hex secret"
-                                    >
-                                        <RefreshCcw className="w-4 h-4" />
-                                    </button>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Session Secret Requirements */}
+                        <div className="space-y-2 bg-background/50 p-4 rounded-lg border border-dashed border-white/10">
+                            <span className="text-xs font-semibold text-foreground-muted uppercase tracking-wider block mb-2">
+                                Session Secret Requirements
+                            </span>
+                            <div className="grid grid-cols-1 gap-1.5">
+                                {[
+                                    { label: 'At least 12 characters', valid: sessionSecret.length >= 12 },
+                                    { label: 'Lowercase letter', valid: /[a-z]/.test(sessionSecret) },
+                                    { label: 'Uppercase letter', valid: /[A-Z]/.test(sessionSecret) },
+                                    { label: 'Number', valid: /[0-9]/.test(sessionSecret) },
+                                    { label: 'Special character', valid: /[^a-zA-Z0-9]/.test(sessionSecret) },
+                                ].map((req, i) => (
+                                    <div key={i} className="flex items-center gap-2 text-sm">
+                                        <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${req.valid ? 'bg-accent-green/20 text-accent-green' : 'bg-background-tertiary text-foreground-muted'
+                                            }`}>
+                                            {req.valid && <Check className="w-2.5 h-2.5" />}
+                                        </div>
+                                        <span className={req.valid ? 'text-foreground' : 'text-foreground-secondary'}>
+                                            {req.label}
+                                        </span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
 
@@ -169,8 +181,8 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                             </div>
                         </div>
 
-                        {/* Requirements */}
-                        <div className="space-y-2 bg-background/50 p-4 rounded-lg border border-border/50">
+                        {/* Password Requirements */}
+                        <div className="space-y-2 bg-background/50 p-4 rounded-lg border border-dashed border-white/10">
                             <span className="text-xs font-semibold text-foreground-muted uppercase tracking-wider block mb-2">
                                 Password Requirements
                             </span>
@@ -198,7 +210,7 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
 
                         <button
                             type="submit"
-                            disabled={loading || requirements.some(r => !r.valid) || password !== confirmPassword}
+                            disabled={loading || requirements.some(r => !r.valid) || password !== confirmPassword || !sessionSecret || sessionSecret.length < 12}
                             className="w-full py-3 px-4 rounded-lg bg-accent-purple text-white hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium flex items-center justify-center gap-2"
                         >
                             {loading ? (
@@ -224,18 +236,17 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                 </p>
             </div>
 
-            {/* Footer - Pushed to bottom via flex layout but not fixed overlapping */}
+            {/* Footer - Pushed to bottom via flex layout */}
             <div className="mt-8 py-4 opacity-50 hover:opacity-100 transition-opacity duration-200">
                 <a
                     href="https://github.com/subratomandal"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm text-foreground-muted hover:text-foreground transition-colors"
+                    className="flex items-center justify-center text-foreground-muted hover:text-foreground transition-colors"
                 >
                     <svg className="w-5 h-5" viewBox="0 0 98 96" fill="currentColor">
                         <path fillRule="evenodd" clipRule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z" />
                     </svg>
-                    <span>subratomandal</span>
                 </a>
             </div>
         </div>
