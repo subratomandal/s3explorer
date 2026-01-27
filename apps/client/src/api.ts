@@ -116,9 +116,23 @@ export async function logout(): Promise<void> {
   await handleResponse(res);
 }
 
-export async function getAuthStatus(): Promise<{ authenticated: boolean; loginTime: number | null }> {
-  const res = await fetchWithTimeout(`${API_BASE}/auth/status`);
-  return handleResponse(res);
+export async function getAuthStatus(): Promise<{ authenticated: boolean; loginTime: number | null; configured: boolean }> {
+  try {
+    const res = await fetchWithTimeout(`${API_BASE}/auth/status`);
+    return await handleResponse(res);
+  } catch (err) {
+    // Fallback for older servers or offline
+    return { authenticated: false, loginTime: null, configured: true };
+  }
+}
+
+export async function setup(password: string): Promise<void> {
+  const res = await fetchWithTimeout(`${API_BASE}/setup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password }),
+  });
+  await handleResponse(res);
 }
 
 // Connection API

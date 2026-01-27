@@ -24,6 +24,7 @@ import { DeleteBucketModal } from './components/modals/DeleteBucketModal';
 import { PreviewModal } from './components/modals/PreviewModal';
 import { CommandPalette } from './components/CommandPalette';
 import { LoginPage } from './components/LoginPage';
+import { SetupPage } from './components/SetupPage';
 import { ConnectionManager } from './components/ConnectionManager';
 import { WelcomeMessage } from './components/WelcomeMessage';
 import { BatchActionsBar } from './components/BatchActionsBar';
@@ -36,6 +37,7 @@ const STORAGE_KEYS = {
 export default function App() {
   // Auth state
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const [configured, setConfigured] = useState<boolean | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   // Connection state
@@ -93,6 +95,7 @@ export default function App() {
     try {
       const status = await api.getAuthStatus();
       setAuthenticated(status.authenticated);
+      setConfigured(status.configured);
       if (status.authenticated) {
         loadActiveConnection();
       }
@@ -573,6 +576,14 @@ export default function App() {
         </div>
       </div>
     );
+  }
+
+  // Not configured - show setup wizard
+  if (configured === false) {
+    return <SetupPage onSetupComplete={() => {
+      checkAuth();
+      showToastMsg('Setup complete! Please log in.');
+    }} />;
   }
 
   // Not authenticated - show login

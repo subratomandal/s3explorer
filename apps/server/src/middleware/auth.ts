@@ -2,16 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import argon2 from 'argon2';
 import { rateLimits } from '../services/db.js';
 
-// Password from ENV (required)
-const APP_PASSWORD = process.env.APP_PASSWORD;
-
-if (!APP_PASSWORD) {
-  console.error('FATAL: APP_PASSWORD environment variable is required');
-  process.exit(1);
-}
-
-// Validate password strength
-function validatePasswordStrength(password: string): { valid: boolean; reason?: string } {
+// Password validation helper (exported for setup route)
+export function validatePasswordStrength(password: string): { valid: boolean; reason?: string } {
   if (password.length < 12) {
     return { valid: false, reason: 'Password must be at least 12 characters' };
   }
@@ -28,12 +20,6 @@ function validatePasswordStrength(password: string): { valid: boolean; reason?: 
     return { valid: false, reason: 'Password must contain special character' };
   }
   return { valid: true };
-}
-
-const passwordCheck = validatePasswordStrength(APP_PASSWORD);
-if (!passwordCheck.valid) {
-  console.error(`FATAL: ${passwordCheck.reason}`);
-  process.exit(1);
 }
 
 // Rate limiting config
@@ -100,21 +86,70 @@ function resetAttempts(ip: string): void {
   rateLimits.reset(ip);
 }
 
-// Hash password at startup
+import { preferences } from '../services/db.js';
+
+// Global state
 let passwordHash: string = '';
-(async () => {
-  passwordHash = await argon2.hash(APP_PASSWORD as string);
-})();
+let setupMode = false;
+
+// Initialize auth state
+export async function initializeAuth() {
+  const envPassword = process.env.APP_PASSWORD;
+
+  if (envPassword) {
+    console.log('Auth: Using APP_PASSWORD from environment');
+    passwordHash = await argon2.hash(envPassword);
+    setupMode = false;
+    return;
+  }
+
+  const dbPassword = preferences.get('admin_password');
+  if (dbPassword) {
+    console.log('Auth: Using stored admin password from database');
+    passwordHash = dbPassword;
+    setupMode = false;
+    return;
+  }
+
+  console.log('Auth: No password configured - entering SETUP MODE');
+  setupMode = true;
+}
+
+// Start initialization
+initializeAuth().catch(err => {
+  console.error('Failed to initialize auth:', err);
+});
+
+export function isSetupMode() {
+  return setupMode;
+}
+
+export async function setAdminPassword(password: string) {
+  passwordHash = await argon2.hash(password);
+  preferences.set('admin_password', passwordHash);
+  setupMode = false;
+  console.log('Auth: Admin password set successfully');
+}
 
 export async function login(req: Request, res: Response): Promise<void> {
+  // If in setup mode, reject login
+  if (setupMode) {
+    res.status(423).json({
+      error: 'Setup required',
+      code: 'SETUP_REQUIRED',
+      message: 'Server has not been configured. Please complete setup first.'
+    });
+    return;
+  }
+
   const ip = getClientIp(req);
-  
+
   // Check rate limit
   const rateCheck = checkRateLimit(ip);
   if (!rateCheck.allowed) {
-    res.status(429).json({ 
+    res.status(429).json({
       error: 'Too many login attempts',
-      retryAfter: rateCheck.retryAfter 
+      retryAfter: rateCheck.retryAfter
     });
     return;
   }
@@ -129,7 +164,7 @@ export async function login(req: Request, res: Response): Promise<void> {
 
   try {
     const valid = await argon2.verify(passwordHash, password);
-    
+
     if (!valid) {
       recordAttempt(ip);
       res.status(401).json({ error: 'Invalid password' });
@@ -138,10 +173,10 @@ export async function login(req: Request, res: Response): Promise<void> {
 
     // Success - reset rate limit and create session
     resetAttempts(ip);
-    
+
     req.session.authenticated = true;
     req.session.loginTime = Date.now();
-    
+
     // Set session duration based on rememberMe
     if (rememberMe) {
       req.session.cookie.maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -179,6 +214,7 @@ export function getAuthStatus(req: Request, res: Response): void {
   res.json({
     authenticated: !!req.session?.authenticated,
     loginTime: req.session?.loginTime || null,
+    configured: !setupMode, // Client needs to know if setup is required
   });
 }
 

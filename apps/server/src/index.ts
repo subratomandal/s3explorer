@@ -13,6 +13,8 @@ import authRouter from './routes/auth.js';
 import bucketsRouter from './routes/buckets.js';
 import objectsRouter from './routes/objects.js';
 import connectionsRouter from './routes/connections.js';
+import setupRouter from './routes/setup.js';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -75,6 +77,8 @@ app.use(session({
 
 // Auth routes (no auth required)
 app.use('/api/auth', authRouter);
+app.use('/api/setup', setupRouter);
+
 
 // Health check (no auth required)
 app.get('/api/health', (req, res) => {
