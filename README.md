@@ -9,7 +9,7 @@ A secure, self-hosted web-based file manager for S3-compatible storage buckets.
 
 ## Guide
 
-###### • Set PASSWORD: to be atleast 12 characters, one symbol [!,@], one capital letter, two numbers atleast.   
+###### • Set APP PASSWORD: to be atleast 12 characters, one symbol [!,@], one capital letter, two numbers atleast.   
 ###### • Example → !Staritongithub20
 ###### • Set SESSION SECRET: Random 32+ character string.
 ###### • Example → 9f3c7e2a1b6d4e8f0c5a9d2e7b1a4f6c8d0e3a9b5c7f2e4d6a1c8b9f0e2d
