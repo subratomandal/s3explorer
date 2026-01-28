@@ -89,6 +89,7 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                                     className="input w-full h-11 sm:h-10 text-base sm:text-sm pr-12 rounded-md"
                                     placeholder="Enter a 32+ char secret..."
                                     required
+                                    autoFocus
                                 />
                                 <button
                                     type="button"
@@ -137,7 +138,6 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                                         className="input w-full h-11 sm:h-10 text-base sm:text-sm pr-10 rounded-md"
                                         placeholder="Create a strong password..."
                                         required
-                                        autoFocus
                                     />
                                     <button
                                         type="button"
