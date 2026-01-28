@@ -69,7 +69,7 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                 </div>
 
                 {/* Card */}
-                <div className="w-full bg-background-secondary p-6 sm:p-8 rounded-xl border border-border shadow-soft">
+                <div className="w-full bg-background-secondary p-6 sm:p-8 rounded-lg border border-border shadow-soft">
                     <form onSubmit={handleSubmit} className="space-y-6">
 
                         {/* Session Secret Section */}
@@ -78,7 +78,7 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                                 Session Secret
                             </label>
                             <p className="text-xs text-foreground-muted mb-2">
-                                Set a persistent secret to keep users logged in. Must match complexity requirements.
+                                Set a persistent secret to keep users logged in. 32+ character string (use <code>openssl rand -hex 32</code>) preferred.
                             </p>
                             <div className="relative">
                                 <input
@@ -86,35 +86,28 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                                     type={showSecret ? "text" : "password"}
                                     value={sessionSecret}
                                     onChange={(e) => setSessionSecret(e.target.value)}
-                                    className="input w-full h-11 sm:h-10 text-base sm:text-sm pr-12 font-mono"
-                                    placeholder="Enter a strong session secret..."
+                                    className="input w-full h-11 sm:h-10 text-base sm:text-sm pr-12 font-mono rounded-md"
+                                    placeholder="Enter a 32+ char secret..."
                                     required
                                 />
-                                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowSecret(!showSecret)}
-                                        className="p-1.5 text-foreground-muted hover:text-foreground hover:bg-background-tertiary rounded-md transition-colors"
-                                        title={showSecret ? "Hide secret" : "Show secret"}
-                                    >
-                                        {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                    </button>
-                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowSecret(!showSecret)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground transition-colors"
+                                >
+                                    {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
                             </div>
                         </div>
 
                         {/* Session Secret Requirements */}
-                        <div className="space-y-2 bg-background/50 p-4 rounded-lg border border-dashed border-white/10">
+                        <div className="space-y-2 bg-background/50 p-4 rounded-md border border-dashed border-white/10">
                             <span className="text-xs font-semibold text-foreground-muted uppercase tracking-wider block mb-2">
                                 Session Secret Requirements
                             </span>
                             <div className="grid grid-cols-1 gap-1.5">
                                 {[
-                                    { label: 'At least 12 characters', valid: sessionSecret.length >= 12 },
-                                    { label: 'Lowercase letter', valid: /[a-z]/.test(sessionSecret) },
-                                    { label: 'Uppercase letter', valid: /[A-Z]/.test(sessionSecret) },
-                                    { label: 'Number', valid: /[0-9]/.test(sessionSecret) },
-                                    { label: 'Special character', valid: /[^a-zA-Z0-9]/.test(sessionSecret) },
+                                    { label: 'At least 32 characters', valid: sessionSecret.length >= 32 },
                                 ].map((req, i) => (
                                     <div key={i} className="flex items-center gap-2 text-sm">
                                         <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${req.valid ? 'bg-accent-green/20 text-accent-green' : 'bg-background-tertiary text-foreground-muted'
@@ -141,7 +134,7 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                                         type={showPassword ? "text" : "password"}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="input w-full h-11 sm:h-10 text-base sm:text-sm pr-10"
+                                        className="input w-full h-11 sm:h-10 text-base sm:text-sm pr-10 rounded-md"
                                         placeholder="Create a strong password..."
                                         required
                                         autoFocus
@@ -166,7 +159,7 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                                         type={showConfirmPassword ? "text" : "password"}
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
-                                        className="input w-full h-11 sm:h-10 text-base sm:text-sm pr-10"
+                                        className="input w-full h-11 sm:h-10 text-base sm:text-sm pr-10 rounded-md"
                                         placeholder="Repeat password..."
                                         required
                                     />
@@ -182,7 +175,7 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                         </div>
 
                         {/* Password Requirements */}
-                        <div className="space-y-2 bg-background/50 p-4 rounded-lg border border-dashed border-white/10">
+                        <div className="space-y-2 bg-background/50 p-4 rounded-md border border-dashed border-white/10">
                             <span className="text-xs font-semibold text-foreground-muted uppercase tracking-wider block mb-2">
                                 Password Requirements
                             </span>
@@ -202,7 +195,7 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                         </div>
 
                         {error && (
-                            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3 text-sm text-red-500">
+                            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-md flex items-start gap-3 text-sm text-red-500">
                                 <AlertCircle className="w-5 h-5 flex-shrink-0" />
                                 <span>{error}</span>
                             </div>
@@ -210,8 +203,8 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
 
                         <button
                             type="submit"
-                            disabled={loading || requirements.some(r => !r.valid) || password !== confirmPassword || !sessionSecret || sessionSecret.length < 12}
-                            className="w-full py-3 px-4 rounded-lg bg-accent-purple text-white hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium flex items-center justify-center gap-2"
+                            disabled={loading || requirements.some(r => !r.valid) || password !== confirmPassword || !sessionSecret || sessionSecret.length < 32}
+                            className="w-full py-3 px-4 rounded-md bg-accent-purple text-white hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium flex items-center justify-center gap-2"
                         >
                             {loading ? (
                                 <span className="flex items-center gap-2">
