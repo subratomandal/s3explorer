@@ -476,17 +476,29 @@ export async function createFolder(bucket: string, path: string): Promise<void> 
 }
 
 // Recursive search across all objects in a bucket. S3 has no native substring
-// search, so we list everything without a delimiter and match filenames manually.
+// search, so we list everything without a delimiter and match keys manually.
+// Matches against the full object key (folder path + filename), so users can
+// find files by any substring of their path — e.g. "2024/q1" or "invoice".
+// Whitespace in the query is treated as an AND of substrings (all must match).
+// An optional `prefix` scopes the scan to a subtree to keep large buckets fast.
 // Capped at maxResults matches or maxScanned total objects to avoid runaway requests.
 export async function searchObjects(
   bucket: string,
   query: string,
-  maxResults: number = 50,
-  maxScanned: number = 10000
+  maxResults: number = 200,
+  maxScanned: number = 50000,
+  prefix?: string
 ): Promise<ObjectInfo[]> {
   const client = getS3Client();
-  const lowerQuery = query.toLowerCase();
+  const tokens = query
+    .toLowerCase()
+    .split(/\s+/)
+    .map(t => t.trim())
+    .filter(Boolean);
+  if (tokens.length === 0) return [];
+
   const results: ObjectInfo[] = [];
+  const seen = new Set<string>();
   let scanned = 0;
   let continuationToken: string | undefined;
 
@@ -494,6 +506,7 @@ export async function searchObjects(
     const command = new ListObjectsV2Command({
       Bucket: bucket,
       // No Delimiter — list recursively across all "folders"
+      ...(prefix && { Prefix: prefix }),
       ...(continuationToken && { ContinuationToken: continuationToken }),
       MaxKeys: 1000,
     });
@@ -504,17 +517,39 @@ export async function searchObjects(
       const key = obj.Key || '';
       if (!key) continue;
 
-      // Match on the filename part (last segment), not the full path
-      const name = key.split('/').filter(Boolean).pop() || '';
-      if (name.toLowerCase().includes(lowerQuery)) {
+      // Match against the full key path (lowercased). All tokens must appear.
+      const lowerKey = key.toLowerCase();
+      if (!tokens.every(t => lowerKey.includes(t))) continue;
+
+      if (!seen.has(key)) {
+        seen.add(key);
         results.push({
           key,
           size: obj.Size || 0,
           lastModified: obj.LastModified,
           isFolder: key.endsWith('/'),
         });
-        if (results.length >= maxResults) break;
       }
+
+      // Surface the parent folder when a query token matches a path segment but
+      // not the filename — makes folder hits discoverable in the results list.
+      const segments = key.split('/');
+      const fileName = segments.pop() || '';
+      if (segments.length > 0 && !tokens.every(t => fileName.toLowerCase().includes(t))) {
+        let acc = '';
+        for (const seg of segments) {
+          if (!seg) continue;
+          acc += `${seg}/`;
+          const lowerAcc = acc.toLowerCase();
+          if (tokens.every(t => lowerAcc.includes(t)) && !seen.has(acc)) {
+            seen.add(acc);
+            results.push({ key: acc, size: 0, lastModified: undefined, isFolder: true });
+            if (results.length >= maxResults) break;
+          }
+        }
+      }
+
+      if (results.length >= maxResults) break;
     }
 
     continuationToken = response.NextContinuationToken;

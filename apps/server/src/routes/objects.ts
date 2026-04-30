@@ -42,12 +42,15 @@ function getS3ErrorDetails(error: any): { message: string; s3Code?: string; stat
   return { message, s3Code, status };
 }
 
-// Search files/folders across the entire bucket by substring match on filename.
+// Search files/folders across the entire bucket by substring match on the
+// full object key (folder path + filename). Optionally scoped to a `prefix`
+// to limit the scan to a subtree of the bucket.
 // Must be defined before the /:bucket catch-all so Express matches it first.
 router.get('/:bucket/search', async (req: Request, res: Response) => {
   try {
     const { bucket } = req.params;
     const query = (req.query.q as string || '').trim();
+    const prefix = (req.query.prefix as string || '').trim() || undefined;
 
     if (!isValidBucketName(bucket)) {
       return res.status(400).json({ error: 'Invalid bucket name' });
@@ -57,7 +60,7 @@ router.get('/:bucket/search', async (req: Request, res: Response) => {
       return res.json({ results: [] });
     }
 
-    const results = await s3.searchObjects(bucket, query);
+    const results = await s3.searchObjects(bucket, query, undefined, undefined, prefix);
     res.json({ results });
   } catch (error: any) {
     console.error('Error searching objects:', error);
