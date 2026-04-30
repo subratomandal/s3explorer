@@ -49,8 +49,18 @@ function getS3ErrorDetails(error: any): { message: string; s3Code?: string; stat
 router.get('/:bucket/search', async (req: Request, res: Response) => {
   try {
     const { bucket } = req.params;
-    const query = (req.query.q as string || '').trim();
-    const prefix = (req.query.prefix as string || '').trim() || undefined;
+
+    // Normalize query params: Express may give us a string, an array (e.g.
+    // ?q=a&q=b), or a nested object. Calling .trim() on a non-string would
+    // throw at runtime, so coerce defensively.
+    const normalizeParam = (raw: unknown): string => {
+      if (typeof raw === 'string') return raw.trim();
+      if (Array.isArray(raw) && typeof raw[0] === 'string') return (raw[0] as string).trim();
+      return '';
+    };
+    const query = normalizeParam(req.query.q);
+    const prefixRaw = normalizeParam(req.query.prefix);
+    const prefix = prefixRaw || undefined;
 
     if (!isValidBucketName(bucket)) {
       return res.status(400).json({ error: 'Invalid bucket name' });
