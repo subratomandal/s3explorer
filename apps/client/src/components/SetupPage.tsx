@@ -54,7 +54,7 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
     ];
 
     return (
-        <div className="min-h-[100dvh] flex flex-col items-center bg-background px-4 py-8 sm:px-6 lg:px-8 animate-in fade-in duration-500 overflow-y-auto">
+        <div className="min-h-[100dvh] flex flex-col items-center bg-background px-4 py-8 sm:px-6 lg:px-8 overflow-y-auto">
 
             <div className="flex-1 w-full flex flex-col items-center justify-center max-w-md space-y-8">
                 {/* Header */}
@@ -69,7 +69,7 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                 </div>
 
                 {/* Card */}
-                <div className="w-full bg-background-secondary p-5 sm:p-6 rounded-lg border border-border shadow-soft">
+                <div className="w-full bg-background-secondary p-5 sm:p-6 rounded-lg border border-border">
                     <form onSubmit={handleSubmit} className="space-y-6">
 
                         {/* Session Secret Section */}
@@ -86,7 +86,7 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                                     type={showSecret ? "text" : "password"}
                                     value={sessionSecret}
                                     onChange={(e) => setSessionSecret(e.target.value)}
-                                    className="input w-full h-10 text-sm pr-12 rounded-md"
+                                    className="input w-full h-10 text-sm pr-10 rounded-md"
                                     placeholder="Enter a 32+ char secret..."
                                     required
                                     autoFocus
@@ -94,7 +94,8 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                                 <button
                                     type="button"
                                     onClick={() => setShowSecret(!showSecret)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground transition-colors"
+                                    aria-label={showSecret ? 'Hide session secret' : 'Show session secret'}
+                                    className="absolute inset-y-0 right-0 px-3 flex items-center text-foreground-muted hover:text-foreground transition-colors"
                                 >
                                     {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
@@ -102,7 +103,7 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                         </div>
 
                         {/* Session Secret Requirements */}
-                        <div className="space-y-2 bg-background/50 p-4 rounded-md border border-dashed border-white/10">
+                        <div className="space-y-2 bg-background/50 p-4 rounded-md border border-dashed border-border">
                             <span className="text-xs font-semibold text-foreground-muted uppercase tracking-wider block mb-2">
                                 Session Secret Requirements
                             </span>
@@ -142,7 +143,8 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground transition-colors"
+                                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                        className="absolute inset-y-0 right-0 px-3 flex items-center text-foreground-muted hover:text-foreground transition-colors"
                                     >
                                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                     </button>
@@ -166,7 +168,8 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                                     <button
                                         type="button"
                                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground transition-colors"
+                                        aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                                        className="absolute inset-y-0 right-0 px-3 flex items-center text-foreground-muted hover:text-foreground transition-colors"
                                     >
                                         {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                     </button>
@@ -175,7 +178,7 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                         </div>
 
                         {/* Password Requirements */}
-                        <div className="space-y-2 bg-background/50 p-4 rounded-md border border-dashed border-white/10">
+                        <div className="space-y-2 bg-background/50 p-4 rounded-md border border-dashed border-border">
                             <span className="text-xs font-semibold text-foreground-muted uppercase tracking-wider block mb-2">
                                 Password Requirements
                             </span>
@@ -195,9 +198,9 @@ export function SetupPage({ onSetupComplete }: SetupPageProps) {
                         </div>
 
                         {error && (
-                            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-md flex items-start gap-3 text-sm text-red-500">
-                                <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                                <span>{error}</span>
+                            <div className="p-3 rounded-md bg-accent-red/10 border border-accent-red/20 text-accent-red text-sm flex items-center gap-2" role="alert">
+                                <AlertCircle className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+                                {error}
                             </div>
                         )}
 

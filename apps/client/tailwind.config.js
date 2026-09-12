@@ -1,31 +1,45 @@
 // v 2.0 - Theme-aware colors using CSS variables
+
+// Colours live in CSS variables (index.css) so the theme can switch at runtime.
+// Tailwind can't derive an alpha from an opaque var(), so a plain string value
+// silently drops every opacity modifier (bg-accent-red/10 generated nothing).
+// A function value lets us pass the variable straight through for plain
+// utilities and use CSS relative colour syntax to tint it for modifiers.
+const token = (variable) => ({ opacityValue }) =>
+  opacityValue === undefined || String(opacityValue).startsWith('var(')
+    ? `var(${variable})`
+    : `rgb(from var(${variable}) r g b / ${opacityValue})`;
+
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  // The app toggles theme via data-theme on <html>; without this, `dark:` variants
+  // would follow the OS preference instead and disagree with the in-app toggle.
+  darkMode: ['class', '[data-theme="dark"]'],
   theme: {
     extend: {
       colors: {
         background: {
-          DEFAULT: 'var(--background)',
-          secondary: 'var(--background-secondary)',
-          tertiary: 'var(--background-tertiary)',
-          hover: 'var(--background-hover)',
+          DEFAULT: token('--background'),
+          secondary: token('--background-secondary'),
+          tertiary: token('--background-tertiary'),
+          hover: token('--background-hover'),
         },
         border: {
-          DEFAULT: 'var(--border)',
-          hover: 'var(--border-hover)',
+          DEFAULT: token('--border'),
+          hover: token('--border-hover'),
         },
         foreground: {
-          DEFAULT: 'var(--foreground)',
-          secondary: 'var(--foreground-secondary)',
-          muted: 'var(--foreground-muted)',
+          DEFAULT: token('--foreground'),
+          secondary: token('--foreground-secondary'),
+          muted: token('--foreground-muted'),
         },
         accent: {
-          pink: 'var(--accent-pink)',
-          purple: 'var(--accent-purple)',
-          green: 'var(--accent-green)',
-          blue: 'var(--accent-blue)',
-          yellow: 'var(--accent-yellow)',
-          red: 'var(--accent-red)',
+          pink: token('--accent-pink'),
+          purple: token('--accent-purple'),
+          green: token('--accent-green'),
+          blue: token('--accent-blue'),
+          yellow: token('--accent-yellow'),
+          red: token('--accent-red'),
         },
       },
       fontFamily: {

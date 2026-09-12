@@ -14,6 +14,13 @@ export function getFileName(key: string): string {
     return parts[parts.length - 1] || key;
 }
 
+// "photos/2024/trip/" -> "photos/2024/", "photos/" -> ""
+export function getParentPrefix(key: string): string {
+    const parts = key.split('/').filter(Boolean);
+    parts.pop();
+    return parts.length ? parts.join('/') + '/' : '';
+}
+
 export function getFileIcon(key: string, isFolder: boolean) {
     if (isFolder) return <Folder className="w-5 h-5" />;
 
@@ -70,4 +77,15 @@ export function getPreviewType(key: string): PreviewType {
 
 export function isPreviewable(key: string): boolean {
     return getPreviewType(key) !== null;
+}
+
+// Programmatic <a download> click. Same-origin URLs served with
+// Content-Disposition: attachment go straight to the browser's download UI.
+export function triggerDownload(url: string, filename: string): void {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }

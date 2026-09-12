@@ -6,6 +6,7 @@ export const API_TIMEOUTS = {
   DELETE_FOLDER: 120000,    // 2 minutes - recursive folder deletion
   RENAME: 60000,            // 1 minute - rename (copy + delete)
   CONNECTION_TEST: 60000,   // 1 minute - connection testing
+  ZIP_PREPARE: 120000,      // 2 minutes - expanding folders before a zip download starts
 } as const;
 
 // UI Constants

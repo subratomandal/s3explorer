@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 
 import { getFileName } from '../../utils/fileUtils';
 import type { S3Object } from '../../types';
@@ -11,6 +12,7 @@ interface DeleteModalProps {
 
 export function DeleteModal({ object, onClose, onDelete }: DeleteModalProps) {
     const [isDeleting, setIsDeleting] = useState(false);
+    useEscapeKey(onClose, !!object);
 
     if (!object) return null;
 
@@ -29,7 +31,7 @@ export function DeleteModal({ object, onClose, onDelete }: DeleteModalProps) {
 
     return (
         <div
-            className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
+            className="fixed inset-0 z-[100] modal-backdrop flex items-center justify-center p-4"
             onClick={onClose}
         >
             <div

@@ -7,9 +7,24 @@ import session from 'express-session';
 const DATA_DIR = process.env.DATA_DIR || '/data';
 const DB_PATH = path.join(DATA_DIR, 's3explorer.db');
 
-// Ensure data directory exists
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+// Ensure data directory exists and is writable. Managed volumes (Railway, Fly, etc.)
+// are mounted root:root, so a non-root process would otherwise die with a cryptic
+// SQLITE_CANTOPEN from better-sqlite3 -- fail fast with an actionable message instead.
+try {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+  fs.accessSync(DATA_DIR, fs.constants.W_OK);
+} catch (err: any) {
+  const uid = typeof process.getuid === 'function' ? process.getuid() : 'unknown';
+  console.error(
+    `DATA_DIR "${DATA_DIR}" is not writable by uid ${uid} (${err.code || err.message}).\n` +
+    `S3 Explorer stores its SQLite database and encryption key there. To fix:\n` +
+    `  - Docker: start the image with its default entrypoint so it can fix volume ownership, or chown the mount to uid 1000.\n` +
+    `  - Railway: remove any custom start command (it bypasses the entrypoint), or set RAILWAY_RUN_UID=0.\n` +
+    `  - Or point DATA_DIR at a writable directory.`
+  );
+  process.exit(1);
 }
 
 const db: DatabaseType = new Database(DB_PATH);

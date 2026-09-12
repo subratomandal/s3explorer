@@ -3,6 +3,9 @@ import { X } from 'lucide-react';
 interface BatchActionsBarProps {
     selectedCount: number;
     previewableCount: number;
+    // 'file' streams a single file directly; 'zip' bundles the selection (folders included).
+    downloadMode: 'file' | 'zip';
+    downloading: boolean;
     onClearSelection: () => void;
     onDeleteSelected: () => void;
     onPreviewSelected: () => void;
@@ -12,6 +15,8 @@ interface BatchActionsBarProps {
 export function BatchActionsBar({
     selectedCount,
     previewableCount,
+    downloadMode,
+    downloading,
     onClearSelection,
     onDeleteSelected,
     onPreviewSelected,
@@ -19,8 +24,12 @@ export function BatchActionsBar({
 }: BatchActionsBarProps) {
     if (selectedCount === 0) return null;
 
+    const downloadLabel = downloading
+        ? 'Preparing…'
+        : downloadMode === 'zip' ? 'Download .zip' : 'Download';
+
     return (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 animate-slideUp">
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 mb-safe animate-slideUp">
             <div className="flex items-center gap-px bg-border rounded-lg shadow-lg overflow-hidden">
                 <span className="text-xs font-medium text-foreground-secondary px-3 py-2 bg-background-secondary whitespace-nowrap">
                     {selectedCount} selected
@@ -37,9 +46,11 @@ export function BatchActionsBar({
 
                 <button
                     onClick={onDownloadSelected}
-                    className="text-xs font-medium px-3 py-2 bg-background-secondary text-foreground-secondary hover:bg-background-hover hover:text-foreground transition-colors whitespace-nowrap"
+                    disabled={downloading}
+                    className="text-xs font-medium px-3 py-2 bg-background-secondary text-foreground-secondary hover:bg-background-hover hover:text-foreground transition-colors whitespace-nowrap disabled:opacity-60 disabled:cursor-wait"
+                    aria-busy={downloading}
                 >
-                    Download
+                    {downloadLabel}
                 </button>
 
                 <button

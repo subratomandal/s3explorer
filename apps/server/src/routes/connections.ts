@@ -2,9 +2,16 @@ import { Router, Request, Response } from 'express';
 import { connections, ConnectionRecord } from '../services/db.js';
 import { encryptAndPack, unpackAndDecrypt } from '../services/crypto.js';
 import { listBuckets, testBucketAccess, S3ConnectionConfig } from '../services/s3.js';
-import { isValidBucketName } from '../utils/validation.js';
+import { isValidBucketName, isValidRegion } from '../utils/validation.js';
 
 const router = Router();
+
+const INVALID_REGION_MSG = 'Invalid region. Use letters, numbers, dots, and hyphens (max 64 chars).';
+
+// Free-text region from the UI (custom providers like Garage). Empty means "use the default".
+function parseRegion(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
 
 // Get all connections (without decrypted creds)
 router.get('/', (req: Request, res: Response) => {
@@ -54,7 +61,8 @@ router.get('/active', (req: Request, res: Response) => {
 // Create new connection
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { name, endpoint, accessKey, secretKey, region, forcePathStyle } = req.body;
+    const { name, endpoint, accessKey, secretKey, forcePathStyle } = req.body;
+    const region = parseRegion(req.body.region);
     const bucket = req.body.bucket?.trim() || null;
 
     if (!name?.trim() || !endpoint?.trim() || !accessKey?.trim() || !secretKey?.trim()) {
@@ -64,6 +72,11 @@ router.post('/', async (req: Request, res: Response) => {
 
     if (bucket && !isValidBucketName(bucket)) {
       res.status(400).json({ error: 'Invalid bucket name. Use 3–63 lowercase letters, numbers, dots, and hyphens.' });
+      return;
+    }
+
+    if (region && !isValidRegion(region)) {
+      res.status(400).json({ error: INVALID_REGION_MSG });
       return;
     }
 
@@ -129,11 +142,17 @@ router.post('/', async (req: Request, res: Response) => {
 router.put('/:id', async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
-    const { name, endpoint, accessKey, secretKey, region, forcePathStyle } = req.body;
+    const { name, endpoint, accessKey, secretKey, forcePathStyle } = req.body;
+    const region = parseRegion(req.body.region);
     const bucket = req.body.bucket !== undefined ? (req.body.bucket?.trim() || null) : undefined;
 
     if (bucket && !isValidBucketName(bucket)) {
       res.status(400).json({ error: 'Invalid bucket name. Use 3–63 lowercase letters, numbers, dots, and hyphens.' });
+      return;
+    }
+
+    if (region && !isValidRegion(region)) {
+      res.status(400).json({ error: INVALID_REGION_MSG });
       return;
     }
 
@@ -256,7 +275,8 @@ router.post('/disconnect', (req: Request, res: Response) => {
 // Test connection without saving
 router.post('/test', async (req: Request, res: Response) => {
   try {
-    const { endpoint, accessKey, secretKey, region, forcePathStyle } = req.body;
+    const { endpoint, accessKey, secretKey, forcePathStyle } = req.body;
+    const region = parseRegion(req.body.region);
     const bucket = req.body.bucket?.trim() || null;
 
     if (!endpoint || !accessKey || !secretKey) {
@@ -266,6 +286,11 @@ router.post('/test', async (req: Request, res: Response) => {
 
     if (bucket && !isValidBucketName(bucket)) {
       res.status(400).json({ error: 'Invalid bucket name. Use 3–63 lowercase letters, numbers, dots, and hyphens.' });
+      return;
+    }
+
+    if (region && !isValidRegion(region)) {
+      res.status(400).json({ error: INVALID_REGION_MSG });
       return;
     }
 

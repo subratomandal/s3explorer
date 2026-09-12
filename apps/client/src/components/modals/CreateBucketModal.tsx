@@ -48,10 +48,10 @@ export function CreateBucketModal({ isOpen, value, onChange, onClose, onCreate }
                     handleSubmit();
                 }}
             >
-                <div className="space-y-2">
-                    <p className="text-xs text-foreground-muted">
-                        3-63 characters: lowercase letters, numbers, and hyphens
-                    </p>
+                <div className="space-y-1.5">
+                    <label htmlFor={inputId} className="text-sm text-foreground-secondary">
+                        Bucket Name
+                    </label>
                     <input
                         id={inputId}
                         type="text"
@@ -69,9 +69,13 @@ export function CreateBucketModal({ isOpen, value, onChange, onClose, onCreate }
                         aria-invalid={showError ? true : undefined}
                         maxLength={63}
                     />
-                    {showError && (
+                    {showError ? (
                         <p id={errorId} className="text-xs text-accent-red" role="alert">
                             {validation.error}
+                        </p>
+                    ) : (
+                        <p id={hintId} className="text-xs text-foreground-muted">
+                            3–63 characters: lowercase letters, numbers, and hyphens
                         </p>
                     )}
                 </div>

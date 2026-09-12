@@ -20,6 +20,7 @@ Supported Providers:
 4. Cloudflare R2
 5. MinIO
 6. DigitalOcean Spaces
+7. Any other S3-compatible API (Garage, Ceph RGW, SeaweedFS, …)
 
 ### Screenshots
 
@@ -90,7 +91,8 @@ flowchart TB
 4. Delete files and folders with confirmation
 5. Batch select and delete multiple items
 6. Download files through secure server proxy
-7. In-browser file preview
+7. Download folders or multi-selections as a single `.zip`, streamed on the fly
+8. In-browser file preview
 
 #### Multi-Connection Support
 
@@ -119,6 +121,8 @@ flowchart TB
    2. `SESSION_SECRET`: Random 32+ character string (use `openssl rand -hex 32`)
 
 Or skip these and configure through the setup wizard on first launch.
+
+> Seeing `SqliteError: unable to open database file` (`SQLITE_CANTOPEN`) after attaching the volume? Railway mounts volumes as `root`, and the image's entrypoint fixes the ownership at startup. Make sure the service has no custom start command (it would bypass the entrypoint), or set `RAILWAY_RUN_UID=0`.
 
 #### Docker
 
@@ -229,6 +233,15 @@ Backend runs on :3000, frontend on :5173.
    1. Endpoint: Your MinIO URL (e.g., `https://minio.example.com`)
    2. Access Key: Generated Access Key
    3. Secret Key: Generated Secret Key
+
+#### Other S3-compatible (Garage, Ceph RGW, SeaweedFS, …)
+
+1. Choose the `Custom` provider
+2. Use values:
+   1. Endpoint: Your server's S3 API URL
+   2. Region: Pick `Custom…` in the region dropdown and enter whatever your server expects (e.g., Garage uses `garage`)
+   3. Access Key / Secret Key: From your server's key management
+   4. Path-style URLs: Usually required for self-hosted servers
 
 ### Stack
 

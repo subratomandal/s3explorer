@@ -807,8 +807,20 @@ textarea:focus-visible {
   padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }
 
+/* Lifts fixed bottom elements (toasts, batch bar, offline pill) above the home
+   indicator. viewport-fit=cover extends the page beneath it, so their bottom-*
+   offset alone would leave them partly covered on notched phones. */
+.mb-safe {
+  margin-bottom: env(safe-area-inset-bottom);
+}
+
 /* Mobile-first touch targets */
 @media (max-width: 640px) {
+  /* Bottom-sheet modals sit flush with the screen edge */
+  .modal-content {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
   .table td {
     padding: 0.5rem 0.625rem;
   }

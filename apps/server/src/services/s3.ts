@@ -203,7 +203,10 @@ function chunk<T>(items: T[], size: number): T[][] {
   return chunks;
 }
 
-async function listAllObjectKeys(client: S3Client, bucket: string, prefix: string): Promise<string[]> {
+// maxKeys bounds how far we walk a prefix. Callers that must see every key
+// (delete, rename) leave it unset; zip downloads cap it so one request can't
+// enumerate an enormous bucket and surface the limit to the user instead.
+async function listAllObjectKeys(client: S3Client, bucket: string, prefix: string, maxKeys?: number): Promise<string[]> {
   const keys: string[] = [];
   let continuationToken: string | undefined;
 
@@ -220,14 +223,32 @@ async function listAllObjectKeys(client: S3Client, bucket: string, prefix: strin
       }
     }
 
+    if (maxKeys !== undefined && keys.length > maxKeys) {
+      const err: any = new Error(`Too many files under "${prefix}" (limit ${maxKeys.toLocaleString()}). Select fewer items.`);
+      err.status = 400;
+      throw err;
+    }
+
     continuationToken = response.NextContinuationToken;
   } while (continuationToken);
 
   return keys;
 }
 
+export async function listObjectKeys(bucket: string, prefix: string, maxKeys?: number): Promise<string[]> {
+  return listAllObjectKeys(getS3Client(), bucket, prefix, maxKeys);
+}
+
 async function deleteObjectWithClient(client: S3Client, bucket: string, key: string): Promise<void> {
   await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
+}
+
+// x-amz-copy-source is "bucket/key" with only the key's special characters
+// escaped -- the form S3 documents and every provider accepts. Encoding the
+// whole string turns the separator into %2F, which relies on the server
+// decoding it back; AWS does, but S3-compatible providers aren't guaranteed to.
+function copySource(bucket: string, key: string): string {
+  return `${bucket}/${key.split('/').map(encodeURIComponent).join('/')}`;
 }
 
 // 100MB threshold: below this, a single PutObject is simpler and has less overhead.
@@ -402,7 +423,7 @@ export async function renameObject(
     await parallelExecute(keyMappings, 10, async (mapping) => {
       const copyCommand = new CopyObjectCommand({
         Bucket: bucket,
-        CopySource: encodeURIComponent(`${bucket}/${mapping.oldKey}`),
+        CopySource: copySource(bucket, mapping.oldKey),
         Key: mapping.newKey,
       });
       await client.send(copyCommand);
@@ -440,7 +461,7 @@ export async function renameObject(
   } else {
     const copyCommand = new CopyObjectCommand({
       Bucket: bucket,
-      CopySource: encodeURIComponent(`${bucket}/${oldKey}`),
+      CopySource: copySource(bucket, oldKey),
       Key: newKey,
     });
     await client.send(copyCommand);
@@ -458,7 +479,7 @@ export async function copyObject(
   const client = getS3Client();
   const command = new CopyObjectCommand({
     Bucket: destBucket,
-    CopySource: encodeURIComponent(`${sourceBucket}/${sourceKey}`),
+    CopySource: copySource(sourceBucket, sourceKey),
     Key: destKey,
   });
   await client.send(command);

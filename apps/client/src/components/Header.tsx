@@ -46,15 +46,18 @@ export function Header({
     };
 
     // Truncate breadcrumbs if too many - fewer on mobile
-    const maxBreadcrumbs = typeof window !== 'undefined' && window.innerWidth < 640 ? 1 : 2;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+    const maxBreadcrumbs = isMobile ? 1 : 2;
     const showEllipsis = breadcrumbs.length > maxBreadcrumbs;
+    // On phones there's only room for the current folder; the bucket name is
+    // always visible in the sidebar and the back arrow covers navigating up.
+    const hideBucketCrumb = isMobile && breadcrumbs.length > 0;
     const displayBreadcrumbs = showEllipsis
         ? breadcrumbs.slice(-maxBreadcrumbs)
         : breadcrumbs;
 
     // Truncate text - shorter on mobile
     const truncateText = (text: string, maxLen: number = 20) => {
-        const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
         const limit = isMobile ? Math.min(maxLen, 12) : maxLen;
         if (text.length <= limit) return text;
         return text.slice(0, limit) + '…';
@@ -63,7 +66,7 @@ export function Header({
     return (
         <header className="h-14 flex items-center justify-between px-2 sm:pl-4 sm:pr-2 border-b border-border bg-background-secondary/50 flex-shrink-0 relative" role="banner">
             {/* Left Section - Navigation */}
-            <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-shrink-0 max-w-[45%] sm:max-w-[280px] z-10">
+            <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1 sm:flex-none sm:max-w-[280px] z-10">
                 <button
                     onClick={onOpenSidebar}
                     className="btn btn-ghost btn-icon md:hidden flex-shrink-0 w-10 h-10 sm:w-9 sm:h-9"
@@ -85,7 +88,7 @@ export function Header({
                 <nav className="flex items-center gap-1 text-sm min-w-0 overflow-hidden" aria-label="Breadcrumb navigation">
                     <button
                         onClick={onNavigateToRoot}
-                        className={`flex-shrink-0 truncate max-w-[100px] sm:max-w-none ${currentPath ? 'text-foreground-muted hover:text-foreground' : 'font-medium'}`}
+                        className={`flex-shrink-0 truncate max-w-[100px] sm:max-w-none ${hideBucketCrumb ? 'hidden' : ''} ${currentPath ? 'text-foreground-muted hover:text-foreground' : 'font-medium'}`}
                         title={selectedBucket || undefined}
                         aria-label={selectedBucket ? `Navigate to bucket root: ${selectedBucket}` : 'Select bucket'}
                         aria-current={!currentPath ? 'page' : undefined}
@@ -95,7 +98,7 @@ export function Header({
 
                     {showEllipsis && (
                         <span className="flex items-center gap-1 text-foreground-muted flex-shrink-0" aria-hidden="true">
-                            <span>/</span>
+                            {!hideBucketCrumb && <span>/</span>}
                             <span>…</span>
                         </span>
                     )}
@@ -105,7 +108,7 @@ export function Header({
                         const isLast = actualIndex === breadcrumbs.length - 1;
                         return (
                             <span key={actualIndex} className="flex items-center gap-1 min-w-0">
-                                <span className="text-foreground-muted flex-shrink-0" aria-hidden="true">/</span>
+                                {(i > 0 || showEllipsis || !hideBucketCrumb) && <span className="text-foreground-muted flex-shrink-0" aria-hidden="true">/</span>}
                                 <button
                                     onClick={() => onNavigateToBreadcrumb(actualIndex)}
                                     className={`truncate max-w-[60px] sm:max-w-none ${isLast ? 'font-medium' : 'text-foreground-muted hover:text-foreground'}`}

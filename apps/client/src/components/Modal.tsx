@@ -67,6 +67,11 @@ export function Modal({ title, children, onClose, isOpen = true, size = 'md' }: 
         // focus. Focusing during the same tick as mount can silently fail if
         // the browser hasn't finished layout yet.
         requestAnimationFrame(() => {
+            // A form input with autoFocus has already taken focus by now; only fall
+            // back to the first focusable element (usually the close button) when
+            // nothing inside the modal is focused, so typing right after opening
+            // "Create Folder" lands in the field instead of on the X.
+            if (modalRef.current?.contains(document.activeElement)) return;
             const firstFocusable = modalRef.current?.querySelector<HTMLElement>(
                 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
             );

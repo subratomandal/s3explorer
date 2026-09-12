@@ -3,6 +3,7 @@ import {
   Search,
   Database,
   FolderPlus,
+  FolderArchive,
   Upload,
   RefreshCw,
   Settings,
@@ -17,6 +18,8 @@ interface CommandPaletteProps {
   buckets: Bucket[];
   selectedBucket: string | null;
   currentPath: string;
+  // Single-bucket (pinned) connections can't create buckets -- mirrors the sidebar's "+"
+  canCreateBucket?: boolean;
   onClose: () => void;
   onSelectBucket: (name: string) => void;
   onNavigateToRoot: () => void;
@@ -24,6 +27,7 @@ interface CommandPaletteProps {
   onRefresh: () => void;
   onNewFolder: () => void;
   onUpload: () => void;
+  onDownloadFolder: () => void;
   onOpenConnections: () => void;
   onNewBucket: () => void;
 }
@@ -33,6 +37,7 @@ export function CommandPalette({
   buckets,
   selectedBucket,
   currentPath,
+  canCreateBucket = true,
   onClose,
   onSelectBucket,
   onNavigateToRoot,
@@ -40,6 +45,7 @@ export function CommandPalette({
   onRefresh,
   onNewFolder,
   onUpload,
+  onDownloadFolder,
   onOpenConnections,
   onNewBucket,
 }: CommandPaletteProps) {
@@ -99,13 +105,25 @@ export function CommandPalette({
       });
     }
 
-    items.push({
-      id: 'new-bucket',
-      label: 'Create Bucket',
-      category: 'actions',
-      icon: Database,
-      onSelect: () => { onNewBucket(); onClose(); },
-    });
+    if (currentPath) {
+      items.push({
+        id: 'download-folder',
+        label: 'Download Folder as .zip',
+        category: 'actions',
+        icon: FolderArchive,
+        onSelect: () => { onDownloadFolder(); onClose(); },
+      });
+    }
+
+    if (canCreateBucket) {
+      items.push({
+        id: 'new-bucket',
+        label: 'Create Bucket',
+        category: 'actions',
+        icon: Database,
+        onSelect: () => { onNewBucket(); onClose(); },
+      });
+    }
 
     items.push({
       id: 'connections',
@@ -126,7 +144,7 @@ export function CommandPalette({
     });
 
     return items;
-  }, [buckets, selectedBucket, currentPath, onGoBack, onNavigateToRoot, onRefresh, onNewFolder, onUpload, onOpenConnections, onNewBucket, onSelectBucket, onClose]);
+  }, [buckets, selectedBucket, currentPath, canCreateBucket, onGoBack, onNavigateToRoot, onRefresh, onNewFolder, onUpload, onDownloadFolder, onOpenConnections, onNewBucket, onSelectBucket, onClose]);
 
   const filteredActions = useMemo(() => {
     if (!query.trim()) return actions;

@@ -42,13 +42,13 @@ export function WelcomeMessage({ onConfigure }: WelcomeMessageProps) {
 
   return (
     <div
-      className={`fixed bottom-3 sm:bottom-5 left-3 right-3 sm:left-auto sm:right-5 z-50 sm:max-w-xs transition-all duration-300 ${
+      className={`fixed bottom-3 sm:bottom-5 left-3 right-3 sm:left-auto sm:right-5 z-50 mb-safe sm:max-w-xs transition-all duration-300 ${
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
       }`}
     >
       <div
         onClick={handleConfigure}
-        className="group bg-background-secondary border border-border rounded-lg p-3.5 shadow-xl cursor-pointer transition-all duration-200 hover:border-accent-purple/50 hover:bg-background-tertiary"
+        className="group relative bg-background-secondary border border-border rounded-lg p-3.5 shadow-xl cursor-pointer transition-all duration-200 hover:border-accent-purple/50 hover:bg-background-tertiary"
       >
         <button
           onClick={(e) => { e.stopPropagation(); handleDismiss(); }}
@@ -66,8 +66,9 @@ export function WelcomeMessage({ onConfigure }: WelcomeMessageProps) {
               className="w-6 h-6 logo-themed opacity-80 group-hover:opacity-100 transition-opacity"
             />
           </div>
-          <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-medium text-foreground group-hover:text-accent-purple transition-colors">
+          {/* Right padding keeps the title clear of the absolutely positioned dismiss button */}
+          <div className="flex-1 min-w-0 pr-6">
+            <h4 className="text-sm font-medium text-foreground group-hover:text-accent-purple transition-colors truncate">
               Welcome to S3 Explorer
             </h4>
             <p className="text-xs text-foreground-muted mt-0.5">

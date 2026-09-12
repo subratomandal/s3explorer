@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { Database, Plus, Trash2, Copy, Check, Settings, LogOut, Sun, Moon, PanelLeftClose, PanelLeft, Github } from 'lucide-react';
+import { Database, Plus, Trash2, Copy, Check, Settings, LogOut, Sun, Moon, PanelLeftClose, PanelLeft, Github, X } from 'lucide-react';
 import type { Bucket } from '../types';
 import { useDebounce } from '../hooks/useDebounce';
 import { UI_DELAYS } from '../constants';
@@ -93,7 +93,8 @@ export function Sidebar({
     }, []);
 
     // ── Expanded content (shared between desktop and mobile) ──
-    const expandedContent = (
+    // Rendered once per <aside>, so element ids are prefixed to stay unique in the DOM.
+    const renderExpanded = (idPrefix: 'desktop' | 'mobile') => (
         <>
             {/* Header */}
             <div className="h-12 flex items-center justify-between pl-3.5 pr-1.5 border-b border-border flex-shrink-0">
@@ -108,13 +109,16 @@ export function Sidebar({
                     <button onClick={onToggleCollapse} className="p-2 text-foreground-muted hover:text-foreground transition-colors hidden md:flex items-center justify-center" aria-label="Collapse sidebar">
                         <PanelLeftClose className="w-4 h-4" />
                     </button>
+                    <button onClick={onCloseSidebar} className="p-2 text-foreground-muted hover:text-foreground transition-colors flex md:hidden items-center justify-center" aria-label="Close sidebar">
+                        <X className="w-4 h-4" />
+                    </button>
                 </div>
             </div>
 
             {/* Search */}
             <div className="px-2.5 pt-2.5 pb-1 flex-shrink-0">
                 <input
-                    id="bucket-search"
+                    id={`${idPrefix}-bucket-search`}
                     type="search"
                     name="bucket-search"
                     placeholder={selectedBucket ? "Search files…" : "Search buckets…"}
@@ -122,7 +126,7 @@ export function Sidebar({
                     onChange={e => setLocalSearch(e.target.value)}
                     className="input h-8 text-xs !rounded-md"
                     tabIndex={collapsed ? -1 : 0}
-                    aria-label="Search buckets"
+                    aria-label={selectedBucket ? 'Search files' : 'Search buckets'}
                     autoComplete="off"
                     spellCheck="false"
                     enterKeyHint="search"
@@ -131,7 +135,7 @@ export function Sidebar({
 
             {/* Buckets header */}
             <div className="flex items-center justify-between pl-[18px] pr-1.5 py-1.5 flex-shrink-0">
-                <span className="text-xs font-semibold text-foreground-muted uppercase tracking-wider" id="buckets-heading">Buckets</span>
+                <span className="text-xs font-semibold text-foreground-muted uppercase tracking-wider" id={`${idPrefix}-buckets-heading`}>Buckets</span>
                 {!pinnedBucket && (
                     <button onClick={onNewBucket} className="create-bucket-btn p-1.5 text-foreground-secondary hover:text-foreground transition-all" tabIndex={collapsed ? -1 : 0} aria-label="Create new bucket">
                         <Plus className="w-3.5 h-3.5" />
@@ -140,7 +144,7 @@ export function Sidebar({
             </div>
 
             {/* Buckets list */}
-            <div className="flex-1 overflow-y-auto px-2.5 min-h-0 bucket-scrollable" role="list" aria-labelledby="buckets-heading">
+            <div className="flex-1 overflow-y-auto px-2.5 min-h-0 bucket-scrollable" role="list" aria-labelledby={`${idPrefix}-buckets-heading`}>
                 <div className="space-y-px">
                     {filteredBuckets.map((bucket, i) => (
                         <div
@@ -298,7 +302,7 @@ export function Sidebar({
                             : 'opacity 180ms ease 80ms',     /* fade in after width starts growing */
                     }}
                 >
-                    {expandedContent}
+                    {renderExpanded('desktop')}
                 </div>
             </aside>
 
@@ -310,7 +314,7 @@ export function Sidebar({
                 role="navigation"
                 aria-label="Sidebar navigation"
             >
-                {expandedContent}
+                {renderExpanded('mobile')}
             </aside>
         </>
     );

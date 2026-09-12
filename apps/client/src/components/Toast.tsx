@@ -21,7 +21,7 @@ export function Toast({ message, type = 'success', onClose }: ToastProps) {
 
     return (
         <div
-            className={`toast fixed bottom-5 right-5 z-50 flex items-center gap-2.5 px-3.5 py-2.5 rounded-md text-xs font-medium ${bgColor} ${textColor} border ${borderColor}`}
+            className={`toast fixed bottom-5 right-5 z-50 mb-safe flex items-center gap-2.5 px-3.5 py-2.5 rounded-md text-xs font-medium ${bgColor} ${textColor} border ${borderColor}`}
             role="alert"
             aria-live="polite"
         >

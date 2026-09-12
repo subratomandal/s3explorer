@@ -54,7 +54,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           {showForgot ? (
             <div className="space-y-4">
               <p className="text-sm text-foreground-secondary leading-relaxed">
-                Your password is set via the <code className="text-xs bg-background-tertiary px-1.5 py-0.5 rounded font-mono">APP_PASSWORD</code> environment variable. To change it, update the variable and restart the server.
+                Your password was set via the <code className="text-xs bg-background-tertiary px-1.5 py-0.5 rounded font-mono">APP_PASSWORD</code> environment variable or the setup wizard. To reset it, set <code className="text-xs bg-background-tertiary px-1.5 py-0.5 rounded font-mono">APP_PASSWORD</code> and restart the server.
               </p>
               <button
                 onClick={() => setShowForgot(false)}
@@ -74,7 +74,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="input pr-12 font-mono h-10 text-sm"
+                    className="input pr-10 font-mono h-10 text-sm"
                     placeholder="Enter password"
                     required
                     autoFocus
@@ -84,10 +84,10 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-foreground-muted hover:text-foreground transition-colors w-11"
+                    className="absolute inset-y-0 right-0 px-3 flex items-center text-foreground-muted hover:text-foreground transition-colors"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showPassword ? <EyeOff className="h-5 w-5 sm:h-4 sm:w-4" aria-hidden="true" /> : <Eye className="h-5 w-5 sm:h-4 sm:w-4" aria-hidden="true" />}
+                    {showPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
                   </button>
                 </div>
               </div>

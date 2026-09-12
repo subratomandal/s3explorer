@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Trash2, Check, Server, ChevronDown, AlertCircle, RefreshCw, ChevronRight, Link } from 'lucide-react';
+import { Plus, Trash2, Check, Server, ChevronDown, AlertCircle, RefreshCw, ChevronRight, Pencil } from 'lucide-react';
 import * as api from '../api';
 import type { Connection, ConnectionConfig } from '../api';
 import { Modal } from './Modal';
+import { useEscapeKey } from '../hooks/useEscapeKey';
 
 // Provider Presets
 const PROVIDERS = [
@@ -109,6 +110,20 @@ function validateBucketName(name: string, providerId: string): string | null {
   return null;
 }
 
+// Sentinel <option> that swaps the region dropdown for a free-text input. Garage,
+// Ceph, SeaweedFS and other self-hosted stacks use regions no preset list covers.
+const CUSTOM_REGION = '__custom__';
+
+// Mirror of server-side isValidRegion. SigV4 only embeds the region in the
+// credential scope, so anything without slashes or whitespace is signable.
+const REGION_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
+function validateRegion(region: string): string | null {
+  const trimmed = region.trim();
+  if (!trimmed) return 'Region is required';
+  if (!REGION_RE.test(trimmed)) return 'Letters, numbers, dots, hyphens; 1–64 chars';
+  return null;
+}
+
 // Helper to get regions based on provider
 function getRegionsForProvider(providerId: string) {
   switch (providerId) {
@@ -144,7 +159,10 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  useEscapeKey(() => setDeleteConfirm(null), deleteConfirm !== null);
   const [bucketTouched, setBucketTouched] = useState(false);
+  const [customRegion, setCustomRegion] = useState(false);
+  const [regionTouched, setRegionTouched] = useState(false);
 
   // Form State
   const [selectedProvider, setSelectedProvider] = useState<string>('custom');
@@ -203,10 +221,13 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
     setTestResult(null);
     setError(null);
     setBucketTouched(false);
+    setCustomRegion(false);
+    setRegionTouched(false);
   }
 
   function handleProviderChange(providerId: string) {
     setSelectedProvider(providerId);
+    setCustomRegion(false);
     const provider = PROVIDERS.find(p => p.id === providerId);
     if (provider) {
       setForm(prev => ({
@@ -220,6 +241,13 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
   }
 
   function handleRegionChange(region: string) {
+    if (region === CUSTOM_REGION) {
+      setCustomRegion(true);
+      setRegionTouched(false);
+      setForm(prev => ({ ...prev, region: '' }));
+      return;
+    }
+    setCustomRegion(false);
     // For DigitalOcean Spaces, update endpoint to match region
     if (selectedProvider === 'digitalocean') {
       setForm(prev => ({
@@ -314,6 +342,10 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
     });
     setEditingId(conn.id);
     setSelectedProvider('custom'); // Or try to infer from endpoint? Keeping simple for now.
+    // A stored region the dropdown doesn't know (e.g. "garage") would otherwise
+    // render as the first option while the form silently keeps the real value.
+    setCustomRegion(!getRegionsForProvider('custom').some(r => r.value === conn.region));
+    setRegionTouched(false);
     setView('form');
   }
 
@@ -321,7 +353,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
     <>
       {/* Delete Confirmation Overlay - Full screen */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+        <div className="fixed inset-0 z-[100] modal-backdrop flex items-center justify-center p-4">
           <div className="bg-background-secondary border border-border rounded-lg p-5 max-w-sm w-full shadow-2xl animate-scaleIn">
             <h3 className="text-lg font-semibold text-foreground mb-3">Delete Connection</h3>
             <p className="text-sm text-foreground-secondary mb-6">
@@ -410,7 +442,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                           className="p-1.5 text-foreground-muted hover:text-accent-purple rounded transition-colors"
                           title="Edit"
                         >
-                          <Link className="w-4 h-4" />
+                          <Pencil className="w-4 h-4" />
                         </button>
                         <button
                           onClick={(e) => handleDelete(e, conn.id)}
@@ -473,20 +505,53 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                     />
                   </div>
                   <div className="space-y-1.5 min-w-0">
-                    <label htmlFor="conn-region" className="text-xs text-foreground-muted leading-none block">Region</label>
-                    <div className="relative">
-                      <select
-                        id="conn-region"
-                        value={form.region}
-                        onChange={(e) => handleRegionChange(e.target.value)}
-                        className="input appearance-none cursor-pointer pr-10 h-10 text-sm truncate"
-                      >
-                        {getRegionsForProvider(selectedProvider).map(r => (
-                          <option key={r.value} value={r.value}>{r.label}</option>
-                        ))}
-                      </select>
-                      <ChevronDown className="w-4 h-4 text-foreground-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <div className="flex items-center justify-between h-3">
+                      <label htmlFor="conn-region" className="text-xs text-foreground-muted leading-none block">Region</label>
+                      {customRegion && (
+                        <button
+                          type="button"
+                          onClick={() => handleRegionChange(PROVIDERS.find(p => p.id === selectedProvider)?.defaultRegion || 'us-east-1')}
+                          className="text-[11px] text-foreground-muted hover:text-accent-purple leading-none transition-colors"
+                        >
+                          Use list
+                        </button>
+                      )}
                     </div>
+                    {customRegion ? (
+                      <input
+                        id="conn-region"
+                        type="text"
+                        value={form.region || ''}
+                        onChange={(e) => { setRegionTouched(true); setForm({ ...form, region: e.target.value }); }}
+                        onBlur={() => setRegionTouched(true)}
+                        placeholder="e.g. garage"
+                        className="input font-mono h-10 text-sm"
+                        aria-invalid={!!(regionTouched && validateRegion(form.region || ''))}
+                        autoFocus
+                        autoComplete="off"
+                        spellCheck="false"
+                      />
+                    ) : (
+                      <div className="relative">
+                        <select
+                          id="conn-region"
+                          value={form.region}
+                          onChange={(e) => handleRegionChange(e.target.value)}
+                          className="input appearance-none cursor-pointer pr-10 h-10 text-sm truncate"
+                        >
+                          {getRegionsForProvider(selectedProvider).map(r => (
+                            <option key={r.value} value={r.value}>{r.label}</option>
+                          ))}
+                          <option value={CUSTOM_REGION}>Custom…</option>
+                        </select>
+                        <ChevronDown className="w-4 h-4 text-foreground-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+                    )}
+                    {customRegion && regionTouched && validateRegion(form.region || '') && (
+                      <p className="text-[11px] text-accent-red leading-tight">
+                        {validateRegion(form.region || '')}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -620,7 +685,7 @@ export function ConnectionManager({ isOpen, onClose, onConnectionChange }: Conne
                 </button>
                 <button
                   onClick={handleSave}
-                  disabled={saving || !form.name || !form.endpoint || !!validateBucketName(form.bucket || '', selectedProvider)}
+                  disabled={saving || !form.name || !form.endpoint || !!validateBucketName(form.bucket || '', selectedProvider) || !!validateRegion(form.region || '')}
                   className="py-2 px-3 rounded-md bg-accent-purple text-white hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium"
                 >
                   {saving ? 'Saving...' : 'Save'}

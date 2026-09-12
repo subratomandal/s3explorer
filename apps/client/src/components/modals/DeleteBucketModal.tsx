@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 
 interface DeleteBucketModalProps {
     bucketName: string | null;
@@ -8,6 +9,7 @@ interface DeleteBucketModalProps {
 
 export function DeleteBucketModal({ bucketName, onClose, onDelete }: DeleteBucketModalProps) {
     const [isDeleting, setIsDeleting] = useState(false);
+    useEscapeKey(onClose, !!bucketName);
 
     if (!bucketName) return null;
 
@@ -23,7 +25,7 @@ export function DeleteBucketModal({ bucketName, onClose, onDelete }: DeleteBucke
 
     return (
         <div
-            className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
+            className="fixed inset-0 z-[100] modal-backdrop flex items-center justify-center p-4"
             onClick={onClose}
         >
             <div

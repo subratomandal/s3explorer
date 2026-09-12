@@ -318,6 +318,27 @@ export function getProxyUrl(bucket: string, key: string): string {
   return `${API_BASE}/objects/${encodeURIComponent(bucket)}/proxy?${params}`;
 }
 
+// Zip downloads are two steps: this call validates the selection (expanding
+// folders server-side) and returns a one-shot token; the browser then fetches
+// getZipUrl() as a normal download so the archive streams straight to disk.
+export async function createZipDownload(
+  bucket: string,
+  prefix: string,
+  objects: Array<{ key: string; isFolder: boolean }>
+): Promise<{ token: string; filename: string; fileCount: number }> {
+  const res = await fetchWithTimeout(`${API_BASE}/objects/${encodeURIComponent(bucket)}/zip`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prefix, objects }),
+    timeout: API_TIMEOUTS.ZIP_PREPARE,
+  });
+  return handleResponse(res);
+}
+
+export function getZipUrl(bucket: string, token: string): string {
+  return `${API_BASE}/objects/${encodeURIComponent(bucket)}/zip/${token}`;
+}
+
 export async function uploadFiles(
   bucket: string,
   prefix: string,

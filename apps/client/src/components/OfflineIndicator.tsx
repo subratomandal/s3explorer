@@ -19,11 +19,11 @@ export function OfflineIndicator({ isOnline, isBackendReachable }: OfflineIndica
 
     return (
         <div
-            className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 animate-slide-up-fade"
+            className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 mb-safe animate-slide-up-fade"
             role="alert"
             aria-live="assertive"
         >
-            <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg bg-accent-red/15 border border-accent-purple/40 shadow-lg backdrop-blur-sm">
+            <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg bg-accent-red/15 border border-accent-red/20 shadow-lg backdrop-blur-sm">
                 <WifiOff className="w-4 h-4 text-accent-red flex-shrink-0" />
                 <span className="text-xs sm:text-sm text-foreground font-medium">{message}</span>
                 <button

@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Folder, Database, Download, Edit3, Trash2, Eye } from 'lucide-react';
+import { Folder, Database, Download, FolderArchive, Edit3, Trash2, Eye } from 'lucide-react';
 import * as api from './api';
 import type { Bucket, S3Object, ToastState, ContextMenuState, SortField, SortDirection } from './types';
-import { getFileName, isPreviewable } from './utils/fileUtils';
+import { getFileName, getParentPrefix, isPreviewable, triggerDownload } from './utils/fileUtils';
 import { resolveUploadConflicts, generateUniqueName, hasNameConflict } from './utils/uniqueName';
 import { useNetworkStatus } from './hooks/useNetworkStatus';
 import { Sidebar } from './components/Sidebar';
@@ -53,6 +53,8 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  // True while the server expands a zip selection; the browser's own download UI takes over after
+  const [preparingZip, setPreparingZip] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -459,14 +461,45 @@ export default function App() {
 
   const handleDownload = (obj: S3Object) => {
     if (!selectedBucket) return;
-    const url = api.getProxyUrl(selectedBucket, obj.key);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = getFileName(obj.key);
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    triggerDownload(api.getProxyUrl(selectedBucket, obj.key), getFileName(obj.key));
   };
+
+  // Zip download: the server expands folders and mints a one-shot token, then the
+  // browser fetches the archive as a native download -- it streams straight to
+  // disk with progress in the browser's own download UI, never buffered in memory.
+  const handleDownloadZip = useCallback(async (items: S3Object[]) => {
+    if (!selectedBucket || items.length === 0 || preparingZip) return;
+
+    if (!networkStatus.isOnline || !networkStatus.isBackendReachable) {
+      showToastMsg('Cannot download - check your connection', 'error');
+      return;
+    }
+
+    try {
+      setPreparingZip(true);
+      // Archive paths are relative to the folder being browsed. A single folder is
+      // rooted at its parent instead so it unpacks as "<name>/...", and search
+      // results (which can come from anywhere) keep their full bucket paths.
+      const single = items.length === 1 && items[0].isFolder ? items[0] : null;
+      const prefix = single ? getParentPrefix(single.key) : searchResults ? '' : currentPath;
+      const { token, filename, fileCount } = await api.createZipDownload(
+        selectedBucket,
+        prefix,
+        items.map(obj => ({ key: obj.key, isFolder: obj.isFolder }))
+      );
+      triggerDownload(api.getZipUrl(selectedBucket, token), filename);
+      showToastMsg(`Downloading ${filename} (${fileCount} file${fileCount !== 1 ? 's' : ''})`);
+    } catch (err: any) {
+      showToastMsg(err.message || 'Failed to prepare download', 'error');
+    } finally {
+      setPreparingZip(false);
+    }
+  }, [selectedBucket, currentPath, searchResults, preparingZip, networkStatus.isOnline, networkStatus.isBackendReachable]);
+
+  // "Download this folder" from the command palette
+  const handleDownloadCurrentFolder = useCallback(() => {
+    if (currentPath) handleDownloadZip([{ key: currentPath, size: 0, isFolder: true }]);
+  }, [currentPath, handleDownloadZip]);
 
   // Selection handlers for batch operations
   const handleSelect = useCallback((key: string, selected: boolean) => {
@@ -558,30 +591,26 @@ export default function App() {
     setBatchPreviewStartIndex(0);
   }, [selectedKeys, objects]);
 
-  // Downloads are triggered by programmatic <a> clicks. Browsers throttle or
-  // block rapid sequential downloads, so we stagger them ~200ms apart. This is
-  // the simplest approach that works across Chrome/Firefox/Safari without needing
-  // a zip-on-the-fly server endpoint.
-  const handleBatchDownload = useCallback(() => {
-    if (selectedKeys.size === 0 || !selectedBucket) return;
-    const filesToDownload = objects.filter(obj => selectedKeys.has(obj.key) && !obj.isFolder);
-    if (filesToDownload.length === 0) {
-      showToastMsg('No files selected to download', 'error');
-      return;
+  // Selection resolved against whatever the table is showing (search results or
+  // the folder listing). A lone file downloads directly; anything else -- several
+  // files, or any folder -- goes out as one .zip, since browsers throttle or block
+  // a burst of separate downloads and folders can't be fetched any other way.
+  const selectedObjects = useMemo(() => {
+    const source = searchResults ?? objects;
+    return source.filter(obj => selectedKeys.has(obj.key));
+  }, [searchResults, objects, selectedKeys]);
+
+  const batchDownloadMode: 'file' | 'zip' =
+    selectedObjects.length === 1 && !selectedObjects[0].isFolder ? 'file' : 'zip';
+
+  const handleBatchDownload = () => {
+    if (selectedObjects.length === 0) return;
+    if (batchDownloadMode === 'file') {
+      handleDownload(selectedObjects[0]);
+    } else {
+      handleDownloadZip(selectedObjects);
     }
-    filesToDownload.forEach((obj, i) => {
-      setTimeout(() => {
-        const url = api.getProxyUrl(selectedBucket, obj.key);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = getFileName(obj.key);
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      }, i * 200);
-    });
-    showToastMsg(`Downloading ${filesToDownload.length} file${filesToDownload.length > 1 ? 's' : ''}`);
-  }, [selectedKeys, objects, selectedBucket]);
+  };
 
   // Count previewable files in selection
   const previewableSelectedCount = useMemo(() => {
@@ -913,6 +942,13 @@ export default function App() {
               onClick={() => { handleDownload(contextMenu.object); setContextMenu(null); }}
             />
           )}
+          {contextMenu.object.isFolder && (
+            <ContextMenuItem
+              icon={FolderArchive}
+              label="Download as .zip"
+              onClick={() => { handleDownloadZip([contextMenu.object]); setContextMenu(null); }}
+            />
+          )}
           <ContextMenuItem
             icon={Edit3}
             label="Rename"
@@ -975,6 +1011,7 @@ export default function App() {
           buckets={buckets}
           selectedBucket={selectedBucket}
           currentPath={currentPath}
+          canCreateBucket={!activeConnection?.bucket}
           onClose={() => setShowCommandPalette(false)}
           onSelectBucket={(name) => { setSelectedBucket(name); setCurrentPath(''); setSearchQuery(''); }}
           onNavigateToRoot={() => setCurrentPath('')}
@@ -982,6 +1019,7 @@ export default function App() {
           onRefresh={() => loadObjects()}
           onNewFolder={() => { setNewName(''); setShowNewFolder(true); }}
           onUpload={() => fileInputRef.current?.click()}
+          onDownloadFolder={handleDownloadCurrentFolder}
           onOpenConnections={() => setShowConnectionManager(true)}
           onNewBucket={() => { setNewName(''); setShowNewBucket(true); }}
         />
@@ -1038,6 +1076,8 @@ export default function App() {
       <BatchActionsBar
         selectedCount={selectedKeys.size}
         previewableCount={previewableSelectedCount}
+        downloadMode={batchDownloadMode}
+        downloading={preparingZip}
         onClearSelection={clearSelection}
         onDeleteSelected={handleBatchDelete}
         onPreviewSelected={handleBatchPreview}

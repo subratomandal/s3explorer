@@ -3,6 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import * as s3 from '../services/s3.js';
+import * as zip from '../services/zip.js';
 import { isValidBucketName } from '../utils/validation.js';
 import { assertBucketAllowed } from '../utils/pinnedBucket.js';
 
@@ -131,6 +132,67 @@ router.get('/:bucket/proxy', async (req: Request, res: Response) => {
     nodeStream.pipe(res);
   } catch (error: any) {
     console.error('Error proxying object:', error);
+    const { message, s3Code, status } = getS3ErrorDetails(error);
+    if (!res.headersSent) {
+      res.status(status).json({ error: message, s3Code });
+    }
+  }
+});
+
+// Zip download, step 1: validate the selection, expand folders, mint a one-shot
+// token. Step 2 (GET below) streams the archive. See services/zip.ts for why.
+router.post('/:bucket/zip', async (req: Request, res: Response) => {
+  try {
+    const { bucket } = req.params;
+    const { objects } = req.body;
+    const prefix = typeof req.body.prefix === 'string' ? req.body.prefix : '';
+
+    if (!isValidBucketName(bucket)) {
+      return res.status(400).json({ error: 'Invalid bucket name' });
+    }
+    assertBucketAllowed(bucket);
+    if (prefix.includes('../')) {
+      return res.status(400).json({ error: 'Invalid prefix' });
+    }
+    if (!Array.isArray(objects) || objects.length === 0) {
+      return res.status(400).json({ error: 'No objects specified' });
+    }
+    for (const obj of objects) {
+      if (!obj?.key || !isValidObjectKey(obj.key)) {
+        return res.status(400).json({ error: 'Invalid key' });
+      }
+    }
+
+    const selection: zip.ZipSelection[] = objects.map((obj: { key: string; isFolder?: boolean }) => ({
+      key: obj.key,
+      isFolder: !!obj.isFolder,
+    }));
+    const job = await zip.createZipJob(bucket, prefix, selection);
+    res.json(job);
+  } catch (error: any) {
+    console.error('Error preparing zip download:', error);
+    const { message, s3Code, status } = getS3ErrorDetails(error);
+    res.status(status).json({ error: message, s3Code });
+  }
+});
+
+router.get('/:bucket/zip/:token', async (req: Request, res: Response) => {
+  try {
+    const { bucket, token } = req.params;
+
+    if (!isValidBucketName(bucket)) {
+      return res.status(400).json({ error: 'Invalid bucket name' });
+    }
+    assertBucketAllowed(bucket);
+
+    const job = /^[a-f0-9]{32}$/.test(token) ? zip.takeZipJob(token, bucket) : undefined;
+    if (!job) {
+      return res.status(404).json({ error: 'Download link expired. Please try again.' });
+    }
+
+    await zip.streamZip(job, res);
+  } catch (error: any) {
+    console.error('Error streaming zip download:', error);
     const { message, s3Code, status } = getS3ErrorDetails(error);
     if (!res.headersSent) {
       res.status(status).json({ error: message, s3Code });

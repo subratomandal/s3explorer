@@ -24,7 +24,7 @@ s3explorer/
         index.ts     # Server entry, middleware, route mounting
         middleware/   # Auth (Argon2, rate limiting, sessions)
         routes/      # API routes (auth, buckets, objects, connections, setup)
-        services/    # S3 client, SQLite, AES-256-GCM encryption
+        services/    # S3 client, SQLite, AES-256-GCM encryption, zip streaming
         types/       # Shared interfaces
 ```
 
@@ -78,6 +78,7 @@ npm run build
 | `apps/client/src/api.ts` | Every API call, error mapping, upload progress |
 | `apps/client/src/App.tsx` | All app state, auth flow, event handlers |
 | `apps/server/src/services/s3.ts` | S3 SDK wrapper, all bucket/object operations |
+| `apps/server/src/services/zip.ts` | Streams folder/multi-file downloads as a `.zip` |
 | `apps/server/src/services/db.ts` | SQLite schema, session store, CRUD |
 | `apps/server/src/services/crypto.ts` | AES-256-GCM encrypt/decrypt for stored credentials |
 | `apps/server/src/middleware/auth.ts` | Password verification, rate limiting, sessions |

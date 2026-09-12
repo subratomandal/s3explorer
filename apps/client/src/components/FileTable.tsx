@@ -128,7 +128,7 @@ const FileRow = memo(({ index, style, data }: RowProps) => {
             <div className="w-12 sm:w-14 flex items-center justify-end pr-2">
                 {/* Size on mobile */}
                 {!obj.isFolder && (
-                    <span className="text-xs text-foreground-muted sm:hidden mr-1" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    <span className="text-xs text-foreground-muted sm:hidden mr-1 whitespace-nowrap" style={{ fontVariantNumeric: 'tabular-nums' }}>
                         {formatBytes(obj.size)}
                     </span>
                 )}
@@ -206,7 +206,7 @@ function StandardRow({ obj, onNavigate, onContextMenu, onItemSelect, isSelected,
             <td className="py-1.5 sm:py-2">
                 <div className="row-actions flex items-center justify-end">
                     {!obj.isFolder && (
-                        <span className="text-xs text-foreground-muted sm:hidden mr-1" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                        <span className="text-xs text-foreground-muted sm:hidden mr-1 whitespace-nowrap" style={{ fontVariantNumeric: 'tabular-nums' }}>
                             {formatBytes(obj.size)}
                         </span>
                     )}
